@@ -1,0 +1,58 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ APP_NAME }} - Connecting Clients with Skilled Freelancers</title>
+    <link rel="stylesheet" href="{% static 'core/css/home.css' %}">
+</head>
+<body>
+    <div class="hero-container">
+        <div class="background-gradient"></div>
+        <div class="blob blob1"></div>
+        <div class="blob blob2"></div>
+        <div class="blob blob3"></div>
+        
+        <div class="content-wrapper">
+            <!-- Left Column: Text Content -->
+            <div class="left-content">
+                <h1 class="main-heading">{{ APP_NAME }}</h1>
+                <p class="tagline">Connecting Clients with Skilled Freelancers</p>
+                <p class="description">
+                    {{ APP_NAME }} is the ultimate platform where clients can post projects 
+                    and freelancers can find and complete work. Experience a fast and simple 
+                    workflow designed to bring your projects to life.
+                </p>
+                <div class="cta-buttons">
+                    <a href="{% url 'signup' %}" class="btn btn-primary">Sign Up</a>
+                    <a href="{% url 'login' %}" class="btn btn-secondary">Log In</a>
+                </div>
+            </div>
+
+            <!-- Right Column: Visual Elements -->
+            <div class="right-content">
+                <div class="floating-card card-project">
+                    <div class="card-icon">📋</div>
+                    <h3>Projects</h3>
+                    <p>Browse exciting opportunities</p>
+                </div>
+                
+                <div class="floating-card card-client">
+                    <div class="card-icon">👥</div>
+                    <h3>Clients</h3>
+                    <p>Post your project needs</p>
+                </div>
+                
+                <div class="floating-card card-freelancer">
+                    <div class="card-icon">💼</div>
+                    <h3>Freelancers</h3>
+                    <p>Showcase your skills</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'core/js/home.js' %}"></script>
+</body>
+</html>

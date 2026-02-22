@@ -1,0 +1,137 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Dashboard - {{ APP_NAME }}</title>
+    <link rel="stylesheet" href="{% static 'core/css/dashboard.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="background-gradient"></div>
+        <div class="blob blob1"></div>
+        <div class="blob blob2"></div>
+        <div class="blob blob3"></div>
+        
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="user-avatar-small">{{ user.first_name|first|upper }}</div>
+                <span class="sidebar-username">{{ user.first_name }}</span>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item">
+                    <i class="fas fa-user"></i>
+                    <span class="nav-text">Profile</span>
+                </a>
+                <a href="#" class="nav-item active">
+                    <i class="fas fa-home"></i>
+                    <span class="nav-text">Overview</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-plus-circle"></i>
+                    <span class="nav-text">Post a Job</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-briefcase"></i>
+                    <span class="nav-text">Posted Jobs</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-envelope"></i>
+                    <span class="nav-text">Messages</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span class="nav-text">Settings</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <a href="{% url 'logout' %}" class="nav-item logout-item">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="nav-text">Logout</span>
+                </a>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="section-header">
+                <h1 class="section-title">Welcome, {{ user.first_name }}!</h1>
+                <p class="section-subtitle">Here's your client dashboard overview</p>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-number">0</h3>
+                        <p class="stat-label">Posted Jobs</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-number">0</h3>
+                        <p class="stat-label">Proposals Received</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-number">0</h3>
+                        <p class="stat-label">Active Projects</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-number">0</h3>
+                        <p class="stat-label">Hired Freelancers</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="quick-actions">
+                <h2 class="subsection-title">Quick Actions</h2>
+                <div class="action-cards">
+                    <div class="action-card">
+                        <i class="fas fa-plus-circle"></i>
+                        <h3>Post a New Job</h3>
+                        <p>Create a job listing to find the right freelancer</p>
+                    </div>
+                    <div class="action-card">
+                        <i class="fas fa-briefcase"></i>
+                        <h3>View Posted Jobs</h3>
+                        <p>Manage your existing job postings</p>
+                    </div>
+                    <div class="action-card">
+                        <i class="fas fa-file-alt"></i>
+                        <h3>Review Proposals</h3>
+                        <p>Check proposals from freelancers</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Floating Chat Button -->
+        <button class="chat-button" title="Chat">
+            <i class="fas fa-comments"></i>
+        </button>
+    </div>
+</body>
+</html>

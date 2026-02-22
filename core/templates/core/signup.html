@@ -1,0 +1,156 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - {{ APP_NAME }}</title>
+    <link rel="stylesheet" href="{% static 'core/css/auth.css' %}">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="background-gradient"></div>
+        <div class="blob blob1"></div>
+        <div class="blob blob2"></div>
+        <div class="blob blob3"></div>
+        
+        <div class="auth-wrapper">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <h1 class="auth-title">Join {{ APP_NAME }}</h1>
+                    <p class="auth-subtitle">Create your account</p>
+                </div>
+
+                {% if error %}
+                <div class="error-message">
+                    <span class="error-icon">⚠️</span>
+                    <span>{{ error }}</span>
+                </div>
+                {% endif %}
+
+                <form method="POST" class="auth-form">
+                    {% csrf_token %}
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="first_name">First Name</label>
+                            <input 
+                                type="text" 
+                                id="first_name" 
+                                name="first_name" 
+                                placeholder="Your first name"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="last_name">Last Name</label>
+                            <input 
+                                type="text" 
+                                id="last_name" 
+                                name="last_name" 
+                                placeholder="Your last name"
+                                required
+                            >
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input 
+                            type="text" 
+                            id="username" 
+                            name="username" 
+                            placeholder="Enter Username"
+                            required
+                        >
+                        <div class="availability-message" id="usernameAvailability"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            placeholder="Enter your email"
+                            required
+                        >
+                        <div class="availability-message" id="emailAvailability"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="password-input-wrapper">
+                            <input 
+                                type="password" 
+                                id="password" 
+                                name="password" 
+                                placeholder="Create a password"
+                                required
+                            >
+                            <button type="button" class="toggle-password" id="togglePassword">
+                                <span class="eye-icon">👁️</span>
+                            </button>
+                            <!-- Tooltip popup for password requirements -->
+                            <div class="password-tooltip" id="passwordTooltip">
+                                <div class="tooltip-arrow"></div>
+                                <div class="tooltip-content">
+                                    <div class="tooltip-title">⚠️ Password Requirements</div>
+                                    <div class="requirement" id="req-length">
+                                        <span class="requirement-icon">✗</span>
+                                        <span>At least 8 characters</span>
+                                    </div>
+                                    <div class="requirement" id="req-uppercase">
+                                        <span class="requirement-icon">✗</span>
+                                        <span>One uppercase letter (A-Z)</span>
+                                    </div>
+                                    <div class="requirement" id="req-number">
+                                        <span class="requirement-icon">✗</span>
+                                        <span>One number (0-9)</span>
+                                    </div>
+                                    <div class="requirement" id="req-special">
+                                        <span class="requirement-icon">✗</span>
+                                        <span>One special character (!@#$%^&*)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>I am a:</label>
+                        <div class="switch-container">
+                            <div class="switch-wrapper">
+                                <input type="radio" id="client" name="user_type" value="client" required checked>
+                                <input type="radio" id="freelancer" name="user_type" value="freelancer" required>
+                                
+                                <label for="client" class="switch-option switch-left">
+                                    <span class="switch-text">Client</span>
+                                    <span class="switch-subtext">Looking to hire</span>
+                                </label>
+                                
+                                <label for="freelancer" class="switch-option switch-right">
+                                    <span class="switch-text">Freelancer</span>
+                                    <span class="switch-subtext">Looking for work</span>
+                                </label>
+                                
+                                <div class="switch-slider"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Sign Up</button>
+                </form>
+
+                <div class="auth-footer">
+                    <p>Already have an account? <a href="{% url 'login' %}" class="auth-link">Log In</a></p>
+                    <a href="{% url 'home' %}" class="back-link">← Back to Home</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'core/js/auth.js' %}"></script>
+</body>
+</html>
