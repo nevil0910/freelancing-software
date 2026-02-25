@@ -141,5 +141,15 @@
             <i class="fas fa-comments"></i>
         </button>
     </div>
+    <script>
+        // Prevent back navigation to cached login page
+        (function() {
+            // Clear session storage to prevent cached access
+            history.pushState(null, null, location.href);
+            window.addEventListener('popstate', function() {
+                history.pushState(null, null, location.href);
+            });
+        })();
+    </script>
 </body>
 </html>
