@@ -74,5 +74,16 @@
     </div>
 
     <script src="{% static 'core/js/auth.js' %}"></script>
+    <script>
+        // Prevent back navigation after login
+        (function() {
+            if (window.history && window.history.pushState) {
+                window.history.pushState('forward', null, '');
+                window.addEventListener('popstate', function() {
+                    window.history.pushState('forward', null, '');
+                });
+            }
+        })();
+    </script>
 </body>
 </html>

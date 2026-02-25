@@ -3,6 +3,7 @@ from django.http import HttpResponse, HttpRequest, JsonResponse
 from django.contrib.auth import logout, login, authenticate
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import never_cache
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
@@ -31,6 +32,7 @@ def home(request):
     return render(request, 'core/home.html')
 
 
+@never_cache
 def signup(request):
     # Redirect to dashboard if already logged in
     if request.user.is_authenticated:
@@ -89,6 +91,7 @@ def signup(request):
     return render(request, 'core/signup.html')
 
 
+@never_cache
 def login_view(request):
     # Redirect to dashboard if already logged in
     if request.user.is_authenticated:
@@ -119,6 +122,7 @@ def login_view(request):
     return render(request, 'core/login.html')
 
 # Logout View
+@never_cache
 def logoutUser(request):
     #user = request.user  # Get the current logged-in user
 
@@ -133,6 +137,7 @@ def logoutUser(request):
 
 
 @login_required
+@never_cache
 def dashboard(request):
     """
     Render dashboard based on user type.
@@ -143,6 +148,7 @@ def dashboard(request):
         return render(request, 'core/freelancer_dashboard.html')
 
 
+@never_cache
 def verify_signup_otp(request):
     """Verify OTP for signup email verification"""
     email = request.session.get('signup_email')
@@ -509,7 +515,7 @@ def send_otp_email(email, otp):
         fail_silently=False,
     )
 
-
+@never_cache
 def forgot_password(request):
     """Step 1: Request OTP for password reset"""
     if request.method == 'POST':
@@ -542,7 +548,7 @@ def forgot_password(request):
     
     return render(request, 'core/forgot_password.html')
 
-
+@never_cache
 def verify_otp(request):
     """Step 2: Verify OTP"""
     email = request.session.get('reset_email')
@@ -581,7 +587,7 @@ def verify_otp(request):
     
     return render(request, 'core/verify_otp.html')
 
-
+@never_cache
 def reset_password(request):
     """Step 3: Reset password after OTP verification"""
     email = request.session.get('reset_email')
@@ -639,7 +645,7 @@ def check_username_availability(request):
     if not username:
         return JsonResponse({'available': False, 'error': 'Username is required'})
     
-    # Check if username exists in CustomUser or SignupOTP (pending registrations)
+    # Check if username exists in CustomUser (pending registrations)
     user_exists = CustomUser.objects.filter(username=username).exists()
     pending_exists = SignupOTP.objects.filter(username=username).exists()
     
@@ -655,7 +661,7 @@ def check_email_availability(request):
     if not email:
         return JsonResponse({'available': False, 'error': 'Email is required'})
     
-    # Check if email exists in CustomUser or SignupOTP (pending registrations)
+    # Check if email exists in CustomUser (pending registrations)
     user_exists = CustomUser.objects.filter(email=email).exists()
     pending_exists = SignupOTP.objects.filter(email=email).exists()
     
