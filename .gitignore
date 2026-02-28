@@ -3,3 +3,12 @@
 
 # Ignore environment variables
 .env
+
+# Ignore log files
+*.log
+
+# Ignore compiled Python files
+__pycache__/
+*.pyc
+*.pyo
+
