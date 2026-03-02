@@ -11,3 +11,13 @@
 __pycache__/
 *.pyc
 *.pyo
+
+# Ignore backup and migration files
+backup_data.json
+migrate_to_neon.py
+
+# Ignore virtual environment
+venv/
+
+# Ignore static files
+staticfiles/
