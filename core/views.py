@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, HttpRequest, JsonResponse
 from django.contrib.auth import logout, login, authenticate
 from django.contrib import messages
@@ -10,7 +10,8 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth.hashers import make_password
-from .models import CustomUser, PasswordResetOTP, SignupOTP
+from .models import CustomUser, PasswordResetOTP, SignupOTP, Job
+from .forms import JobForm
 import random
 import string
 import threading
@@ -700,3 +701,84 @@ def check_email_availability(request):
     available = not (user_exists)
     
     return JsonResponse({'available': available})
+
+
+# ============================================
+# Job Management Views
+# ============================================
+
+@login_required
+@never_cache
+def post_job(request):
+    """
+    View for clients to post a new job.
+    Only accessible by users with 'client' user_type.
+    """
+    # Check if user is a client
+    if request.user.user_type != 'client':
+        messages.error(request, 'Only clients can post jobs.')
+        return redirect('dashboard')
+    
+    if request.method == 'POST':
+        form = JobForm(request.POST)
+        if form.is_valid():
+            job = form.save(commit=False)
+            job.client = request.user
+            job.status = 'OPEN'
+            job.save()
+            messages.success(request, 'Job posted successfully!')
+            return redirect('my_jobs')
+        else:
+            # Form has validation errors
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = JobForm()
+    
+    return render(request, 'core/post_job.html', {'form': form})
+
+
+@login_required
+@never_cache
+def my_jobs(request):
+    """
+    View for clients to see all their posted jobs.
+    Only accessible by users with 'client' user_type.
+    """
+    # Check if user is a client
+    if request.user.user_type != 'client':
+        messages.error(request, 'Only clients can view posted jobs.')
+        return redirect('dashboard')
+    
+    # Get all jobs posted by the current client
+    jobs = Job.objects.filter(client=request.user).order_by('-created_at')
+    
+    # Add applications count for each job (will be 0 for now since no Application model yet)
+    for job in jobs:
+        job.applications_count = 0  # Placeholder - will be dynamic when Application model is added
+    
+    return render(request, 'core/my_jobs.html', {'jobs': jobs})
+
+
+@login_required
+@never_cache
+def close_job(request, job_id):
+    """
+    View for clients to close a job.
+    Only the job owner can close their job.
+    """
+    # Check if user is a client
+    if request.user.user_type != 'client':
+        messages.error(request, 'Only clients can close jobs.')
+        return redirect('dashboard')
+    
+    # Get the job and ensure it belongs to the current user
+    job = get_object_or_404(Job, id=job_id, client=request.user)
+    
+    if request.method == 'POST':
+        job.status = 'CLOSED'
+        job.save()
+        messages.success(request, f'Job "{job.title}" has been closed.')
+        return redirect('my_jobs')
+    
+    return redirect('my_jobs')
+

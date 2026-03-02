@@ -12,6 +12,11 @@ urlpatterns = [
     path('verify-otp/', views.verify_otp, name='verify_otp'),
     path('reset-password/', views.reset_password, name='reset_password'),
     
+    # Job Management URLs
+    path('post-job/', views.post_job, name='post_job'),
+    path('my-jobs/', views.my_jobs, name='my_jobs'),
+    path('close-job/<int:job_id>/', views.close_job, name='close_job'),
+    
     # API endpoints
     path('check-username/', views.check_username_availability, name='check_username'),
     path('check-email/', views.check_email_availability, name='check_email'),

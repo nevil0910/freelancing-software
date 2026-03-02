@@ -27,15 +27,15 @@
                     <i class="fas fa-user"></i>
                     <span class="nav-text">Profile</span>
                 </a>
-                <a href="#" class="nav-item active">
+                <a href="{% url 'dashboard' %}" class="nav-item active">
                     <i class="fas fa-home"></i>
                     <span class="nav-text">Overview</span>
                 </a>
-                <a href="#" class="nav-item">
+                <a href="{% url 'post_job' %}" class="nav-item">
                     <i class="fas fa-plus-circle"></i>
                     <span class="nav-text">Post a Job</span>
                 </a>
-                <a href="#" class="nav-item">
+                <a href="{% url 'my_jobs' %}" class="nav-item">
                     <i class="fas fa-briefcase"></i>
                     <span class="nav-text">Posted Jobs</span>
                 </a>
@@ -109,16 +109,16 @@
             <div class="quick-actions">
                 <h2 class="subsection-title">Quick Actions</h2>
                 <div class="action-cards">
-                    <div class="action-card">
+                    <a href="{% url 'post_job' %}" class="action-card" style="text-decoration: none; color: inherit;">
                         <i class="fas fa-plus-circle"></i>
                         <h3>Post a New Job</h3>
                         <p>Create a job listing to find the right freelancer</p>
-                    </div>
-                    <div class="action-card">
+                    </a>
+                    <a href="{% url 'my_jobs' %}" class="action-card" style="text-decoration: none; color: inherit;">
                         <i class="fas fa-briefcase"></i>
                         <h3>View Posted Jobs</h3>
                         <p>Manage your existing job postings</p>
-                    </div>
+                    </a>
                     <div class="action-card">
                         <i class="fas fa-file-alt"></i>
                         <h3>Review Proposals</h3>

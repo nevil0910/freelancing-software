@@ -1,0 +1,196 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post a Job - {{ APP_NAME }}</title>
+    <link rel="stylesheet" href="{% static 'core/css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/job_form.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="background-gradient"></div>
+        <div class="blob blob1"></div>
+        <div class="blob blob2"></div>
+        <div class="blob blob3"></div>
+        
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="user-avatar-small">{{ user.first_name|first|upper }}</div>
+                <span class="sidebar-username">{{ user.first_name }}</span>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item">
+                    <i class="fas fa-user"></i>
+                    <span class="nav-text">Profile</span>
+                </a>
+                <a href="{% url 'dashboard' %}" class="nav-item">
+                    <i class="fas fa-home"></i>
+                    <span class="nav-text">Overview</span>
+                </a>
+                <a href="{% url 'post_job' %}" class="nav-item active">
+                    <i class="fas fa-plus-circle"></i>
+                    <span class="nav-text">Post a Job</span>
+                </a>
+                <a href="{% url 'my_jobs' %}" class="nav-item">
+                    <i class="fas fa-briefcase"></i>
+                    <span class="nav-text">Posted Jobs</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-envelope"></i>
+                    <span class="nav-text">Messages</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span class="nav-text">Settings</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <a href="{% url 'logout' %}" class="nav-item logout-item">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="nav-text">Logout</span>
+                </a>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="form-container">
+                <div class="form-header">
+                    <h1><i class="fas fa-briefcase"></i> Post a New Job</h1>
+                    <p>Fill in the details below to create a job listing</p>
+                </div>
+
+                {% if messages %}
+                    {% for message in messages %}
+                        {% if 'logout' not in message.message|lower %}
+                        <div class="alert alert-{{ message.tags }}">
+                            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"></i>
+                            {{ message }}
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+
+                <form method="post" class="job-form">
+                    {% csrf_token %}
+                    
+                    <div class="form-group full-width">
+                        <label for="{{ form.title.id_for_label }}">
+                            {{ form.title.label }} <span class="required">*</span>
+                        </label>
+                        {{ form.title }}
+                        {% if form.title.errors %}
+                            {% for error in form.title.errors %}
+                                <span class="error-message">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ error }}
+                                </span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="{{ form.description.id_for_label }}">
+                            {{ form.description.label }} <span class="required">*</span>
+                        </label>
+                        {{ form.description }}
+                        <span class="help-text">Describe the job requirements, skills needed, and expected deliverables</span>
+                        {% if form.description.errors %}
+                            {% for error in form.description.errors %}
+                                <span class="error-message">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ error }}
+                                </span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.budget.id_for_label }}">
+                            {{ form.budget.label }} <span class="required">*</span>
+                        </label>
+                        {{ form.budget }}
+                        <span class="help-text">Enter the budget in USD</span>
+                        {% if form.budget.errors %}
+                            {% for error in form.budget.errors %}
+                                <span class="error-message">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ error }}
+                                </span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.deadline.id_for_label }}">
+                            {{ form.deadline.label }} <span class="required">*</span>
+                        </label>
+                        {{ form.deadline }}
+                        <span class="help-text">Expected completion date</span>
+                        {% if form.deadline.errors %}
+                            {% for error in form.deadline.errors %}
+                                <span class="error-message">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ error }}
+                                </span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.required_freelancers.id_for_label }}">
+                            {{ form.required_freelancers.label }} <span class="required">*</span>
+                        </label>
+                        {{ form.required_freelancers }}
+                        <span class="help-text">Number of freelancers needed for this job</span>
+                        {% if form.required_freelancers.errors %}
+                            {% for error in form.required_freelancers.errors %}
+                                <span class="error-message">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ error }}
+                                </span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                            Post Job
+                        </button>
+                        <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i>
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Prevent back navigation to cached page
+        (function() {
+            history.pushState(null, null, location.href);
+            window.addEventListener('popstate', function() {
+                history.pushState(null, null, location.href);
+            });
+        })();
+
+        // Set minimum date for deadline to today
+        document.addEventListener('DOMContentLoaded', function() {
+            const deadlineInput = document.querySelector('input[type="date"]');
+            if (deadlineInput) {
+                const today = new Date().toISOString().split('T')[0];
+                deadlineInput.setAttribute('min', today);
+            }
+        });
+    </script>
+</body>
+</html>
