@@ -647,9 +647,8 @@ def check_username_availability(request):
     
     # Check if username exists in CustomUser (pending registrations)
     user_exists = CustomUser.objects.filter(username=username).exists()
-    pending_exists = SignupOTP.objects.filter(username=username).exists()
     
-    available = not (user_exists or pending_exists)
+    available = not (user_exists)
     
     return JsonResponse({'available': available})
 
@@ -663,9 +662,8 @@ def check_email_availability(request):
     
     # Check if email exists in CustomUser (pending registrations)
     user_exists = CustomUser.objects.filter(email=email).exists()
-    pending_exists = SignupOTP.objects.filter(email=email).exists()
     
-    available = not (user_exists or pending_exists)
+    available = not (user_exists)
     
     return JsonResponse({'available': available})
 
