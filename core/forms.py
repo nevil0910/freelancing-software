@@ -7,7 +7,7 @@ class JobForm(forms.ModelForm):
     
     class Meta:
         model = Job
-        fields = ['title', 'description', 'budget', 'deadline', 'required_freelancers']
+        fields = ['title', 'description', 'category', 'budget', 'deadline', 'required_freelancers']
         widgets = {
             'title': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -19,9 +19,12 @@ class JobForm(forms.ModelForm):
                 'placeholder': 'Describe the job requirements, skills needed, and deliverables...',
                 'rows': '6'
             }),
+            'category': forms.Select(attrs={
+                'class': 'form-control',
+            }),
             'budget': forms.NumberInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Enter budget amount',
+                'placeholder': 'Enter budget amount in INR',
                 'step': '0.01',
                 'min': '0'
             }),
@@ -39,7 +42,8 @@ class JobForm(forms.ModelForm):
         labels = {
             'title': 'Job Title',
             'description': 'Job Description',
-            'budget': 'Budget ($)',
+            'category': 'Category',
+            'budget': 'Budget (₹ INR)',
             'deadline': 'Deadline',
             'required_freelancers': 'Required Freelancers'
         }

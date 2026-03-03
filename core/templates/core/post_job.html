@@ -68,7 +68,7 @@
 
                 {% if messages %}
                     {% for message in messages %}
-                        {% if 'logout' not in message.message|lower %}
+                        {% if 'logged out' not in message|lower %}
                         <div class="alert alert-{{ message.tags }}">
                             <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"></i>
                             {{ message }}
@@ -112,11 +112,27 @@
                     </div>
 
                     <div class="form-group">
+                        <label for="{{ form.category.id_for_label }}">
+                            {{ form.category.label }} <span class="required">*</span>
+                        </label>
+                        {{ form.category }}
+                        <span class="help-text">Select the job category</span>
+                        {% if form.category.errors %}
+                            {% for error in form.category.errors %}
+                                <span class="error-message">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ error }}
+                                </span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
                         <label for="{{ form.budget.id_for_label }}">
                             {{ form.budget.label }} <span class="required">*</span>
                         </label>
                         {{ form.budget }}
-                        <span class="help-text">Enter the budget in USD</span>
+                        <span class="help-text">Enter the budget in Indian Rupees (INR)</span>
                         {% if form.budget.errors %}
                             {% for error in form.budget.errors %}
                                 <span class="error-message">

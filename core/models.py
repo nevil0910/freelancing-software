@@ -67,9 +67,23 @@ class Job(models.Model):
         ('CLOSED', 'Closed'),
     )
     
+    CATEGORY_CHOICES = (
+        ('web_dev', 'Web Development'),
+        ('mobile_dev', 'Mobile Development'),
+        ('design', 'Graphic Design'),
+        ('writing', 'Content Writing'),
+        ('marketing', 'Digital Marketing'),
+        ('data_entry', 'Data Entry'),
+        ('seo', 'SEO & Analytics'),
+        ('video_edit', 'Video Editing'),
+        ('ai_ml', 'AI & Machine Learning'),
+        ('other', 'Other'),
+    )
+    
     title = models.CharField(max_length=200)
     description = models.TextField()
-    budget = models.DecimalField(max_digits=10, decimal_places=2)
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='other')
+    budget = models.DecimalField(max_digits=10, decimal_places=2, help_text='Budget in INR')
     deadline = models.DateField()
     required_freelancers = models.IntegerField(default=1)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='OPEN')

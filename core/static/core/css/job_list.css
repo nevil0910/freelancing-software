@@ -177,6 +177,19 @@
     white-space: nowrap;
 }
 
+/* Category Badge */
+.category-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: rgba(138, 43, 226, 0.2);
+    color: #a78bfa;
+    border: 1px solid rgba(138, 43, 226, 0.3);
+    white-space: nowrap;
+}
+
 /* Status Badges */
 .badge {
     display: inline-block;
