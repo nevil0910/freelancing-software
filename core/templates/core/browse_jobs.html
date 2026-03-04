@@ -1,0 +1,225 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Jobs - {{ APP_NAME }}</title>
+    <link rel="stylesheet" href="{% static 'core/css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/browse_jobs.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="background-gradient"></div>
+        <div class="blob blob1"></div>
+        <div class="blob blob2"></div>
+        <div class="blob blob3"></div>
+        
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="user-avatar-small">{{ user.first_name|first|upper }}</div>
+                <span class="sidebar-username">{{ user.first_name }}</span>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item">
+                    <i class="fas fa-user"></i>
+                    <span class="nav-text">Profile</span>
+                </a>
+                <a href="{% url 'dashboard' %}" class="nav-item">
+                    <i class="fas fa-home"></i>
+                    <span class="nav-text">Overview</span>
+                </a>
+                <a href="{% url 'browse_jobs' %}" class="nav-item active">
+                    <i class="fas fa-search"></i>
+                    <span class="nav-text">Browse Jobs</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-briefcase"></i>
+                    <span class="nav-text">My Applications</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-envelope"></i>
+                    <span class="nav-text">Messages</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span class="nav-text">Settings</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <a href="{% url 'logout' %}" class="nav-item logout-item">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="nav-text">Logout</span>
+                </a>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="browse-container">
+                <div class="page-header">
+                    <h1><i class="fas fa-search"></i> Browse Available Jobs</h1>
+                    <p class="subtitle">Find projects that match your skills</p>
+                </div>
+
+                <!-- Search and Filter Bar -->
+                <div class="filter-bar">
+                    <form method="get" class="filter-form">
+                        <div class="filter-group">
+                            <label for="category">
+                                <i class="fas fa-tag"></i> Category
+                            </label>
+                            <select name="category" id="category" class="filter-select">
+                                <option value="">All Categories</option>
+                                {% for value, label in categories %}
+                                    <option value="{{ value }}" {% if selected_category == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label for="search">
+                                <i class="fas fa-user"></i> Client
+                            </label>
+                            <input 
+                                type="text" 
+                                name="search" 
+                                id="search" 
+                                class="filter-input" 
+                                placeholder="Search by client username"
+                                value="{{ search_query }}"
+                            >
+                        </div>
+
+                        <div class="filter-group">
+                            <label for="sort">
+                                <i class="fas fa-sort"></i> Sort By
+                            </label>
+                            <select name="sort" id="sort" class="filter-select">
+                                <option value="newest" {% if selected_sort == 'newest' %}selected{% endif %}>Newest</option>
+                                <option value="budget_low" {% if selected_sort == 'budget_low' %}selected{% endif %}>Budget: Low to High</option>
+                                <option value="budget_high" {% if selected_sort == 'budget_high' %}selected{% endif %}>Budget: High to Low</option>
+                                <option value="deadline_earliest" {% if selected_sort == 'deadline_earliest' %}selected{% endif %}>Deadline: Earliest</option>
+                                <option value="deadline_latest" {% if selected_sort == 'deadline_latest' %}selected{% endif %}>Deadline: Latest</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-actions">
+                            <button type="submit" class="btn-apply-filter">
+                                <i class="fas fa-filter"></i> Apply
+                            </button>
+                            <a href="{% url 'browse_jobs' %}" class="btn-clear-filter">
+                                <i class="fas fa-times"></i> Clear
+                            </a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Job Cards Grid -->
+                <div class="jobs-grid">
+                    {% if jobs %}
+                        {% for job in jobs %}
+                        <div class="job-card">
+                            <div class="job-card-header">
+                                <h3 class="job-title">{{ job.title }}</h3>
+                            </div>
+                            
+                            <hr class="divider">
+                            
+                            <div class="job-info">
+                                <span class="info-label">
+                                    <i class="fas fa-user-tie"></i> Posted by
+                                </span>
+                                <span class="info-value">{{ job.client.username }}</span>
+                            </div>
+                            
+                            <hr class="divider">
+                            
+                            <div class="job-info">
+                                <span class="info-label">
+                                    <i class="fas fa-tag"></i> Category
+                                </span>
+                                <span class="category-badge">{{ job.get_category_display }}</span>
+                            </div>
+                            
+                            <hr class="divider">
+                            
+                            <div class="job-tagline">
+                                <p>{{ job.tagline }}</p>
+                            </div>
+                            
+                            <hr class="divider">
+                            
+                            <div class="job-footer">
+                                <div class="footer-info">
+                                    <div class="budget-info">
+                                        <i class="fas fa-rupee-sign"></i>
+                                        <span class="budget" data-amount="{{ job.budget }}">₹{{ job.budget }}</span>
+                                    </div>
+                                    <div class="deadline-info">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        <span>{{ job.deadline|date:"M d, Y" }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button class="btn-apply">
+                                <i class="fas fa-paper-plane"></i> Apply Now
+                            </button>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="no-jobs">
+                            <i class="fas fa-briefcase"></i>
+                            <h3>No Jobs Found</h3>
+                            <p>Try adjusting your filters or check back later for new opportunities.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Format budget in Indian currency format
+        function formatINR(amount) {
+            const num = parseFloat(amount);
+            
+            if (num < 1000) {
+                return `₹${num.toFixed(0)}`;
+            } else if (num < 100000) {
+                const thousands = num / 1000;
+                return `₹${thousands % 1 === 0 ? thousands.toFixed(0) : thousands.toFixed(1)}k`;
+            } else if (num < 10000000) {
+                const lakhs = num / 100000;
+                return `₹${lakhs % 1 === 0 ? lakhs.toFixed(0) : lakhs.toFixed(2)} Lakhs`;
+            } else {
+                const crores = num / 10000000;
+                return `₹${crores % 1 === 0 ? crores.toFixed(0) : crores.toFixed(2)} Cr`;
+            }
+        }
+
+        // Format all budget elements on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.budget[data-amount]').forEach(function(el) {
+                const amount = el.getAttribute('data-amount');
+                el.textContent = formatINR(amount);
+            });
+        });
+
+        // Prevent back navigation to cached page
+        (function() {
+            history.pushState(null, null, location.href);
+            window.addEventListener('popstate', function() {
+                history.pushState(null, null, location.href);
+            });
+        })();
+    </script>
+</body>
+</html>

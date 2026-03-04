@@ -96,11 +96,25 @@
                     </div>
 
                     <div class="form-group full-width">
+                        <label for="{{ form.tagline.id_for_label }}">
+                            {{ form.tagline.label }} <span class="required">*</span>
+                        </label>
+                        {{ form.tagline }}
+                        {% if form.tagline.errors %}
+                            {% for error in form.tagline.errors %}
+                                <span class="error-message">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ error }}
+                                </span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group full-width">
                         <label for="{{ form.description.id_for_label }}">
                             {{ form.description.label }} <span class="required">*</span>
                         </label>
                         {{ form.description }}
-                        <span class="help-text">Describe the job requirements, skills needed, and expected deliverables</span>
                         {% if form.description.errors %}
                             {% for error in form.description.errors %}
                                 <span class="error-message">

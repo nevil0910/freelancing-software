@@ -641,64 +641,36 @@ def reset_password(request):
 
 def check_username_availability(request):
     """API endpoint to check if username is available"""
-    username = request.GET.get('username', '').strip()
+    if request.method != 'POST':
+        return JsonResponse({'available': False, 'error': 'Invalid request method'})
+    
+    username = request.POST.get('username', '').strip()
     
     if not username:
         return JsonResponse({'available': False, 'error': 'Username is required'})
     
-    # Check if username exists in CustomUser (pending registrations)
+    # Check if username exists in CustomUser
     user_exists = CustomUser.objects.filter(username=username).exists()
     
-    available = not (user_exists)
+    available = not user_exists
     
     return JsonResponse({'available': available})
 
 
 def check_email_availability(request):
     """API endpoint to check if email is available"""
-    email = request.GET.get('email', '').strip()
+    if request.method != 'POST':
+        return JsonResponse({'available': False, 'error': 'Invalid request method'})
+    
+    email = request.POST.get('email', '').strip()
     
     if not email:
         return JsonResponse({'available': False, 'error': 'Email is required'})
     
-    # Check if email exists in CustomUser (pending registrations)
+    # Check if email exists in CustomUser
     user_exists = CustomUser.objects.filter(email=email).exists()
     
-    available = not (user_exists)
-    
-    return JsonResponse({'available': available})
-
-
-# ============= AVAILABILITY CHECK API =============
-
-from django.http import JsonResponse
-
-def check_username_availability(request):
-    """API endpoint to check if username is available"""
-    username = request.GET.get('username', '').strip()
-    
-    if not username:
-        return JsonResponse({'available': False, 'error': 'Username is required'})
-    
-    # Check if username exists in CustomUser (pending registrations)
-    user_exists = CustomUser.objects.filter(username=username).exists()
-    
-    available = not (user_exists)
-    
-    return JsonResponse({'available': available})
-
-
-def check_email_availability(request):
-    """API endpoint to check if email is available"""
-    email = request.GET.get('email', '').strip()
-    
-    if not email:
-        return JsonResponse({'available': False, 'error': 'Email is required'})
-    
-    # Check if email exists in CustomUser (pending registrations)
-    user_exists = CustomUser.objects.filter(email=email).exists()
-    
-    available = not (user_exists)
+    available = not user_exists
     
     return JsonResponse({'available': available})
 
@@ -781,4 +753,66 @@ def close_job(request, job_id):
         return redirect('my_jobs')
     
     return redirect('my_jobs')
+
+
+@login_required
+@never_cache
+def browse_jobs(request):
+    """
+    View for freelancers to browse and search available jobs.
+    Only accessible by users with 'freelancer' user_type.
+    Supports filtering by category, search by client, and sorting.
+    """
+    # Check if user is a freelancer
+    if request.user.user_type != 'freelancer':
+        messages.error(request, 'Only freelancers can browse jobs.')
+        return redirect('dashboard')
+    
+    # Get all OPEN jobs
+    jobs = Job.objects.filter(status='OPEN').select_related('client')
+    
+    # Get filter parameters from POST if form submitted, otherwise defaults
+    if request.method == 'POST':
+        category = request.POST.get('category', '')
+        search = request.POST.get('search', '')
+        sort = request.POST.get('sort', 'newest')
+    else:
+        category = ''
+        search = ''
+        sort = 'newest'
+    
+    # Apply category filter
+    if category:
+        jobs = jobs.filter(category=category)
+    
+    # Apply search filter (client username)
+    if search:
+        jobs = jobs.filter(client__username__icontains=search)
+    
+    # Apply sorting
+    if sort == 'newest':
+        jobs = jobs.order_by('-created_at')
+    elif sort == 'budget_low':
+        jobs = jobs.order_by('budget')
+    elif sort == 'budget_high':
+        jobs = jobs.order_by('-budget')
+    elif sort == 'deadline_earliest':
+        jobs = jobs.order_by('deadline')
+    elif sort == 'deadline_latest':
+        jobs = jobs.order_by('-deadline')
+    else:
+        jobs = jobs.order_by('-created_at')
+    
+    # Get category choices for the filter dropdown
+    categories = Job.CATEGORY_CHOICES
+    
+    context = {
+        'jobs': jobs,
+        'categories': categories,
+        'selected_category': category,
+        'search_query': search,
+        'selected_sort': sort,
+    }
+    
+    return render(request, 'core/browse_jobs.html', context)
 

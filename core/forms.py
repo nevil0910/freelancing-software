@@ -7,12 +7,17 @@ class JobForm(forms.ModelForm):
     
     class Meta:
         model = Job
-        fields = ['title', 'description', 'category', 'budget', 'deadline', 'required_freelancers']
+        fields = ['title', 'tagline', 'description', 'category', 'budget', 'deadline', 'required_freelancers']
         widgets = {
             'title': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Enter job title',
                 'maxlength': '200'
+            }),
+            'tagline': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'A brief one-line summary of the job',
+                'maxlength': '300'
             }),
             'description': forms.Textarea(attrs={
                 'class': 'form-control',
@@ -41,7 +46,8 @@ class JobForm(forms.ModelForm):
         }
         labels = {
             'title': 'Job Title',
-            'description': 'Job Description',
+            'tagline': 'Tagline',
+            'description': 'Full Description',
             'category': 'Category',
             'budget': 'Budget (₹ INR)',
             'deadline': 'Deadline',

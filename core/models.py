@@ -81,7 +81,8 @@ class Job(models.Model):
     )
     
     title = models.CharField(max_length=200)
-    description = models.TextField()
+    tagline = models.CharField(max_length=300, help_text='Brief summary of the job')
+    description = models.TextField(help_text='Detailed job description')
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='other')
     budget = models.DecimalField(max_digits=10, decimal_places=2, help_text='Budget in INR')
     deadline = models.DateField()

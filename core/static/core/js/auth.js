@@ -200,7 +200,16 @@ function updateRequirement(elementId, isValid) {
 
 // Check username availability via AJAX
 function checkUsernameAvailability(username) {
-    fetch(`/check-username/?username=${encodeURIComponent(username)}`)
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    fetch('/check-username/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrftoken
+        },
+        body: `username=${encodeURIComponent(username)}`
+    })
         .then(response => response.json())
         .then(data => {
             const usernameAvailability = document.getElementById('usernameAvailability');
@@ -223,7 +232,16 @@ function checkUsernameAvailability(username) {
 
 // Check email availability via AJAX
 function checkEmailAvailability(email) {
-    fetch(`/check-email/?email=${encodeURIComponent(email)}`)
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    fetch('/check-email/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrftoken
+        },
+        body: `email=${encodeURIComponent(email)}`
+    })
         .then(response => response.json())
         .then(data => {
             const emailAvailability = document.getElementById('emailAvailability');

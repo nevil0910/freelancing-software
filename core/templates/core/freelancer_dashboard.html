@@ -27,11 +27,11 @@
                     <i class="fas fa-user"></i>
                     <span class="nav-text">Profile</span>
                 </a>
-                <a href="#" class="nav-item active">
+                <a href="{% url 'dashboard' %}" class="nav-item active">
                     <i class="fas fa-home"></i>
                     <span class="nav-text">Overview</span>
                 </a>
-                <a href="#" class="nav-item">
+                <a href="{% url 'browse_jobs' %}" class="nav-item">
                     <i class="fas fa-search"></i>
                     <span class="nav-text">Browse Jobs</span>
                 </a>
@@ -117,11 +117,11 @@
             <div class="quick-actions">
                 <h2 class="subsection-title">Quick Actions</h2>
                 <div class="action-cards">
-                    <div class="action-card">
+                    <a href="{% url 'browse_jobs' %}" class="action-card" style="text-decoration: none; color: inherit;">
                         <i class="fas fa-search"></i>
                         <h3>Browse Jobs</h3>
                         <p>Find new opportunities and projects</p>
-                    </div>
+                    </a>
                     <div class="action-card">
                         <i class="fas fa-paper-plane"></i>
                         <h3>My Proposals</h3>
