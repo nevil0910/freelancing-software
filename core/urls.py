@@ -17,6 +17,11 @@ urlpatterns = [
     path('my-jobs/', views.my_jobs, name='my_jobs'),
     path('close-job/<int:job_id>/', views.close_job, name='close_job'),
     path('browse-jobs/', views.browse_jobs, name='browse_jobs'),
+    path('job/<int:job_id>/', views.job_view, name='job_view'),
+    path('job/<int:job_id>/apply/', views.apply_job, name='apply_job'),
+    path('job/<int:job_id>/update/', views.update_job, name='update_job'),
+    path('application/<int:application_id>/accept/', views.accept_application, name='accept_application'),
+    path('application/<int:application_id>/reject/', views.reject_application, name='reject_application'),
     
     # API endpoints
     path('check-username/', views.check_username_availability, name='check_username'),

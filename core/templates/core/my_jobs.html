@@ -130,10 +130,10 @@
                                     </td>
                                     <td>
                                         <div class="action-buttons">
-                                            <a href="#" class="btn-action btn-view">
+                                            <a href="{% url 'job_view' job.id %}" class="btn-action btn-view">
                                                 <i class="fas fa-eye"></i> View
                                             </a>
-                                            <a href="#" class="btn-action btn-edit">
+                                            <a href="{% url 'job_view' job.id %}" class="btn-action btn-edit">
                                                 <i class="fas fa-edit"></i> Edit
                                             </a>
                                             {% if job.status != 'CLOSED' %}

@@ -10,7 +10,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth.hashers import make_password
-from .models import CustomUser, PasswordResetOTP, SignupOTP, Job
+from .models import CustomUser, PasswordResetOTP, SignupOTP, Job, Application
 from .forms import JobForm
 import random
 import string
@@ -721,12 +721,11 @@ def my_jobs(request):
         messages.error(request, 'Only clients can view posted jobs.')
         return redirect('dashboard')
     
-    # Get all jobs posted by the current client
+    # Get all jobs posted by the current client with real application counts
     jobs = Job.objects.filter(client=request.user).order_by('-created_at')
-    
-    # Add applications count for each job (will be 0 for now since no Application model yet)
+
     for job in jobs:
-        job.applications_count = 0  # Placeholder - will be dynamic when Application model is added
+        job.applications_count = job.applications.count()
     
     return render(request, 'core/my_jobs.html', {'jobs': jobs})
 
@@ -755,6 +754,144 @@ def close_job(request, job_id):
     return redirect('my_jobs')
 
 
+# ============================================
+# Job View (shared by freelancers and clients)
+# ============================================
+
+@login_required
+@never_cache
+def job_view(request, job_id):
+    """
+    Unified job detail view for both freelancers and clients.
+    - Freelancers: can view any OPEN job and apply.
+    - Clients: can view and manage only their own jobs.
+    """
+    user = request.user
+
+    if user.user_type == 'client':
+        job = get_object_or_404(Job, id=job_id, client=user)
+        applications = job.applications.select_related('freelancer').all()
+        has_applied = False
+        user_application = None
+        form = JobForm(instance=job)
+    else:
+        job = get_object_or_404(Job, id=job_id)
+        applications = None
+        form = None
+        try:
+            user_application = Application.objects.get(job=job, freelancer=user)
+            has_applied = True
+        except Application.DoesNotExist:
+            user_application = None
+            has_applied = False
+
+    context = {
+        'job': job,
+        'applications': applications,
+        'has_applied': has_applied,
+        'user_application': user_application,
+        'form': form,
+    }
+    return render(request, 'core/job_view.html', context)
+
+
+@login_required
+@never_cache
+def apply_job(request, job_id):
+    """
+    Freelancer submits an application for a job.
+    Returns JSON for AJAX handling.
+    """
+    if request.user.user_type != 'freelancer':
+        return JsonResponse({'success': False, 'error': 'Only freelancers can apply for jobs.'}, status=403)
+
+    job = get_object_or_404(Job, id=job_id, status='OPEN')
+
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=400)
+
+    message = request.POST.get('message', '').strip()
+    if not message:
+        return JsonResponse({'success': False, 'error': 'Please write a cover message before submitting.'})
+
+    if Application.objects.filter(job=job, freelancer=request.user).exists():
+        return JsonResponse({'success': False, 'error': 'You have already applied for this job.'})
+
+    Application.objects.create(
+        job=job,
+        freelancer=request.user,
+        message=message,
+    )
+    return JsonResponse({'success': True, 'message': 'Application submitted successfully!'})
+
+
+@login_required
+@never_cache
+def update_job(request, job_id):
+    """
+    Client updates an existing job's details.
+    """
+    if request.user.user_type != 'client':
+        messages.error(request, 'Only clients can update jobs.')
+        return redirect('dashboard')
+
+    job = get_object_or_404(Job, id=job_id, client=request.user)
+
+    if request.method == 'POST':
+        form = JobForm(request.POST, instance=job)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Job updated successfully!')
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field.replace("_", " ").title()}: {error}')
+
+    return redirect('job_view', job_id=job_id)
+
+
+@login_required
+@never_cache
+def accept_application(request, application_id):
+    """
+    Client accepts a freelancer application.
+    Returns JSON for AJAX handling.
+    """
+    if request.user.user_type != 'client':
+        return JsonResponse({'success': False, 'error': 'Unauthorized.'}, status=403)
+
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=400)
+
+    application = get_object_or_404(Application, id=application_id, job__client=request.user)
+    application.status = 'ACCEPTED'
+    application.save()
+    return JsonResponse({'success': True, 'status': 'ACCEPTED', 'message': 'Application accepted.'})
+
+
+@login_required
+@never_cache
+def reject_application(request, application_id):
+    """
+    Client rejects a freelancer application.
+    Returns JSON for AJAX handling.
+    """
+    if request.user.user_type != 'client':
+        return JsonResponse({'success': False, 'error': 'Unauthorized.'}, status=403)
+
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=400)
+
+    application = get_object_or_404(Application, id=application_id, job__client=request.user)
+    application.status = 'REJECTED'
+    application.save()
+    return JsonResponse({'success': True, 'status': 'REJECTED', 'message': 'Application rejected.'})
+
+
+# ============================================
+# Browse Jobs (Freelancer)
+# ============================================
+
 @login_required
 @never_cache
 def browse_jobs(request):
@@ -771,15 +908,10 @@ def browse_jobs(request):
     # Get all OPEN jobs
     jobs = Job.objects.filter(status='OPEN').select_related('client')
     
-    # Get filter parameters from POST if form submitted, otherwise defaults
-    if request.method == 'POST':
-        category = request.POST.get('category', '')
-        search = request.POST.get('search', '')
-        sort = request.POST.get('sort', 'newest')
-    else:
-        category = ''
-        search = ''
-        sort = 'newest'
+    # Get filter parameters from POST (form uses method="post")
+    category = request.POST.get('category', '')
+    search = request.POST.get('search', '')
+    sort = request.POST.get('sort', 'newest')
     
     # Apply category filter
     if category:

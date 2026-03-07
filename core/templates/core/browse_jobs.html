@@ -68,7 +68,8 @@
 
                 <!-- Search and Filter Bar -->
                 <div class="filter-bar">
-                    <form method="get" class="filter-form">
+                    <form method="post" class="filter-form">
+                        {% csrf_token %}
                         <div class="filter-group">
                             <label for="category">
                                 <i class="fas fa-tag"></i> Category
@@ -169,9 +170,9 @@
                                 </div>
                             </div>
                             
-                            <button class="btn-apply">
-                                <i class="fas fa-paper-plane"></i> Apply Now
-                            </button>
+                            <a href="{% url 'job_view' job.id %}" class="btn-apply">
+                                <i class="fas fa-eye"></i> View Job
+                            </a>
                         </div>
                         {% endfor %}
                     {% else %}

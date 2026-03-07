@@ -1,0 +1,630 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ job.title }} - {{ APP_NAME }}</title>
+    <link rel="stylesheet" href="{% static 'core/css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/job_view.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="background-gradient"></div>
+        <div class="blob blob1"></div>
+        <div class="blob blob2"></div>
+        <div class="blob blob3"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="user-avatar-small">{{ user.first_name|first|upper }}</div>
+                <span class="sidebar-username">{{ user.first_name }}</span>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item">
+                    <i class="fas fa-user"></i>
+                    <span class="nav-text">Profile</span>
+                </a>
+                <a href="{% url 'dashboard' %}" class="nav-item">
+                    <i class="fas fa-home"></i>
+                    <span class="nav-text">Overview</span>
+                </a>
+                {% if user.user_type == 'client' %}
+                    <a href="{% url 'post_job' %}" class="nav-item">
+                        <i class="fas fa-plus-circle"></i>
+                        <span class="nav-text">Post a Job</span>
+                    </a>
+                    <a href="{% url 'my_jobs' %}" class="nav-item active">
+                        <i class="fas fa-briefcase"></i>
+                        <span class="nav-text">Posted Jobs</span>
+                    </a>
+                {% else %}
+                    <a href="{% url 'browse_jobs' %}" class="nav-item active">
+                        <i class="fas fa-search"></i>
+                        <span class="nav-text">Browse Jobs</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-briefcase"></i>
+                        <span class="nav-text">My Applications</span>
+                    </a>
+                {% endif %}
+                <a href="#" class="nav-item">
+                    <i class="fas fa-envelope"></i>
+                    <span class="nav-text">Messages</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span class="nav-text">Settings</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="{% url 'logout' %}" class="nav-item logout-item">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="nav-text">Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="job-view-container">
+
+                <!-- Page Header -->
+                <div class="page-header">
+                    <a href="{% if user.user_type == 'client' %}{% url 'my_jobs' %}{% else %}{% url 'browse_jobs' %}{% endif %}" class="btn-back">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </a>
+                    <h1><i class="fas fa-briefcase"></i> Job Details</h1>
+                </div>
+
+                <!-- Django messages -->
+                {% if messages %}
+                    {% for message in messages %}
+                        {% if 'logged out' not in message|lower %}
+                        <div class="page-alert {% if message.tags == 'success' %}success{% else %}error{% endif %}">
+                            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"></i>
+                            {{ message }}
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Two-column layout -->
+                <div class="job-view-layout">
+
+                    <!-- LEFT COLUMN: Job Details -->
+                    <div class="job-details-card">
+                        <div class="job-title-row">
+                            <h2 class="job-main-title">{{ job.title }}</h2>
+                            <span class="status-badge status-{{ job.status|lower|cut:'_' }}">
+                                {{ job.get_status_display }}
+                            </span>
+                        </div>
+
+                        <p class="job-tagline">{{ job.tagline }}</p>
+
+                        <!-- Meta grid -->
+                        <div class="job-meta-grid">
+                            <div class="meta-item">
+                                <span class="meta-label"><i class="fas fa-tag"></i> Category</span>
+                                <span class="meta-value">
+                                    <span class="category-chip">{{ job.get_category_display }}</span>
+                                </span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label"><i class="fas fa-user-tie"></i> Posted by</span>
+                                <span class="meta-value">{{ job.client.username }}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label"><i class="fas fa-rupee-sign"></i> Budget</span>
+                                <span class="meta-value budget" data-amount="{{ job.budget }}">₹{{ job.budget }}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label"><i class="fas fa-calendar-alt"></i> Deadline</span>
+                                <span class="meta-value">{{ job.deadline|date:"M d, Y" }}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label"><i class="fas fa-users"></i> Freelancers needed</span>
+                                <span class="meta-value">{{ job.required_freelancers }}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label"><i class="fas fa-clock"></i> Posted on</span>
+                                <span class="meta-value">{{ job.created_at|date:"M d, Y" }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Full description -->
+                        <div>
+                            <p class="section-title">
+                                <i class="fas fa-align-left"></i> Job Description
+                            </p>
+                            <p class="job-description-text">{{ job.description }}</p>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT COLUMN: Action Panel -->
+                    <div class="action-panel">
+
+                        {% if user.user_type == 'freelancer' %}
+                        <!-- ================================
+                             FREELANCER ACTION PANEL
+                             ================================ -->
+                        <div class="panel-card">
+                            <p class="panel-card-title">
+                                <i class="fas fa-paper-plane"></i> Your Action
+                            </p>
+
+                            {% if job.status == 'OPEN' %}
+                                {% if has_applied %}
+                                    <!-- Already applied -->
+                                    <div class="applied-status">
+                                        <div class="status-icon">
+                                            {% if user_application.status == 'ACCEPTED' %}
+                                                <i class="fas fa-check-circle" style="color:#34d399;"></i>
+                                            {% elif user_application.status == 'REJECTED' %}
+                                                <i class="fas fa-times-circle" style="color:#f87171;"></i>
+                                            {% else %}
+                                                <i class="fas fa-hourglass-half" style="color:#fbbf24;"></i>
+                                            {% endif %}
+                                        </div>
+                                        <p class="status-text">Application status</p>
+                                        <p class="status-value {{ user_application.status|lower }}">
+                                            {{ user_application.get_status_display }}
+                                        </p>
+                                        <div class="applied-message-preview">
+                                            "{{ user_application.message|truncatechars:160 }}"
+                                        </div>
+                                        <p style="font-size:0.8rem;color:rgba(255,255,255,0.35);margin-top:10px;">
+                                            Applied {{ user_application.created_at|date:"M d, Y" }}
+                                        </p>
+                                    </div>
+                                {% else %}
+                                    <!-- Apply button -->
+                                    <button class="btn-apply-job" id="openApplyModal">
+                                        <i class="fas fa-paper-plane"></i> Apply for this Job
+                                    </button>
+                                    <p style="font-size:0.82rem;color:rgba(255,255,255,0.4);text-align:center;margin-top:12px;">
+                                        Send a cover message to the client
+                                    </p>
+                                {% endif %}
+                            {% else %}
+                                <div class="job-closed-notice">
+                                    <i class="fas fa-lock"></i>
+                                    This job is no longer accepting applications.
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        {% else %}
+                        <!-- ================================
+                             CLIENT ACTION PANEL
+                             ================================ -->
+
+                        <!-- View Applications -->
+                        <div class="panel-card">
+                            <p class="panel-card-title">
+                                <i class="fas fa-users"></i> Applications
+                            </p>
+                            <button class="btn-view-applications" id="openApplicationsModal">
+                                <i class="fas fa-list"></i>
+                                View Applications
+                                <span class="app-count-badge" id="appCountBadge">{{ applications|length }}</span>
+                            </button>
+                        </div>
+
+                        <!-- Edit Job -->
+                        <div class="panel-card">
+                            <p class="panel-card-title">
+                                <i class="fas fa-edit"></i> Edit Job
+                            </p>
+                            <form method="post" action="{% url 'update_job' job.id %}" class="edit-form">
+                                {% csrf_token %}
+
+                                <div class="form-row">
+                                    <label class="form-label">Job Title</label>
+                                    {{ form.title }}
+                                    {% if form.title.errors %}<ul class="errorlist">{% for e in form.title.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                                </div>
+
+                                <div class="form-row">
+                                    <label class="form-label">Tagline</label>
+                                    {{ form.tagline }}
+                                    {% if form.tagline.errors %}<ul class="errorlist">{% for e in form.tagline.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                                </div>
+
+                                <div class="form-row">
+                                    <label class="form-label">Description</label>
+                                    {{ form.description }}
+                                    {% if form.description.errors %}<ul class="errorlist">{% for e in form.description.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                                </div>
+
+                                <div class="form-row">
+                                    <label class="form-label">Category</label>
+                                    {{ form.category }}
+                                    {% if form.category.errors %}<ul class="errorlist">{% for e in form.category.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                                </div>
+
+                                <div class="form-row">
+                                    <label class="form-label">Budget (₹ INR)</label>
+                                    {{ form.budget }}
+                                    {% if form.budget.errors %}<ul class="errorlist">{% for e in form.budget.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                                </div>
+
+                                <div class="form-row">
+                                    <label class="form-label">Deadline</label>
+                                    {{ form.deadline }}
+                                    {% if form.deadline.errors %}<ul class="errorlist">{% for e in form.deadline.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                                </div>
+
+                                <div class="form-row">
+                                    <label class="form-label">Required Freelancers</label>
+                                    {{ form.required_freelancers }}
+                                    {% if form.required_freelancers.errors %}<ul class="errorlist">{% for e in form.required_freelancers.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                                </div>
+
+                                <button type="submit" class="btn-save">
+                                    <i class="fas fa-save"></i> Save Changes
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Danger zone -->
+                        {% if job.status != 'CLOSED' %}
+                        <div class="panel-card danger-zone">
+                            <p class="panel-card-title" style="color:#f87171;">
+                                <i class="fas fa-exclamation-triangle" style="color:#f87171;"></i> Danger Zone
+                            </p>
+                            <form method="post" action="{% url 'close_job' job.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-close-job"
+                                        onclick="return confirm('Are you sure you want to close this job? This cannot be undone.');">
+                                    <i class="fas fa-times-circle"></i> Close Job
+                                </button>
+                            </form>
+                        </div>
+                        {% endif %}
+
+                        {% endif %}
+                        <!-- end role-based panel -->
+
+                    </div>
+                    <!-- end right column -->
+
+                </div>
+                <!-- end two-column layout -->
+
+            </div>
+        </main>
+    </div>
+
+    <!-- ============================================================
+         MODAL: Apply for Job (freelancer only)
+         ============================================================ -->
+    {% if user.user_type == 'freelancer' and job.status == 'OPEN' and not has_applied %}
+    <div class="modal-overlay" id="applyModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <span class="modal-title">
+                    <i class="fas fa-paper-plane"></i> Apply for "{{ job.title|truncatechars:40 }}"
+                </span>
+                <button class="modal-close" id="closeApplyModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-alert" id="applyAlert"></div>
+
+                <label class="apply-textarea-label" for="applyMessage">
+                    Cover message to the client
+                </label>
+                <textarea
+                    id="applyMessage"
+                    class="apply-textarea"
+                    placeholder="Introduce yourself, explain why you're a great fit, and ask any clarifying questions..."
+                    maxlength="2000"
+                ></textarea>
+                <p class="apply-hint">
+                    <i class="fas fa-info-circle"></i>
+                    A strong message increases your chances. Be specific about your experience.
+                </p>
+
+                <div class="modal-actions">
+                    <button class="btn-modal-submit" id="submitApplyBtn">
+                        <i class="fas fa-paper-plane"></i> Submit Application
+                    </button>
+                    <button class="btn-modal-cancel" id="cancelApplyBtn">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ============================================================
+         MODAL: View Applications (client only)
+         ============================================================ -->
+    {% if user.user_type == 'client' %}
+    <div class="modal-overlay" id="applicationsModal">
+        <div class="modal-box modal-wide">
+            <div class="modal-header">
+                <span class="modal-title">
+                    <i class="fas fa-users"></i>
+                    Freelancer Applications
+                    <span style="font-weight:400;color:rgba(255,255,255,0.5);font-size:0.9rem;">({{ applications|length }})</span>
+                </span>
+                <button class="modal-close" id="closeApplicationsModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-alert" id="appActionAlert"></div>
+
+                {% if applications %}
+                    {% for app in applications %}
+                    <div class="application-item {{ app.status|lower }}" id="appItem{{ app.id }}">
+                        <div class="app-header">
+                            <div class="app-freelancer-info">
+                                <div class="app-avatar">{{ app.freelancer.first_name|first|upper }}</div>
+                                <div>
+                                    <div class="app-username">{{ app.freelancer.username }}</div>
+                                    <div class="app-date">Applied {{ app.created_at|date:"M d, Y" }}</div>
+                                </div>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                                <span class="app-rating">
+                                    <i class="fas fa-star"></i> N/A
+                                </span>
+                                <span class="app-status-badge app-status-{{ app.status|lower }}" id="appStatus{{ app.id }}">
+                                    {{ app.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="app-message">{{ app.message }}</div>
+
+                        <div class="app-actions">
+                            <a href="#" class="btn-profile" title="View profile (coming soon)">
+                                <i class="fas fa-user"></i> View Profile
+                            </a>
+                            {% if app.status == 'PENDING' %}
+                            <button
+                                class="btn-accept"
+                                onclick="handleApplication({{ app.id }}, 'accept')"
+                                id="acceptBtn{{ app.id }}">
+                                <i class="fas fa-check"></i> Accept
+                            </button>
+                            <button
+                                class="btn-reject"
+                                onclick="handleApplication({{ app.id }}, 'reject')"
+                                id="rejectBtn{{ app.id }}">
+                                <i class="fas fa-times"></i> Reject
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="applications-empty">
+                        <i class="fas fa-inbox"></i>
+                        <p>No applications received yet.</p>
+                        <p style="font-size:0.85rem;margin-top:6px;">Check back later — freelancers will apply here.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Hidden CSRF for AJAX -->
+    <form id="csrfForm" style="display:none;">{% csrf_token %}</form>
+
+    <script>
+        // ============================================================
+        // Utility: Indian currency format
+        // ============================================================
+        function formatINR(amount) {
+            const num = parseFloat(amount);
+            if (num < 1000) return `₹${num.toFixed(0)}`;
+            if (num < 100000) {
+                const t = num / 1000;
+                return `₹${t % 1 === 0 ? t.toFixed(0) : t.toFixed(1)}k`;
+            }
+            if (num < 10000000) {
+                const l = num / 100000;
+                return `₹${l % 1 === 0 ? l.toFixed(0) : l.toFixed(2)} L`;
+            }
+            const c = num / 10000000;
+            return `₹${c % 1 === 0 ? c.toFixed(0) : c.toFixed(2)} Cr`;
+        }
+
+        document.querySelectorAll('.budget[data-amount]').forEach(function(el) {
+            el.textContent = formatINR(el.getAttribute('data-amount'));
+        });
+
+        // ============================================================
+        // Utility: Get CSRF token
+        // ============================================================
+        function getCsrf() {
+            const el = document.querySelector('#csrfForm [name=csrfmiddlewaretoken]');
+            return el ? el.value : '';
+        }
+
+        // ============================================================
+        // Modal helpers
+        // ============================================================
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Close on overlay click
+        document.querySelectorAll('.modal-overlay').forEach(function(overlay) {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) closeModal(overlay.id);
+            });
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay.active').forEach(function(m) {
+                    closeModal(m.id);
+                });
+            }
+        });
+
+        // ============================================================
+        // Apply modal (freelancer)
+        // ============================================================
+        {% if user.user_type == 'freelancer' and job.status == 'OPEN' and not has_applied %}
+        const openApplyBtn = document.getElementById('openApplyModal');
+        if (openApplyBtn) {
+            openApplyBtn.addEventListener('click', function() {
+                openModal('applyModal');
+            });
+        }
+        document.getElementById('closeApplyModal').addEventListener('click', function() {
+            closeModal('applyModal');
+        });
+        document.getElementById('cancelApplyBtn').addEventListener('click', function() {
+            closeModal('applyModal');
+        });
+
+        document.getElementById('submitApplyBtn').addEventListener('click', function() {
+            const message = document.getElementById('applyMessage').value.trim();
+            const alertEl = document.getElementById('applyAlert');
+            const submitBtn = document.getElementById('submitApplyBtn');
+
+            if (!message) {
+                alertEl.className = 'modal-alert error';
+                alertEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Please write a cover message before submitting.';
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+            alertEl.className = 'modal-alert';
+            alertEl.innerHTML = '';
+
+            fetch('{% url "apply_job" job.id %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': getCsrf(),
+                },
+                body: 'message=' + encodeURIComponent(message),
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    alertEl.className = 'modal-alert success';
+                    alertEl.innerHTML = '<i class="fas fa-check-circle"></i> ' + data.message;
+                    submitBtn.innerHTML = '<i class="fas fa-check"></i> Submitted!';
+                    // Reload after short delay to show updated state
+                    setTimeout(function() { location.reload(); }, 1400);
+                } else {
+                    alertEl.className = 'modal-alert error';
+                    alertEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + data.error;
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Application';
+                }
+            })
+            .catch(function() {
+                alertEl.className = 'modal-alert error';
+                alertEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Something went wrong. Please try again.';
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Application';
+            });
+        });
+        {% endif %}
+
+        // ============================================================
+        // Applications modal (client)
+        // ============================================================
+        {% if user.user_type == 'client' %}
+        document.getElementById('openApplicationsModal').addEventListener('click', function() {
+            openModal('applicationsModal');
+        });
+        document.getElementById('closeApplicationsModal').addEventListener('click', function() {
+            closeModal('applicationsModal');
+        });
+
+        function handleApplication(appId, action) {
+            const url = action === 'accept'
+                ? '/application/' + appId + '/accept/'
+                : '/application/' + appId + '/reject/';
+
+            const acceptBtn = document.getElementById('acceptBtn' + appId);
+            const rejectBtn = document.getElementById('rejectBtn' + appId);
+            const alertEl = document.getElementById('appActionAlert');
+
+            if (acceptBtn) acceptBtn.disabled = true;
+            if (rejectBtn) rejectBtn.disabled = true;
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': getCsrf(),
+                },
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    const item = document.getElementById('appItem' + appId);
+                    const statusBadge = document.getElementById('appStatus' + appId);
+
+                    // Update status badge
+                    statusBadge.className = 'app-status-badge app-status-' + data.status.toLowerCase();
+                    statusBadge.textContent = data.status.charAt(0) + data.status.slice(1).toLowerCase();
+
+                    // Update item class
+                    item.classList.remove('pending');
+                    item.classList.add(data.status.toLowerCase());
+
+                    // Remove action buttons
+                    if (acceptBtn) acceptBtn.remove();
+                    if (rejectBtn) rejectBtn.remove();
+
+                    // Show success
+                    alertEl.className = 'modal-alert success';
+                    alertEl.innerHTML = '<i class="fas fa-check-circle"></i> ' + data.message;
+                    setTimeout(function() {
+                        alertEl.className = 'modal-alert';
+                        alertEl.innerHTML = '';
+                    }, 3000);
+                } else {
+                    alertEl.className = 'modal-alert error';
+                    alertEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + data.error;
+                    if (acceptBtn) acceptBtn.disabled = false;
+                    if (rejectBtn) rejectBtn.disabled = false;
+                }
+            })
+            .catch(function() {
+                alertEl.className = 'modal-alert error';
+                alertEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Something went wrong. Please try again.';
+                if (acceptBtn) acceptBtn.disabled = false;
+                if (rejectBtn) rejectBtn.disabled = false;
+            });
+        }
+        {% endif %}
+
+        // ============================================================
+        // Set min date on deadline input (client edit form)
+        // ============================================================
+        const deadlineInput = document.querySelector('input[name="deadline"]');
+        if (deadlineInput) {
+            const today = new Date().toISOString().split('T')[0];
+            deadlineInput.setAttribute('min', today);
+        }
+
+    </script>
+</body>
+</html>

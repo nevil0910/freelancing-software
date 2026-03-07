@@ -93,6 +93,29 @@ class Job(models.Model):
     
     def __str__(self):
         return f"{self.title} - {self.client.username}"
-    
+
     class Meta:
         ordering = ['-created_at']
+
+
+# Application Model for Freelancer Job Applications
+class Application(models.Model):
+    STATUS_CHOICES = (
+        ('PENDING', 'Pending'),
+        ('ACCEPTED', 'Accepted'),
+        ('REJECTED', 'Rejected'),
+    )
+
+    message = models.TextField(help_text='Cover letter or clarification message')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    freelancer = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='applications')
+    job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='applications')
+
+    def __str__(self):
+        return f"{self.freelancer.username} applied to {self.job.title}"
+
+    class Meta:
+        ordering = ['-created_at']
+        unique_together = [('job', 'freelancer')]
