@@ -207,6 +207,14 @@ body {
     backdrop-filter: blur(10px);
 }
 
+.form-group input:-webkit-autofill{
+    -webkit-box-shadow: 0 0 0px 1000px #ffffff0d inset;
+    caret-color: #ffffff;
+    -webkit-text-fill-color: #ffffff;
+    border-color: #ffffff1a;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
 .form-group input:focus,
 .form-group select:focus {
     outline: none;

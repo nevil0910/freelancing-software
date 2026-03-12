@@ -28,7 +28,7 @@
                 </div>
                 {% endif %}
 
-                <form method="POST" class="auth-form">
+                <form method="POST" class="auth-form" autocomplete="off">
                     {% csrf_token %}
                     
                     <div class="form-row">
@@ -39,6 +39,7 @@
                                 id="first_name" 
                                 name="first_name" 
                                 placeholder="Your first name"
+                                autocomplete="off"
                                 required
                             >
                         </div>
@@ -50,6 +51,7 @@
                                 id="last_name" 
                                 name="last_name" 
                                 placeholder="Your last name"
+                                autocomplete="off"
                                 required
                             >
                         </div>
