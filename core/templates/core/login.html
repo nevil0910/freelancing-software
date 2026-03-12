@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - {{ APP_NAME }}</title>
     <link rel="stylesheet" href="{% static 'core/css/auth.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="auth-container">
@@ -53,7 +54,8 @@
                                 required
                             >
                             <button type="button" class="toggle-password" id="togglePassword">
-                                <span class="eye-icon">👁️</span>
+                                <i class="fa-solid fa-eye" id="eyeIcon"></i>
+                                <i class="fa-solid fa-eye-slash" id="eyeSlashIcon" style="display:none;"></i>
                             </button>
                         </div>
                     </div>

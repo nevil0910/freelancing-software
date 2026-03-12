@@ -23,17 +23,22 @@ document.addEventListener('DOMContentLoaded', function() {
     togglePasswordButtons.forEach(button => {
         button.addEventListener('click', function(e) {
             e.preventDefault();
-            
+
             // Find the password input in the same wrapper
             const wrapper = this.closest('.password-input-wrapper');
             const passwordField = wrapper.querySelector('input[type="password"], input[type="text"]');
-            
+
             if (passwordField) {
-                const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
-                passwordField.setAttribute('type', type);
-                
-                // Toggle button class for styling
-                this.classList.toggle('hide');
+                const isPassword = passwordField.getAttribute('type') === 'password';
+                passwordField.setAttribute('type', isPassword ? 'text' : 'password');
+
+                // Swap icons
+                const eyeIcon = this.querySelector('.fa-eye');
+                const eyeSlashIcon = this.querySelector('.fa-eye-slash');
+                if (eyeIcon && eyeSlashIcon) {
+                    eyeIcon.style.display = isPassword ? 'none' : '';
+                    eyeSlashIcon.style.display = isPassword ? '' : 'none';
+                }
             }
         });
     });
