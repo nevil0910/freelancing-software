@@ -15,55 +15,7 @@
         <div class="blob blob2"></div>
         <div class="blob blob3"></div>
         
-        <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="user-avatar-small">{{ user.first_name|first|upper }}</div>
-                <span class="sidebar-username">{{ user.first_name }}</span>
-            </div>
-            
-            <nav class="sidebar-nav">
-                <a href="#" class="nav-item">
-                    <i class="fas fa-user"></i>
-                    <span class="nav-text">Profile</span>
-                </a>
-                <a href="{% url 'dashboard' %}" class="nav-item active">
-                    <i class="fas fa-home"></i>
-                    <span class="nav-text">Overview</span>
-                </a>
-                <a href="{% url 'browse_jobs' %}" class="nav-item">
-                    <i class="fas fa-search"></i>
-                    <span class="nav-text">Browse Jobs</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <i class="fas fa-paper-plane"></i>
-                    <span class="nav-text">My Proposals</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <i class="fas fa-tasks"></i>
-                    <span class="nav-text">Active Projects</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <i class="fas fa-dollar-sign"></i>
-                    <span class="nav-text">Earnings</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <i class="fas fa-envelope"></i>
-                    <span class="nav-text">Messages</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <i class="fas fa-cog"></i>
-                    <span class="nav-text">Settings</span>
-                </a>
-            </nav>
-            
-            <div class="sidebar-footer">
-                <a href="{% url 'logout' %}" class="nav-item logout-item">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span class="nav-text">Logout</span>
-                </a>
-            </div>
-        </aside>
+        {% include 'core/freelancer_sidebar.html' %}
         
         <!-- Main Content -->
         <main class="main-content">

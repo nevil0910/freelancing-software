@@ -1,0 +1,41 @@
+<!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="user-avatar-small">{{ user.first_name|first|upper }}</div>
+                <span class="sidebar-username">{{ user.first_name }}</span>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item">
+                    <i class="fas fa-user"></i>
+                    <span class="nav-text">Profile</span>
+                </a>
+                <a href="{% url 'dashboard' %}" class="nav-item{% if request.resolver_match.url_name == 'dashboard' %} active{% endif %}">
+                    <i class="fas fa-home"></i>
+                    <span class="nav-text">Overview</span>
+                </a>
+                <a href="{% url 'post_job' %}" class="nav-item{% if request.resolver_match.url_name == 'post_job' %} active{% endif %}">
+                    <i class="fas fa-plus-circle"></i>
+                    <span class="nav-text">Post a Job</span>
+                </a>
+                <a href="{% url 'my_jobs' %}" class="nav-item{% if request.resolver_match.url_name == 'my_jobs' or request.resolver_match.url_name == 'job_view' %} active{% endif %}">
+                    <i class="fas fa-briefcase"></i>
+                    <span class="nav-text">Posted Jobs</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-envelope"></i>
+                    <span class="nav-text">Messages</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span class="nav-text">Settings</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <a href="{% url 'logout' %}" class="nav-item logout-item">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="nav-text">Logout</span>
+                </a>
+            </div>
+        </aside>
