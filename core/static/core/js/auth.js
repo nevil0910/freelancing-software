@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // Show checking message
-            if (username.length >= 3) {
+            if (username.length > 0) {
                 usernameAvailability.textContent = '⏳ Checking availability...';
                 usernameAvailability.classList.add('show', 'checking');
                 usernameAvailability.classList.remove('available', 'taken');
