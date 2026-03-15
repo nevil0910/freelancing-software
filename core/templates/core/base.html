@@ -1,0 +1,24 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ APP_NAME }}{% endblock %}</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'core/res/freelancehub.ico' %}">
+    <link rel="stylesheet" href="{% static 'core/css/base.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    {% block extra_css %}{% endblock %}
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <div class="{% block page_container_class %}{% endblock %}">
+        <div class="background-gradient"></div>
+        <div class="blob blob1"></div>
+        <div class="blob blob2"></div>
+        <div class="blob blob3"></div>
+        {% block content %}{% endblock %}
+    </div>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

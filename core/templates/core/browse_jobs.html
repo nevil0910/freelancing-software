@@ -1,21 +1,16 @@
+{% extends 'core/base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Browse Jobs - {{ APP_NAME }}</title>
+
+{% block title %}Browse Jobs - {{ APP_NAME }}{% endblock %}
+
+{% block extra_css %}
     <link rel="stylesheet" href="{% static 'core/css/dashboard.css' %}">
     <link rel="stylesheet" href="{% static 'core/css/browse_jobs.css' %}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
-    <div class="dashboard-container">
-        <div class="background-gradient"></div>
-        <div class="blob blob1"></div>
-        <div class="blob blob2"></div>
-        <div class="blob blob3"></div>
-        
+{% endblock %}
+
+{% block page_container_class %}dashboard-container{% endblock %}
+
+{% block content %}
 {% include 'core/freelancer_sidebar.html' %}
         
         <!-- Main Content -->
@@ -144,8 +139,9 @@
                 </div>
             </div>
         </main>
-    </div>
+{% endblock %}
 
+{% block extra_js %}
     <script>
         // Format budget in Indian currency format
         function formatINR(amount) {
@@ -181,5 +177,4 @@
             });
         })();
     </script>
-</body>
-</html>
+{% endblock %}

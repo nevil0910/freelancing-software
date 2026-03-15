@@ -1,21 +1,16 @@
+{% extends 'core/base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ job.title }} - {{ APP_NAME }}</title>
+
+{% block title %}{{ job.title }} - {{ APP_NAME }}{% endblock %}
+
+{% block extra_css %}
     <link rel="stylesheet" href="{% static 'core/css/dashboard.css' %}">
     <link rel="stylesheet" href="{% static 'core/css/job_view.css' %}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
-    <div class="dashboard-container">
-        <div class="background-gradient"></div>
-        <div class="blob blob1"></div>
-        <div class="blob blob2"></div>
-        <div class="blob blob3"></div>
+{% endblock %}
 
+{% block page_container_class %}dashboard-container{% endblock %}
+
+{% block content %}
         {% if user.user_type == 'client' %}
             {% include 'core/client_sidebar.html' %}
         {% else %}
@@ -158,6 +153,7 @@
                              ================================ -->
 
                         <!-- View Applications -->
+                        {% if job.status != 'CLOSED' %}
                         <div class="panel-card">
                             <p class="panel-card-title">
                                 <i class="fas fa-users"></i> Applications
@@ -168,8 +164,10 @@
                                 <span class="app-count-badge" id="appCountBadge">{{ applications|length }}</span>
                             </button>
                         </div>
+                        {% endif %}
 
                         <!-- Edit Job -->
+                        {% if job.status != 'CLOSED' %}
                         <div class="panel-card">
                             <p class="panel-card-title">
                                 <i class="fas fa-edit"></i> Edit Job
@@ -224,6 +222,7 @@
                                 </button>
                             </form>
                         </div>
+                        {% endif %}
 
                         <!-- Danger zone -->
                         {% if job.status != 'CLOSED' %}
@@ -255,7 +254,7 @@
     </div>
 
     <!-- ============================================================
-         MODAL: Apply for Job (freelancer only)
+         MODEL: Apply for Job (freelancer only)
          ============================================================ -->
     {% if user.user_type == 'freelancer' and job.status == 'OPEN' and not has_applied %}
     <div class="modal-overlay" id="applyModal">
@@ -297,9 +296,9 @@
     {% endif %}
 
     <!-- ============================================================
-         MODAL: View Applications (client only)
+         MODEL: View Applications (client only)
          ============================================================ -->
-    {% if user.user_type == 'client' %}
+    {% if user.user_type == 'client' and job.status != 'CLOSED' %}
     <div class="modal-overlay" id="applicationsModal">
         <div class="modal-box modal-wide">
             <div class="modal-header">
@@ -373,211 +372,16 @@
 
     <!-- Hidden CSRF for AJAX -->
     <form id="csrfForm" style="display:none;">{% csrf_token %}</form>
+{% endblock %}
 
+{% block extra_js %}
     <script>
-        // ============================================================
-        // Utility: Indian currency format
-        // ============================================================
-        function formatINR(amount) {
-            const num = parseFloat(amount);
-            if (num < 1000) return `₹${num.toFixed(0)}`;
-            if (num < 100000) {
-                const t = num / 1000;
-                return `₹${t % 1 === 0 ? t.toFixed(0) : t.toFixed(1)}k`;
-            }
-            if (num < 10000000) {
-                const l = num / 100000;
-                return `₹${l % 1 === 0 ? l.toFixed(0) : l.toFixed(2)} L`;
-            }
-            const c = num / 10000000;
-            return `₹${c % 1 === 0 ? c.toFixed(0) : c.toFixed(2)} Cr`;
-        }
-
-        document.querySelectorAll('.budget[data-amount]').forEach(function(el) {
-            el.textContent = formatINR(el.getAttribute('data-amount'));
-        });
-
-        // ============================================================
-        // Utility: Get CSRF token
-        // ============================================================
-        function getCsrf() {
-            const el = document.querySelector('#csrfForm [name=csrfmiddlewaretoken]');
-            return el ? el.value : '';
-        }
-
-        // ============================================================
-        // Modal helpers
-        // ============================================================
-        function openModal(id) {
-            document.getElementById(id).classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('active');
-            document.body.style.overflow = '';
-        }
-
-        // Close on overlay click
-        document.querySelectorAll('.modal-overlay').forEach(function(overlay) {
-            overlay.addEventListener('click', function(e) {
-                if (e.target === overlay) closeModal(overlay.id);
-            });
-        });
-
-        // Close on Escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                document.querySelectorAll('.modal-overlay.active').forEach(function(m) {
-                    closeModal(m.id);
-                });
-            }
-        });
-
-        // ============================================================
-        // Apply modal (freelancer)
-        // ============================================================
-        {% if user.user_type == 'freelancer' and job.status == 'OPEN' and not has_applied %}
-        const openApplyBtn = document.getElementById('openApplyModal');
-        if (openApplyBtn) {
-            openApplyBtn.addEventListener('click', function() {
-                openModal('applyModal');
-            });
-        }
-        document.getElementById('closeApplyModal').addEventListener('click', function() {
-            closeModal('applyModal');
-        });
-        document.getElementById('cancelApplyBtn').addEventListener('click', function() {
-            closeModal('applyModal');
-        });
-
-        document.getElementById('submitApplyBtn').addEventListener('click', function() {
-            const message = document.getElementById('applyMessage').value.trim();
-            const alertEl = document.getElementById('applyAlert');
-            const submitBtn = document.getElementById('submitApplyBtn');
-
-            if (!message) {
-                alertEl.className = 'modal-alert error';
-                alertEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Please write a cover message before submitting.';
-                return;
-            }
-
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
-            alertEl.className = 'modal-alert';
-            alertEl.innerHTML = '';
-
-            fetch('{% url "apply_job" job.id %}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRFToken': getCsrf(),
-                },
-                body: 'message=' + encodeURIComponent(message),
-            })
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                if (data.success) {
-                    alertEl.className = 'modal-alert success';
-                    alertEl.innerHTML = '<i class="fas fa-check-circle"></i> ' + data.message;
-                    submitBtn.innerHTML = '<i class="fas fa-check"></i> Submitted!';
-                    // Reload after short delay to show updated state
-                    setTimeout(function() { location.reload(); }, 1400);
-                } else {
-                    alertEl.className = 'modal-alert error';
-                    alertEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + data.error;
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Application';
-                }
-            })
-            .catch(function() {
-                alertEl.className = 'modal-alert error';
-                alertEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Something went wrong. Please try again.';
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Application';
-            });
-        });
-        {% endif %}
-
-        // ============================================================
-        // Applications modal (client)
-        // ============================================================
-        {% if user.user_type == 'client' %}
-        document.getElementById('openApplicationsModal').addEventListener('click', function() {
-            openModal('applicationsModal');
-        });
-        document.getElementById('closeApplicationsModal').addEventListener('click', function() {
-            closeModal('applicationsModal');
-        });
-
-        function handleApplication(appId, action) {
-            const url = action === 'accept'
-                ? '/application/' + appId + '/accept/'
-                : '/application/' + appId + '/reject/';
-
-            const acceptBtn = document.getElementById('acceptBtn' + appId);
-            const rejectBtn = document.getElementById('rejectBtn' + appId);
-            const alertEl = document.getElementById('appActionAlert');
-
-            if (acceptBtn) acceptBtn.disabled = true;
-            if (rejectBtn) rejectBtn.disabled = true;
-
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRFToken': getCsrf(),
-                },
-            })
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                if (data.success) {
-                    const item = document.getElementById('appItem' + appId);
-                    const statusBadge = document.getElementById('appStatus' + appId);
-
-                    // Update status badge
-                    statusBadge.className = 'app-status-badge app-status-' + data.status.toLowerCase();
-                    statusBadge.textContent = data.status.charAt(0) + data.status.slice(1).toLowerCase();
-
-                    // Update item class
-                    item.classList.remove('pending');
-                    item.classList.add(data.status.toLowerCase());
-
-                    // Remove action buttons
-                    if (acceptBtn) acceptBtn.remove();
-                    if (rejectBtn) rejectBtn.remove();
-
-                    // Show success
-                    alertEl.className = 'modal-alert success';
-                    alertEl.innerHTML = '<i class="fas fa-check-circle"></i> ' + data.message;
-                    setTimeout(function() {
-                        alertEl.className = 'modal-alert';
-                        alertEl.innerHTML = '';
-                    }, 3000);
-                } else {
-                    alertEl.className = 'modal-alert error';
-                    alertEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + data.error;
-                    if (acceptBtn) acceptBtn.disabled = false;
-                    if (rejectBtn) rejectBtn.disabled = false;
-                }
-            })
-            .catch(function() {
-                alertEl.className = 'modal-alert error';
-                alertEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Something went wrong. Please try again.';
-                if (acceptBtn) acceptBtn.disabled = false;
-                if (rejectBtn) rejectBtn.disabled = false;
-            });
-        }
-        {% endif %}
-
-        // ============================================================
-        // Set min date on deadline input (client edit form)
-        // ============================================================
-        const deadlineInput = document.querySelector('input[name="deadline"]');
-        if (deadlineInput) {
-            const today = new Date().toISOString().split('T')[0];
-            deadlineInput.setAttribute('min', today);
-        }
-
+        window.jobViewConfig = {
+            userType: "{{ user.user_type|default:''|escapejs }}",
+            canApply: "{{ user.user_type|default:''|escapejs }}" === "freelancer" && "{{ job.status|default:''|escapejs }}" === "OPEN" && "{{ has_applied|yesno:'true,false' }}" === "false",
+            isClient: "{{ user.user_type|default:''|escapejs }}" === "client",
+            applyUrl: "{% url 'apply_job' job.id %}"
+        };
     </script>
-</body>
-</html>
+    <script src="{% static 'core/js/job_view.js' %}"></script>
+{% endblock %}

@@ -1,95 +1,15 @@
+{% extends 'core/base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verify OTP - {{ APP_NAME }}</title>
+
+{% block title %}Verify OTP - {{ APP_NAME }}{% endblock %}
+
+{% block extra_css %}
     <link rel="stylesheet" href="{% static 'core/css/auth.css' %}">
-    <style>
-        .otp-boxes {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            margin: 20px 0;
-        }
-        
-        .otp-box {
-            width: 60px;
-            height: 70px;
-            font-size: 2rem !important;
-            text-align: center;
-            font-weight: 700;
-            padding: 10px !important;
-            border: 2px solid #ffffff1a !important;
-            border-radius: 12px;
-            background: #ffffff0d;
-            color: #ffffff;
-            transition: all 0.3s ease;
-        }
-        
-        .otp-box:focus {
-            border-color: #8b5cf6 !important;
-            background: #ffffff14;
-            box-shadow: 0 0 0 4px #8b5cf626;
-            outline: none;
-        }
-        
-        .otp-box.filled {
-            border-color: #8b5cf6 !important;
-            background: linear-gradient(135deg, #8b5cf620 0%, #7c3aed20 100%);
-        }
-        
-        .info-box {
-            background: rgba(139, 92, 246, 0.1);
-            border: 1px solid rgba(139, 92, 246, 0.3);
-            border-radius: 12px;
-            padding: 15px 20px;
-            margin-bottom: 25px;
-            text-align: center;
-        }
-        .info-box p {
-            color: #c7d2fe;
-            font-size: 0.95rem;
-            margin: 0;
-            line-height: 1.6;
-        }
-        .spam-warning {
-            background: rgba(255, 193, 7, 0.1);
-            border: 1px solid rgba(255, 193, 7, 0.3);
-            border-radius: 12px;
-            padding: 12px 20px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .spam-warning p {
-            color: #ffd700;
-            font-size: 0.9rem;
-            margin: 0;
-        }
-        .resend-link {
-            text-align: center;
-            margin-top: 20px;
-        }
-        .resend-link a {
-            color: #a78bfa;
-            text-decoration: none;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
-        }
-        .resend-link a:hover {
-            color: #c084fc;
-            text-decoration: underline;
-        }
-    </style>
-</head>
-<body>
-    <div class="auth-container">
-        <div class="background-gradient"></div>
-        <div class="blob blob1"></div>
-        <div class="blob blob2"></div>
-        <div class="blob blob3"></div>
-        
+{% endblock %}
+
+{% block page_container_class %}auth-container{% endblock %}
+
+{% block content %}
         <div class="auth-wrapper">
             <div class="auth-card">
                 <div class="auth-header">
@@ -147,8 +67,9 @@
                 </div>
             </div>
         </div>
-    </div>
+{% endblock %}
 
+{% block extra_js %}
     <script src="{% static 'core/js/auth.js' %}"></script>
     <script src="{% static 'core/js/otp.js' %}"></script>
 
@@ -163,5 +84,4 @@
             }
         })();
     </script>
-</body>
-</html>
+    {% endblock %}

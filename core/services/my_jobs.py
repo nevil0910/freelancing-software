@@ -21,6 +21,6 @@ def my_jobs(request):
     jobs = Job.objects.filter(client=request.user).order_by('-created_at')
 
     for job in jobs:
-        job.applications_count = job.applications.count()
+        job.applications_count = job.applications.filter(status='PENDING').count()
 
     return render(request, 'core/my_jobs.html', {'jobs': jobs})

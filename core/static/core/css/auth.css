@@ -1,9 +1,3 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     overflow-x: hidden;
@@ -22,67 +16,6 @@ body {
     overflow: hidden;
 }
 
-/* Background Gradient */
-.background-gradient {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #1a1a3e 0%, #2d1b4e 50%, #1a1a3e 100%);
-    z-index: 1;
-}
-
-/* Glowing Blobs */
-.blob {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.5;
-    z-index: 2;
-    animation: float 20s infinite ease-in-out;
-}
-
-.blob1 {
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(circle, #5856d699 0%, #5856d600 70%);
-    top: 10%;
-    left: 5%;
-    animation-delay: 0s;
-}
-
-.blob2 {
-    width: 400px;
-    height: 400px;
-    background: radial-gradient(circle, #8a2be299 0%, #8a2be200 70%);
-    bottom: 15%;
-    right: 10%;
-    animation-delay: 5s;
-}
-
-.blob3 {
-    width: 450px;
-    height: 450px;
-    background: radial-gradient(circle, #4b008280 0%, #4b008200 70%);
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    animation-delay: 10s;
-}
-
-@keyframes float {
-    0%, 100% {
-        transform: translate(0, 0) scale(1);
-    }
-    33% {
-        transform: translate(30px, -50px) scale(1.1);
-    }
-    66% {
-        transform: translate(-20px, 30px) scale(0.9);
-    }
-}
-
 /* Auth Wrapper */
 .auth-wrapper {
     position: relative;
@@ -98,6 +31,7 @@ body {
         opacity: 0;
         transform: translateY(30px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -151,9 +85,19 @@ body {
 }
 
 @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-10px); }
-    75% { transform: translateX(10px); }
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-10px);
+    }
+
+    75% {
+        transform: translateX(10px);
+    }
 }
 
 .error-icon {
@@ -207,7 +151,7 @@ body {
     backdrop-filter: blur(10px);
 }
 
-.form-group input:-webkit-autofill{
+.form-group input:-webkit-autofill {
     -webkit-box-shadow: 0 0 0px 1000px #ffffff0d inset;
     caret-color: #ffffff;
     -webkit-text-fill-color: #ffffff;
@@ -399,7 +343,8 @@ body {
 .switch-slider {
     position: absolute;
     top: 8px;
-    left: 8px;  /* Default position for client */
+    left: 8px;
+    /* Default position for client */
     width: calc(50% - 8px);
     height: calc(100% - 16px);
     background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
@@ -410,35 +355,35 @@ body {
 }
 
 /* When Client is selected (default) */
-.switch-wrapper input#client:checked ~ .switch-slider {
+.switch-wrapper input#client:checked~.switch-slider {
     left: 8px;
 }
 
 /* When Freelancer is selected */
-.switch-wrapper input#freelancer:checked ~ .switch-slider {
+.switch-wrapper input#freelancer:checked~.switch-slider {
     left: calc(50%);
 }
 
 /* Default text styling when client is selected */
-.switch-wrapper input#client:checked ~ .switch-left .switch-text {
+.switch-wrapper input#client:checked~.switch-left .switch-text {
     color: #ffffff;
 }
 
-.switch-wrapper input#client:checked ~ .switch-left .switch-subtext {
+.switch-wrapper input#client:checked~.switch-left .switch-subtext {
     color: rgba(255, 255, 255, 0.9);
 }
 
 /* Text color changes for checked states */
-.switch-wrapper input#freelancer:checked ~ .switch-right .switch-text {
+.switch-wrapper input#freelancer:checked~.switch-right .switch-text {
     color: #ffffff;
 }
 
-.switch-wrapper input#freelancer:checked ~ .switch-right .switch-subtext {
+.switch-wrapper input#freelancer:checked~.switch-right .switch-subtext {
     color: rgba(255, 255, 255, 0.9);
 }
 
-.switch-wrapper input#client:checked ~ .switch-left .switch-icon,
-.switch-wrapper input#freelancer:checked ~ .switch-right .switch-icon {
+.switch-wrapper input#client:checked~.switch-left .switch-icon,
+.switch-wrapper input#freelancer:checked~.switch-right .switch-icon {
     transform: scale(1.15);
 }
 
@@ -596,6 +541,7 @@ body {
         opacity: 0;
         transform: translateY(-10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -641,4 +587,138 @@ body {
 .forgot-password-link a:hover {
     color: #c084fc;
     text-decoration: underline;
+}
+
+/* Verify OTP Page */
+
+.otp-boxes {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.otp-box {
+    width: 60px;
+    height: 70px;
+    font-size: 2rem !important;
+    text-align: center;
+    font-weight: 700;
+    padding: 10px !important;
+    border: 2px solid #ffffff1a !important;
+    border-radius: 12px;
+    background: #ffffff0d;
+    color: #ffffff;
+    transition: all 0.3s ease;
+}
+
+.otp-box:focus {
+    border-color: #8b5cf6 !important;
+    background: #ffffff14;
+    box-shadow: 0 0 0 4px #8b5cf626;
+    outline: none;
+}
+
+.otp-box.filled {
+    border-color: #8b5cf6 !important;
+    background: linear-gradient(135deg, #8b5cf620 0%, #7c3aed20 100%);
+}
+
+.info-box {
+    background: rgba(139, 92, 246, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 12px;
+    padding: 15px 20px;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.info-box p {
+    color: #c7d2fe;
+    font-size: 0.95rem;
+    margin: 0;
+    line-height: 1.6;
+}
+
+.spam-warning {
+    background: rgba(255, 193, 7, 0.1);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    border-radius: 12px;
+    padding: 12px 20px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.spam-warning p {
+    color: #ffd700;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.resend-link {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.resend-link a {
+    color: #a78bfa;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.resend-link a:hover {
+    color: #c084fc;
+    text-decoration: underline;
+}
+
+/* Success Page */
+.success-icon {
+    font-size: 5rem;
+    margin-bottom: 20px;
+    animation: scaleIn 0.5s ease-out;
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.success-title {
+    font-size: 2rem;
+    margin-bottom: 15px;
+}
+
+.countdown-text {
+    font-size: 1.2rem;
+    color: #c7d2fe;
+    margin-top: 20px;
+}
+
+.countdown-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #8b5cf6;
+    display: inline-block;
+    margin: 0 10px;
+    animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
 }

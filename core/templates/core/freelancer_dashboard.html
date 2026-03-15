@@ -1,20 +1,15 @@
+{% extends 'core/base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Freelancer Dashboard - {{ APP_NAME }}</title>
+
+{% block title %}Freelancer Dashboard - {{ APP_NAME }}{% endblock %}
+
+{% block extra_css %}
     <link rel="stylesheet" href="{% static 'core/css/dashboard.css' %}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
-    <div class="dashboard-container">
-        <div class="background-gradient"></div>
-        <div class="blob blob1"></div>
-        <div class="blob blob2"></div>
-        <div class="blob blob3"></div>
-        
+{% endblock %}
+
+{% block page_container_class %}dashboard-container{% endblock %}
+
+{% block content %}
         {% include 'core/freelancer_sidebar.html' %}
         
         <!-- Main Content -->
@@ -92,7 +87,9 @@
         <button class="chat-button" title="Chat">
             <i class="fas fa-comments"></i>
         </button>
-    </div>
+{% endblock %}
+
+{% block extra_js %}
     <script>
         // Prevent back navigation to cached login page
         (function() {
@@ -103,5 +100,4 @@
             });
         })();
     </script>
-</body>
-</html>
+{% endblock %}

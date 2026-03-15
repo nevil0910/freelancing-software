@@ -1,66 +1,15 @@
+{% extends 'core/base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Success - {{ APP_NAME }}</title>
+
+{% block title %}Success - {{ APP_NAME }}{% endblock %}
+
+{% block extra_css %}
     <link rel="stylesheet" href="{% static 'core/css/auth.css' %}">
-    <style>
-        .success-icon {
-            font-size: 5rem;
-            margin-bottom: 20px;
-            animation: scaleIn 0.5s ease-out;
-        }
-        
-        @keyframes scaleIn {
-            from {
-                transform: scale(0);
-                opacity: 0;
-            }
-            to {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-        
-        .success-title {
-            font-size: 2rem;
-            margin-bottom: 15px;
-        }
-        
-        .countdown-text {
-            font-size: 1.2rem;
-            color: #c7d2fe;
-            margin-top: 20px;
-        }
-        
-        .countdown-number {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #8b5cf6;
-            display: inline-block;
-            margin: 0 10px;
-            animation: pulse 1s ease-in-out infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.2);
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="auth-container">
-        <div class="background-gradient"></div>
-        <div class="blob blob1"></div>
-        <div class="blob blob2"></div>
-        <div class="blob blob3"></div>
-        
+{% endblock %}
+
+{% block page_container_class %}auth-container{% endblock %}
+
+{% block content %}
         <div class="auth-wrapper">
             <div class="auth-card" style="text-align: center;">
                 <div class="success-icon">✅</div>
@@ -74,8 +23,9 @@
                 </div>
             </div>
         </div>
-    </div>
+{% endblock %}
 
+{% block extra_js %}
     <script>
         let countdown = 3;
         const countdownElement = document.getElementById('countdown');
@@ -90,5 +40,4 @@
             }
         }, 1000);
     </script>
-</body>
-</html>
+{% endblock %}

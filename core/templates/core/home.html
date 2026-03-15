@@ -1,19 +1,15 @@
+{% extends 'core/base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ APP_NAME }} - Connecting Clients with Skilled Freelancers</title>
+
+{% block title %}{{ APP_NAME }} - Connecting Clients with Skilled Freelancers{% endblock %}
+
+{% block extra_css %}
     <link rel="stylesheet" href="{% static 'core/css/home.css' %}">
-</head>
-<body>
-    <div class="hero-container">
-        <div class="background-gradient"></div>
-        <div class="blob blob1"></div>
-        <div class="blob blob2"></div>
-        <div class="blob blob3"></div>
-        
+{% endblock %}
+
+{% block page_container_class %}hero-container{% endblock %}
+
+{% block content %}
         <div class="content-wrapper">
             <!-- Left Column: Text Content -->
             <div class="left-content">
@@ -51,8 +47,8 @@
                 </div>
             </div>
         </div>
-    </div>
+{% endblock %}
 
+{% block extra_js %}
     <script src="{% static 'core/js/home.js' %}"></script>
-</body>
-</html>
+{% endblock %}
