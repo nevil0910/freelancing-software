@@ -1,0 +1,123 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}My Proposals - {{ APP_NAME }}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'core/css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/browse_jobs.css' %}">
+{% endblock %}
+
+{% block page_container_class %}dashboard-container{% endblock %}
+
+{% block content %}
+{% include 'core/freelancer_sidebar.html' %}
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="browse-container">
+            <div class="page-header">
+                <h1><i class="fas fa-paper-plane"></i> My Proposals</h1>
+                <p class="subtitle">Track your pending job applications</p>
+            </div>
+
+            <!-- Proposal Cards Grid -->
+            <div class="jobs-grid">
+                {% if applications %}
+                    {% for app in applications %}
+                    <div class="job-card">
+                        <div class="job-card-header">
+                            <h3 class="job-title">{{ app.job.title }}</h3>
+                        </div>
+
+                        <hr class="divider">
+
+                        <div class="job-info">
+                            <span class="info-label">
+                                <i class="fas fa-user-tie"></i> Posted by
+                            </span>
+                            <span class="info-value">{{ app.job.client.username }}</span>
+                        </div>
+
+                        <hr class="divider">
+
+                        <div class="job-info">
+                            <span class="info-label">
+                                <i class="fas fa-tag"></i> Category
+                            </span>
+                            <span class="category-badge">{{ app.job.get_category_display }}</span>
+                        </div>
+
+                        <hr class="divider">
+
+                        <div class="job-tagline">
+                            <p>{{ app.job.tagline }}</p>
+                        </div>
+
+                        <hr class="divider">
+
+                        <div class="job-info">
+                            <span class="info-label">
+                                <i class="fas fa-hourglass-half"></i> Applied on
+                            </span>
+                            <span class="info-value">{{ app.created_at|date:"M d, Y" }}</span>
+                        </div>
+
+                        <hr class="divider">
+
+                        <div class="job-footer">
+                            <div class="footer-info">
+                                <div class="budget-info">
+                                    <span class="budget" data-amount="{{ app.job.budget }}">₹{{ app.job.budget }}</span>
+                                </div>
+                                <div class="deadline-info">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>{{ app.job.deadline|date:"M d, Y" }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <a href="{% url 'job_view' app.job.id %}" class="btn-apply" style="text-decoration: none; color: inherit;">
+                            <i class="fas fa-eye"></i> View Job
+                        </a>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="no-jobs">
+                        <i class="fas fa-paper-plane"></i>
+                        <h3>No Pending Proposals</h3>
+                        <p>You have no pending applications. <a href="{% url 'browse_jobs' %}" style="color: var(--primary);">Browse Jobs</a> to apply.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        // Format budget in Indian currency format
+        function formatINR(amount) {
+            const num = parseFloat(amount);
+            if (num < 1000) {
+                return `₹${num.toFixed(0)}`;
+            } else if (num < 100000) {
+                const thousands = num / 1000;
+                return `₹${thousands % 1 === 0 ? thousands.toFixed(0) : thousands.toFixed(1)}k`;
+            } else if (num < 10000000) {
+                const lakhs = num / 100000;
+                return `₹${lakhs % 1 === 0 ? lakhs.toFixed(0) : lakhs.toFixed(2)} Lakhs`;
+            } else {
+                const crores = num / 10000000;
+                return `₹${crores % 1 === 0 ? crores.toFixed(0) : crores.toFixed(2)} Cr`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.budget[data-amount]').forEach(function(el) {
+                const amount = el.getAttribute('data-amount');
+                el.textContent = formatINR(amount);
+            });
+        });
+    </script>
+{% endblock %}

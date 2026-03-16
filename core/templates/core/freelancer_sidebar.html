@@ -14,17 +14,17 @@
                     <i class="fas fa-home"></i>
                     <span class="nav-text">Overview</span>
                 </a>
-                <a href="{% url 'browse_jobs' %}" class="nav-item{% if request.resolver_match.url_name == 'browse_jobs' or request.resolver_match.url_name == 'job_view' %} active{% endif %}">
+                <a href="{% url 'browse_jobs' %}" class="nav-item{% if request.resolver_match.url_name == 'browse_jobs' %} active{% endif %}">
                     <i class="fas fa-search"></i>
                     <span class="nav-text">Browse Jobs</span>
                 </a>
-                <a href="#" class="nav-item">
+                <a href="{% url 'my_proposals' %}" class="nav-item{% if request.resolver_match.url_name == 'my_proposals' %} active{% endif %}">
                     <i class="fas fa-paper-plane"></i>
                     <span class="nav-text">My Proposals</span>
                 </a>
-                <a href="#" class="nav-item">
+                <a href="{% url 'active_jobs' %}" class="nav-item{% if request.resolver_match.url_name == 'active_jobs' %} active{% endif %}">
                     <i class="fas fa-tasks"></i>
-                    <span class="nav-text">Active Projects</span>
+                    <span class="nav-text">Active Jobs</span>
                 </a>
                 <a href="#" class="nav-item">
                     <i class="fas fa-dollar-sign"></i>

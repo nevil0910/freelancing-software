@@ -69,11 +69,16 @@
                         <h3>Browse Jobs</h3>
                         <p>Find new opportunities and projects</p>
                     </a>
-                    <div class="action-card">
+                    <a href="{% url 'my_proposals' %}" class="action-card" style="text-decoration: none; color: inherit;">
                         <i class="fas fa-paper-plane"></i>
                         <h3>My Proposals</h3>
                         <p>Track your submitted proposals</p>
-                    </div>
+                    </a>
+                    <a href="{% url 'active_jobs' %}" class="action-card" style="text-decoration: none; color: inherit;">
+                        <i class="fas fa-briefcase"></i>
+                        <h3>Active Jobs</h3>
+                        <p>View your currently active in-progress jobs</p>
+                    </a>
                     <div class="action-card">
                         <i class="fas fa-dollar-sign"></i>
                         <h3>View Earnings</h3>

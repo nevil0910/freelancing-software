@@ -143,7 +143,6 @@ if (config.canApply) {
                     submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Application';
                 });
         });
-        window.location.reload();
     }
 }
 

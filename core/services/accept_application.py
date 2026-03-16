@@ -10,6 +10,7 @@ from ..models import Application
 def accept_application(request, application_id):
     """
     Client accepts a freelancer application.
+    Also sets the job status to IN_PROGRESS.
     Returns JSON for AJAX handling.
     """
     if request.user.user_type != 'client':
@@ -21,4 +22,11 @@ def accept_application(request, application_id):
     application = get_object_or_404(Application, id=application_id, job__client=request.user)
     application.status = 'ACCEPTED'
     application.save()
-    return JsonResponse({'success': True, 'status': 'ACCEPTED', 'message': 'Application accepted.'})
+
+    # Set the job to IN_PROGRESS when a freelancer is accepted
+    job = application.job
+    if job.status == 'OPEN':
+        job.status = 'IN_PROGRESS'
+        job.save()
+
+    return JsonResponse({'success': True, 'status': 'ACCEPTED', 'message': 'Application accepted. Job is now In Progress.'})

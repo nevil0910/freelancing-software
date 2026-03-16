@@ -11,3 +11,7 @@ from .services.update_job import update_job
 from .services.accept_application import accept_application
 from .services.reject_application import reject_application
 from .services.browse_jobs import browse_jobs
+from .services.my_proposals import my_proposals
+from .services.active_jobs import active_jobs
+from .services.update_deadline import update_deadline
+

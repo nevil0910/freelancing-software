@@ -22,7 +22,10 @@ urlpatterns = [
     path('job/<int:job_id>/update/', views.update_job, name='update_job'),
     path('application/<int:application_id>/accept/', views.accept_application, name='accept_application'),
     path('application/<int:application_id>/reject/', views.reject_application, name='reject_application'),
-    
+    path('my-proposals/', views.my_proposals, name='my_proposals'),
+    path('active-jobs/', views.active_jobs, name='active_jobs'),
+    path('job/<int:job_id>/update-deadline/', views.update_deadline, name='update_deadline'),
+
     # API endpoints
     path('check-username/', views.check_username_availability, name='check_username'),
     path('check-email/', views.check_email_availability, name='check_email'),

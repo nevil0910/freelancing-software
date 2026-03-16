@@ -23,7 +23,7 @@
 
                 <!-- Page Header -->
                 <div class="page-header">
-                    <a href="{% if user.user_type == 'client' %}{% url 'my_jobs' %}{% else %}{% url 'browse_jobs' %}{% endif %}" class="btn-back">
+                    <a href="{{ back_url }}" class="btn-back">
                         <i class="fas fa-arrow-left"></i> Back
                     </a>
                     <h1><i class="fas fa-briefcase"></i> Job Details</h1>
@@ -139,6 +139,20 @@
                                         Send a cover message to the client
                                     </p>
                                 {% endif %}
+                            {% elif job.status == 'IN_PROGRESS' %}
+                                <!-- Job is in progress - show accepted status -->
+                                <div class="applied-status">
+                                    <div class="status-icon">
+                                        <i class="fas fa-briefcase" style="color:#34d399;"></i>
+                                    </div>
+                                    <p class="status-text">Job Status</p>
+                                    <p class="status-value accepted">In Progress</p>
+                                    {% if has_applied and user_application.status == 'ACCEPTED' %}
+                                    <p style="font-size:0.85rem;color:rgba(255,255,255,0.55);margin-top:10px;text-align:center;">
+                                        <i class="fas fa-check-circle" style="color:#34d399;"></i> You are working on this job
+                                    </p>
+                                    {% endif %}
+                                </div>
                             {% else %}
                                 <div class="job-closed-notice">
                                     <i class="fas fa-lock"></i>
@@ -151,6 +165,60 @@
                         <!-- ================================
                              CLIENT ACTION PANEL
                              ================================ -->
+
+                        {% if job.status == 'IN_PROGRESS' %}
+                        <!-- IN_PROGRESS: Accepted freelancers info + deadline edit only -->
+
+                        <!-- Accepted Freelancers -->
+                        <div class="panel-card">
+                            <p class="panel-card-title">
+                                <i class="fas fa-users"></i> Accepted Freelancers
+                            </p>
+                            {% with accepted=applications|dictsort:"status" %}
+                                {% for app in applications %}
+                                    {% if app.status == 'ACCEPTED' %}
+                                    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+                                        <div class="app-avatar">{{ app.freelancer.first_name|first|upper }}</div>
+                                        <div>
+                                            <div class="app-username">{{ app.freelancer.username }}</div>
+                                            <div class="app-date">Accepted {{ app.updated_at|date:"M d, Y" }}</div>
+                                        </div>
+                                        <span class="app-status-badge app-status-accepted" style="margin-left:auto;">Accepted</span>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endwith %}
+                        </div>
+
+                        <!-- Edit Deadline Only -->
+                        <div class="panel-card">
+                            <p class="panel-card-title">
+                                <i class="fas fa-calendar-edit"></i> Update Deadline
+                            </p>
+                            <p style="font-size:0.82rem;color:rgba(255,255,255,0.45);margin-bottom:14px;">
+                                Only the project deadline can be modified while the job is in progress.
+                            </p>
+                            <form method="post" action="{% url 'update_deadline' job.id %}" class="edit-form">
+                                {% csrf_token %}
+                                <div class="form-row">
+                                    <label class="form-label">New Deadline</label>
+                                    {{ deadline_form.deadline }}
+                                    {% if deadline_form.deadline.errors %}
+                                        <ul class="errorlist">
+                                            {% for e in deadline_form.deadline.errors %}
+                                            <li>{{ e }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                </div>
+                                <button type="submit" class="btn-save">
+                                    <i class="fas fa-save"></i> Update Deadline
+                                </button>
+                            </form>
+                        </div>
+
+                        {% else %}
+                        <!-- OPEN / other status: full edit + applications + danger zone -->
 
                         <!-- View Applications -->
                         {% if job.status != 'CLOSED' %}
@@ -239,6 +307,8 @@
                             </form>
                         </div>
                         {% endif %}
+
+                        {% endif %}{# end open/in-progress split #}
 
                         {% endif %}
                         <!-- end role-based panel -->

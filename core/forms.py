@@ -76,3 +76,29 @@ class JobForm(forms.ModelForm):
         if required_freelancers and required_freelancers < 1:
             raise forms.ValidationError("At least one freelancer is required.")
         return required_freelancers
+
+
+class DeadlineForm(forms.ModelForm):
+    """Form for editing only the deadline of an in-progress job"""
+
+    class Meta:
+        model = Job
+        fields = ['deadline']
+        widgets = {
+            'deadline': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+        }
+        labels = {
+            'deadline': 'New Deadline',
+        }
+
+    def clean_deadline(self):
+        """Validate that deadline is not in the past"""
+        deadline = self.cleaned_data.get('deadline')
+        if deadline:
+            from django.utils import timezone
+            if deadline < timezone.now().date():
+                raise forms.ValidationError("Deadline cannot be in the past.")
+        return deadline
