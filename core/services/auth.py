@@ -127,12 +127,49 @@ def logoutUser(request):
 @never_cache
 def dashboard(request):
     """
-    Render dashboard based on user type.
+    Render dashboard based on user type with real statistics.
     """
-    if request.user.user_type == 'client':
-        return render(request, 'core/client_dashboard.html')
+    from ..models import Job, Application, Earning
+    from django.db.models import Sum
+
+    user = request.user
+
+    if user.user_type == 'client':
+        posted_jobs = Job.objects.filter(client=user).count()
+        proposals_received = Application.objects.filter(job__client=user).count()
+        active_projects = Job.objects.filter(client=user, status='IN_PROGRESS').count()
+        hired_freelancers = Job.objects.filter(
+            client=user, hired_freelancer__isnull=False
+        ).values('hired_freelancer').distinct().count()
+
+        context = {
+            'posted_jobs': posted_jobs,
+            'proposals_received': proposals_received,
+            'active_projects': active_projects,
+            'hired_freelancers': hired_freelancers,
+        }
+        return render(request, 'core/client_dashboard.html', context)
     else:
-        return render(request, 'core/freelancer_dashboard.html')
+        active_jobs = Job.objects.filter(
+            hired_freelancer=user, status='IN_PROGRESS'
+        ).count()
+        submitted_proposals = Application.objects.filter(
+            freelancer=user, status='PENDING'
+        ).count()
+        total_earnings = Earning.objects.filter(
+            freelancer=user
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        completed_jobs = Job.objects.filter(
+            hired_freelancer=user, status__in=['COMPLETED', 'CLOSED']
+        ).count()
+
+        context = {
+            'active_jobs': active_jobs,
+            'submitted_proposals': submitted_proposals,
+            'total_earnings': total_earnings,
+            'completed_jobs': completed_jobs,
+        }
+        return render(request, 'core/freelancer_dashboard.html', context)
 
 
 @never_cache

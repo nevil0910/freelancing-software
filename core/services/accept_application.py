@@ -27,6 +27,7 @@ def accept_application(request, application_id):
     job = application.job
     if job.status == 'OPEN':
         job.status = 'IN_PROGRESS'
+        job.hired_freelancer = application.freelancer
         job.save()
 
     return JsonResponse({'success': True, 'status': 'ACCEPTED', 'message': 'Application accepted. Job is now In Progress.'})

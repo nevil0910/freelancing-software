@@ -11,6 +11,7 @@ def close_job(request, job_id):
     """
     View for clients to close a job.
     Only the job owner can close their job.
+    Jobs can only be closed after COMPLETED status.
     """
     # Check if user is a client
     if request.user.user_type != 'client':
@@ -21,6 +22,10 @@ def close_job(request, job_id):
     job = get_object_or_404(Job, id=job_id, client=request.user)
 
     if request.method == 'POST':
+        if job.status not in ('COMPLETED', 'OPEN'):
+            messages.error(request, 'This job cannot be closed in its current state.')
+            return redirect('job_view', job_id=job.id)
+
         job.status = 'CLOSED'
         job.save()
         messages.success(request, f'Job "{job.title}" has been closed.')

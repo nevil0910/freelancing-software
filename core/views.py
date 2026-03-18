@@ -14,4 +14,11 @@ from .services.browse_jobs import browse_jobs
 from .services.my_proposals import my_proposals
 from .services.active_jobs import active_jobs
 from .services.update_deadline import update_deadline
-
+from .services.submit_work import submit_work
+from .services.review_submission import review_submission
+from .services.submit_review import submit_review, get_pending_reviews
+from .services.earnings import earnings_view
+from .services.chat_api import (
+    send_message, get_messages, mark_seen,
+    set_typing, get_typing, get_chat_list, get_unread_count
+)

@@ -68,6 +68,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'core.context_processors.app_name',
+                'core.context_processors.chat_context',
             ],
         },
     },
@@ -146,6 +147,16 @@ CLOUDINARY_STORAGE = {
     'API_SECRET': config('CLOUDINARY_API_SECRET'),
 }
 
+# Configure the raw Cloudinary SDK (used by cloudinary.uploader.upload directly)
+import cloudinary
+cloudinary.config(
+    cloud_name=config('CLOUDINARY_CLOUD_NAME'),
+    api_key=config('CLOUDINARY_API_KEY'),
+    api_secret=config('CLOUDINARY_API_SECRET'),
+    secure=True
+)
+
+
 # App Configuration
 APP_NAME = 'FreelanceHub'
 
@@ -173,3 +184,52 @@ OTP_EXPIRY_MINUTES = 10
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# ── Logging: suppress noisy polling endpoints from dev server console ──
+import logging
+
+
+class SuppressPollingFilter(logging.Filter):
+    """Filter out frequent polling requests from the Django dev server log."""
+    SUPPRESSED = (
+        '/chat/typing/',
+        '/chat/typing-status/',
+        '/chat/messages/',
+        '/api/unread-count/',
+        '/chat/mark-seen/',
+    )
+
+    def filter(self, record):
+        msg = record.getMessage()
+        return not any(path in msg for path in self.SUPPRESSED)
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'suppress_polling': {
+            '()': SuppressPollingFilter,
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'filters': ['suppress_polling'],
+        },
+    },
+    'loggers': {
+        'django.server': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+    },
+}
+

@@ -8,6 +8,9 @@
     <link rel="icon" type="image/x-icon" href="{% static 'core/res/freelancehub.ico' %}">
     <link rel="stylesheet" href="{% static 'core/css/base.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    {% if user.is_authenticated %}
+    <link rel="stylesheet" href="{% static 'core/css/chat_widget.css' %}">
+    {% endif %}
     {% block extra_css %}{% endblock %}
     {% block extra_head %}{% endblock %}
 </head>
@@ -19,6 +22,20 @@
         <div class="blob blob3"></div>
         {% block content %}{% endblock %}
     </div>
+
+    {% if user.is_authenticated %}
+    <!-- Floating Chat Button -->
+    <button class="chat-button" title="Chat">
+        <i class="fas fa-comments"></i>
+        {% if total_unread_messages > 0 %}
+        <span class="unread-badge">{{ total_unread_messages }}</span>
+        {% endif %}
+    </button>
+
+    {% include 'core/chat_widget.html' %}
+    <script src="{% static 'core/js/chat_widget.js' %}"></script>
+    {% endif %}
+
     {% block extra_js %}{% endblock %}
 </body>
 </html>

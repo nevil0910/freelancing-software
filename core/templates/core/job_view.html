@@ -41,7 +41,7 @@
                     {% endfor %}
                 {% endif %}
 
-                <!-- Two-column layout -->
+                <!-- Two-column layout (job details left, actions right) -->
                 <div class="job-view-layout">
 
                     <!-- LEFT COLUMN: Job Details -->
@@ -103,12 +103,11 @@
                              ================================ -->
                         <div class="panel-card">
                             <p class="panel-card-title">
-                                <i class="fas fa-paper-plane"></i> Your Action
+                                <i class="fas fa-paper-plane"></i> Your Status
                             </p>
 
                             {% if job.status == 'OPEN' %}
                                 {% if has_applied %}
-                                    <!-- Already applied -->
                                     <div class="applied-status">
                                         <div class="status-icon">
                                             {% if user_application.status == 'ACCEPTED' %}
@@ -131,7 +130,6 @@
                                         </p>
                                     </div>
                                 {% else %}
-                                    <!-- Apply button -->
                                     <button class="btn-apply-job" id="openApplyModal">
                                         <i class="fas fa-paper-plane"></i> Apply for this Job
                                     </button>
@@ -139,19 +137,49 @@
                                         Send a cover message to the client
                                     </p>
                                 {% endif %}
-                            {% elif job.status == 'IN_PROGRESS' %}
-                                <!-- Job is in progress - show accepted status -->
+
+                            {% elif job.status == 'IN_PROGRESS' and is_hired_freelancer %}
                                 <div class="applied-status">
                                     <div class="status-icon">
                                         <i class="fas fa-briefcase" style="color:#34d399;"></i>
                                     </div>
                                     <p class="status-text">Job Status</p>
                                     <p class="status-value accepted">In Progress</p>
-                                    {% if has_applied and user_application.status == 'ACCEPTED' %}
                                     <p style="font-size:0.85rem;color:rgba(255,255,255,0.55);margin-top:10px;text-align:center;">
                                         <i class="fas fa-check-circle" style="color:#34d399;"></i> You are working on this job
                                     </p>
+                                </div>
+
+                            {% elif job.status == 'SUBMITTED' %}
+                                <div class="applied-status">
+                                    <div class="status-icon">
+                                        <i class="fas fa-clock" style="color:#fbbf24;"></i>
+                                    </div>
+                                    <p class="status-text">Job Status</p>
+                                    <p class="status-value" style="color:#fbbf24;">Submitted — Awaiting Review</p>
+                                </div>
+
+                            {% elif job.status == 'COMPLETED' %}
+                                <div class="applied-status">
+                                    <div class="status-icon">
+                                        <i class="fas fa-check-double" style="color:#34d399;"></i>
+                                    </div>
+                                    <p class="status-text">Job Status</p>
+                                    <p class="status-value accepted">Completed</p>
+                                    {% if job.auto_completed %}
+                                    <p style="font-size:0.8rem;color:rgba(255,255,255,0.4);margin-top:6px;text-align:center;">
+                                        <i class="fas fa-info-circle"></i> Auto-approved after 3 days
+                                    </p>
                                     {% endif %}
+                                </div>
+
+                            {% elif job.status == 'IN_PROGRESS' and not is_hired_freelancer %}
+                                <div class="applied-status">
+                                    <div class="status-icon">
+                                        <i class="fas fa-lock" style="color:rgba(255,255,255,0.4);"></i>
+                                    </div>
+                                    <p class="status-text">Job Status</p>
+                                    <p class="status-value" style="color:rgba(255,255,255,0.5);">In Progress</p>
                                 </div>
                             {% else %}
                                 <div class="job-closed-notice">
@@ -166,31 +194,32 @@
                              CLIENT ACTION PANEL
                              ================================ -->
 
-                        {% if job.status == 'IN_PROGRESS' %}
-                        <!-- IN_PROGRESS: Accepted freelancers info + deadline edit only -->
-
+                        {% if job.status == 'IN_PROGRESS' or job.status == 'SUBMITTED' %}
                         <!-- Accepted Freelancers -->
                         <div class="panel-card">
                             <p class="panel-card-title">
                                 <i class="fas fa-users"></i> Accepted Freelancers
                             </p>
-                            {% with accepted=applications|dictsort:"status" %}
-                                {% for app in applications %}
-                                    {% if app.status == 'ACCEPTED' %}
-                                    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
-                                        <div class="app-avatar">{{ app.freelancer.first_name|first|upper }}</div>
-                                        <div>
-                                            <div class="app-username">{{ app.freelancer.username }}</div>
-                                            <div class="app-date">Accepted {{ app.updated_at|date:"M d, Y" }}</div>
-                                        </div>
-                                        <span class="app-status-badge app-status-accepted" style="margin-left:auto;">Accepted</span>
+                            {% for app in applications %}
+                                {% if app.status == 'ACCEPTED' %}
+                                <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+                                    <div class="app-avatar">{{ app.freelancer.first_name|first|upper }}</div>
+                                    <div>
+                                        <div class="app-username">{{ app.freelancer.username }}</div>
+                                        <div class="app-date">Accepted {{ app.updated_at|date:"M d, Y" }}</div>
                                     </div>
+                                    {% if freelancer_rating %}
+                                    <span class="app-rating" style="margin-left:auto;">
+                                        <i class="fas fa-star" style="color:#fbbf24;"></i> {{ freelancer_rating.average }}
+                                        <span style="font-size:0.7rem;color:rgba(255,255,255,0.35);">({{ freelancer_rating.count }})</span>
+                                    </span>
                                     {% endif %}
-                                {% endfor %}
-                            {% endwith %}
+                                </div>
+                                {% endif %}
+                            {% endfor %}
                         </div>
 
-                        <!-- Edit Deadline Only -->
+                        <!-- Edit Deadline (IN_PROGRESS or SUBMITTED) -->
                         <div class="panel-card">
                             <p class="panel-card-title">
                                 <i class="fas fa-calendar-edit"></i> Update Deadline
@@ -217,10 +246,46 @@
                             </form>
                         </div>
 
-                        {% else %}
-                        <!-- OPEN / other status: full edit + applications + danger zone -->
+                        {% elif job.status == 'COMPLETED' %}
+                            <div class="panel-card">
+                                <p class="panel-card-title">
+                                    <i class="fas fa-check-double" style="color:#34d399;"></i> Job Completed
+                                </p>
+                                <div class="applied-status">
+                                    <p class="status-text">Completed on</p>
+                                    <p class="status-value accepted">{{ job.completed_at|date:"M d, Y" }}</p>
+                                    {% if job.auto_completed %}
+                                    <p style="font-size:0.8rem;color:rgba(255,255,255,0.4);margin-top:6px;text-align:center;">
+                                        <i class="fas fa-info-circle"></i> Auto-approved after 3 days
+                                    </p>
+                                    {% endif %}
+                                    {% if has_review %}
+                                    <p style="font-size:0.82rem;color:#34d399;margin-top:10px;text-align:center;">
+                                        <i class="fas fa-check"></i> Review submitted
+                                    </p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <!-- Close Job (after COMPLETED) -->
+                            <div class="panel-card danger-zone">
+                                <p class="panel-card-title" style="color:#f87171;">
+                                    <i class="fas fa-exclamation-triangle" style="color:#f87171;"></i> Close Job
+                                </p>
+                                <p style="font-size:0.82rem;color:rgba(255,255,255,0.45);margin-bottom:14px;">
+                                    Closing the job will hide the chat. This action is permanent.
+                                </p>
+                                <form method="post" action="{% url 'close_job' job.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-close-job"
+                                            onclick="return confirm('Are you sure you want to close this job? Chat will be hidden.');">
+                                        <i class="fas fa-times-circle"></i> Close Job
+                                    </button>
+                                </form>
+                            </div>
 
-                        <!-- View Applications -->
+                        {% else %}
+                        <!-- OPEN status: full edit + applications + danger zone -->
+
                         {% if job.status != 'CLOSED' %}
                         <div class="panel-card">
                             <p class="panel-card-title">
@@ -234,7 +299,6 @@
                         </div>
                         {% endif %}
 
-                        <!-- Edit Job -->
                         {% if job.status != 'CLOSED' %}
                         <div class="panel-card">
                             <p class="panel-card-title">
@@ -242,49 +306,41 @@
                             </p>
                             <form method="post" action="{% url 'update_job' job.id %}" class="edit-form">
                                 {% csrf_token %}
-
                                 <div class="form-row">
                                     <label class="form-label">Job Title</label>
                                     {{ form.title }}
                                     {% if form.title.errors %}<ul class="errorlist">{% for e in form.title.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
                                 </div>
-
                                 <div class="form-row">
                                     <label class="form-label">Tagline</label>
                                     {{ form.tagline }}
                                     {% if form.tagline.errors %}<ul class="errorlist">{% for e in form.tagline.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
                                 </div>
-
                                 <div class="form-row">
                                     <label class="form-label">Description</label>
                                     {{ form.description }}
                                     {% if form.description.errors %}<ul class="errorlist">{% for e in form.description.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
                                 </div>
-
                                 <div class="form-row">
                                     <label class="form-label">Category</label>
                                     {{ form.category }}
                                     {% if form.category.errors %}<ul class="errorlist">{% for e in form.category.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
                                 </div>
-
                                 <div class="form-row">
                                     <label class="form-label">Budget (₹ INR)</label>
                                     {{ form.budget }}
                                     {% if form.budget.errors %}<ul class="errorlist">{% for e in form.budget.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
                                 </div>
-
                                 <div class="form-row">
                                     <label class="form-label">Deadline</label>
                                     {{ form.deadline }}
                                     {% if form.deadline.errors %}<ul class="errorlist">{% for e in form.deadline.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
                                 </div>
-
                                 <div class="form-row">
                                     <label class="form-label">Required Freelancers</label>
                                     {{ form.required_freelancers }}
                                     {% if form.required_freelancers.errors %}<ul class="errorlist">{% for e in form.required_freelancers.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
                                 </div>
-
                                 <button type="submit" class="btn-save">
                                     <i class="fas fa-save"></i> Save Changes
                                 </button>
@@ -292,8 +348,7 @@
                         </div>
                         {% endif %}
 
-                        <!-- Danger zone -->
-                        {% if job.status != 'CLOSED' %}
+                        {% if job.status == 'OPEN' %}
                         <div class="panel-card danger-zone">
                             <p class="panel-card-title" style="color:#f87171;">
                                 <i class="fas fa-exclamation-triangle" style="color:#f87171;"></i> Danger Zone
@@ -301,17 +356,15 @@
                             <form method="post" action="{% url 'close_job' job.id %}">
                                 {% csrf_token %}
                                 <button type="submit" class="btn-close-job"
-                                        onclick="return confirm('Are you sure you want to close this job? This cannot be undone.');">
+                                        onclick="return confirm('Are you sure you want to close this job?');">
                                     <i class="fas fa-times-circle"></i> Close Job
                                 </button>
                             </form>
                         </div>
                         {% endif %}
 
-                        {% endif %}{# end open/in-progress split #}
-
-                        {% endif %}
-                        <!-- end role-based panel -->
+                        {% endif %}{# end status branching #}
+                        {% endif %}{# end role branching #}
 
                     </div>
                     <!-- end right column -->
@@ -319,12 +372,152 @@
                 </div>
                 <!-- end two-column layout -->
 
+                <!-- ==================================================
+                     BELOW SECTION: Submission + Chat (full width)
+                     ================================================== -->
+
+                {% if user.user_type == 'freelancer' and is_hired_freelancer and job.status == 'IN_PROGRESS' %}
+                <!-- Freelancer: Submit Work Form -->
+                <div class="full-width-section">
+                    <div class="job-details-card">
+                        <p class="section-title">
+                            <i class="fas fa-cloud-upload-alt"></i> Submit Your Work
+                        </p>
+                        <div class="form-row" style="margin-bottom:14px;">
+                            <label class="form-label">Message / Notes</label>
+                            <textarea id="submitMessage" class="apply-textarea" placeholder="Describe what you've completed, any notes for the client..." rows="3"></textarea>
+                        </div>
+                        <div class="form-row" style="margin-bottom:14px;">
+                            <label class="form-label">Attach Files</label>
+                            <input type="file" id="submitFiles" class="file-input-styled" multiple>
+                            <p style="font-size:0.78rem;color:rgba(255,255,255,0.35);margin-top:6px;">
+                                Upload multiple files — images, videos, documents
+                            </p>
+                        </div>
+                        <div class="modal-alert" id="submitAlert" style="display:none;"></div>
+                        <button type="button" class="btn-save" id="submitWorkBtn" onclick="submitWork()" style="max-width:280px;">
+                            <i class="fas fa-paper-plane"></i> Submit Work
+                        </button>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if job.status == 'SUBMITTED' or job.status == 'COMPLETED' or job.status == 'CLOSED' %}
+                {% if latest_submission %}
+                <!-- Submission Details (full width) -->
+                <div class="full-width-section">
+                    <div class="job-details-card">
+                        <p class="section-title">
+                            <i class="fas fa-file-upload"></i> Latest Submission
+                        </p>
+                        <div class="submission-info" style="margin-top:0;">
+                            <p class="submission-meta">
+                                Submitted by <strong>{{ latest_submission.freelancer.username }}</strong>
+                                on {{ latest_submission.created_at|date:"M d, Y \a\t h:i A" }}
+                            </p>
+                            {% if latest_submission.message %}
+                            <div class="submission-message">{{ latest_submission.message }}</div>
+                            {% endif %}
+
+                            {% if latest_submission.files.all %}
+                            <!-- Download All button -->
+                            <button class="btn-download-all" onclick="downloadAllFiles()"
+                                    id="downloadAllBtn"
+                                    data-files='[{% for file in latest_submission.files.all %}{"url":"{{ file.file_url|escapejs }}","name":"{{ file.file_name|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]'>
+                                <i class="fas fa-download"></i> Download All Files
+                                <span class="download-count-badge">{{ latest_submission.files.all|length }}</span>
+                            </button>
+                            <div class="submission-files">
+                                {% for file in latest_submission.files.all %}
+                                <div class="submission-file-card">
+                                    <a href="{{ file.file_url }}" target="_blank" class="file-preview-link" title="Preview">
+                                        {% if file.file_type == 'image' %}
+                                            <i class="fas fa-image"></i>
+                                        {% elif file.file_type == 'video' %}
+                                            <i class="fas fa-video"></i>
+                                        {% else %}
+                                            <i class="fas fa-file"></i>
+                                        {% endif %}
+                                        <span>{{ file.file_name }}</span>
+                                    </a>
+                                    <button class="file-dl-btn" title="Download"
+                                            onclick="downloadSingle('{{ file.file_url|escapejs }}', '{{ file.file_name|escapejs }}')">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+
+
+                            <!-- Client Review Actions -->
+                            {% if user.user_type == 'client' and job.status == 'SUBMITTED' %}
+                            <div class="submission-actions">
+                                <button class="btn-accept-work" id="acceptWorkBtn" onclick="reviewSubmission('accept')">
+                                    <i class="fas fa-check-circle"></i> Accept Work
+                                </button>
+                                <button class="btn-request-changes" id="requestChangesBtn" onclick="reviewSubmission('request_changes')">
+                                    <i class="fas fa-undo"></i> Request Changes
+                                </button>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endif %}
+
+                {% if can_chat %}
+                <!-- ================================================
+                     FULL-WIDTH CHAT SECTION (below job details)
+                     ================================================ -->
+                <div class="full-width-section">
+                    <div class="job-details-card full-chat-card">
+                        <p class="section-title">
+                            <i class="fas fa-comments"></i> Chat
+                            {% if actual_freelancer %}
+                                {% if user.user_type == 'client' %}
+                                    — {{ actual_freelancer.first_name|default:actual_freelancer.username }}
+                                {% else %}
+                                    — {{ job.client.first_name|default:job.client.username }}
+                                {% endif %}
+                            {% elif user.user_type == 'freelancer' %}
+                                — {{ job.client.first_name|default:job.client.username }}
+                            {% endif %}
+                        </p>
+
+                        <div class="full-chat-messages" id="fullChatMessages"></div>
+                        <div class="typing-indicator" id="fullTypingIndicator" style="display:none;">
+                            <span class="typing-dots"><span></span><span></span><span></span></span>
+                            <span id="fullTypingText">typing...</span>
+                        </div>
+
+                        <div class="chat-input-area">
+                            <div class="chat-file-preview" id="fullFilePreview" style="display:none;">
+                                <span id="fullFileName"></span>
+                                <button class="chat-file-remove" id="fullFileRemove"><i class="fas fa-times"></i></button>
+                            </div>
+                            <div class="chat-input-row">
+                                <button class="chat-attach-btn" id="fullAttachBtn" title="Attach file">
+                                    <i class="fas fa-paperclip"></i>
+                                </button>
+                                <input type="file" id="fullFileInput" style="display:none;" accept="image/*,video/*,.pdf,.doc,.docx,.zip,.rar,.txt">
+                                <input type="text" class="chat-input" id="fullChatInput" placeholder="Type a message..." autocomplete="off">
+                                <button class="chat-send-btn" id="fullSendBtn" title="Send">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
             </div>
         </main>
     </div>
 
     <!-- ============================================================
-         MODEL: Apply for Job (freelancer only)
+         MODAL: Apply for Job (freelancer only)
          ============================================================ -->
     {% if user.user_type == 'freelancer' and job.status == 'OPEN' and not has_applied %}
     <div class="modal-overlay" id="applyModal">
@@ -339,21 +532,16 @@
             </div>
             <div class="modal-body">
                 <div class="modal-alert" id="applyAlert"></div>
-
                 <label class="apply-textarea-label" for="applyMessage">
                     Cover message to the client
                 </label>
-                <textarea
-                    id="applyMessage"
-                    class="apply-textarea"
-                    placeholder="Introduce yourself, explain why you're a great fit, and ask any clarifying questions..."
-                    maxlength="2000"
-                ></textarea>
+                <textarea id="applyMessage" class="apply-textarea"
+                    placeholder="Introduce yourself, explain why you're a great fit..."
+                    maxlength="2000"></textarea>
                 <p class="apply-hint">
                     <i class="fas fa-info-circle"></i>
                     A strong message increases your chances. Be specific about your experience.
                 </p>
-
                 <div class="modal-actions">
                     <button class="btn-modal-submit" id="submitApplyBtn">
                         <i class="fas fa-paper-plane"></i> Submit Application
@@ -366,9 +554,9 @@
     {% endif %}
 
     <!-- ============================================================
-         MODEL: View Applications (client only)
+         MODAL: View Applications (client only)
          ============================================================ -->
-    {% if user.user_type == 'client' and job.status != 'CLOSED' %}
+    {% if user.user_type == 'client' and job.status == 'OPEN' %}
     <div class="modal-overlay" id="applicationsModal">
         <div class="modal-box modal-wide">
             <div class="modal-header">
@@ -396,32 +584,18 @@
                                 </div>
                             </div>
                             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-                                <span class="app-rating">
-                                    <i class="fas fa-star"></i> N/A
-                                </span>
                                 <span class="app-status-badge app-status-{{ app.status|lower }}" id="appStatus{{ app.id }}">
                                     {{ app.get_status_display }}
                                 </span>
                             </div>
                         </div>
-
                         <div class="app-message">{{ app.message }}</div>
-
                         <div class="app-actions">
-                            <a href="#" class="btn-profile" title="View profile (coming soon)">
-                                <i class="fas fa-user"></i> View Profile
-                            </a>
                             {% if app.status == 'PENDING' %}
-                            <button
-                                class="btn-accept"
-                                onclick="handleApplication({{ app.id }}, 'accept')"
-                                id="acceptBtn{{ app.id }}">
+                            <button class="btn-accept" onclick="handleApplication({{ app.id }}, 'accept')" id="acceptBtn{{ app.id }}">
                                 <i class="fas fa-check"></i> Accept
                             </button>
-                            <button
-                                class="btn-reject"
-                                onclick="handleApplication({{ app.id }}, 'reject')"
-                                id="rejectBtn{{ app.id }}">
+                            <button class="btn-reject" onclick="handleApplication({{ app.id }}, 'reject')" id="rejectBtn{{ app.id }}">
                                 <i class="fas fa-times"></i> Reject
                             </button>
                             {% endif %}
@@ -432,9 +606,52 @@
                     <div class="applications-empty">
                         <i class="fas fa-inbox"></i>
                         <p>No applications received yet.</p>
-                        <p style="font-size:0.85rem;margin-top:6px;">Check back later — freelancers will apply here.</p>
                     </div>
                 {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if user.user_type == 'client' and job.status == 'COMPLETED' and not has_review %}
+    <!-- Review Freelancer Modal -->
+    <div class="modal-overlay review-modal-overlay" id="reviewModal">
+        <div class="modal-box review-modal-box">
+            <div class="modal-header">
+                <span class="modal-title">
+                    <i class="fas fa-star"></i> Leave a Review
+                </span>
+                <button class="modal-close" id="closeReviewModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-alert" id="reviewAlert"></div>
+                {% if job.auto_completed %}
+                <div class="review-auto-note">
+                    <i class="fas fa-info-circle"></i> This job was automatically completed after 3 days.
+                </div>
+                {% endif %}
+                <p class="review-job-title">{{ job.title }}</p>
+                <p class="review-freelancer">Freelancer: {{ actual_freelancer.first_name|default:actual_freelancer.username }}</p>
+
+                <div class="star-rating" id="starRating">
+                    <i class="fas fa-star" data-rating="1"></i>
+                    <i class="fas fa-star" data-rating="2"></i>
+                    <i class="fas fa-star" data-rating="3"></i>
+                    <i class="fas fa-star" data-rating="4"></i>
+                    <i class="fas fa-star" data-rating="5"></i>
+                </div>
+                <input type="hidden" id="reviewRating" value="0">
+
+                <textarea id="reviewComment" class="apply-textarea" placeholder="Add an optional comment about your experience..." rows="3"></textarea>
+
+                <div class="modal-actions">
+                    <button class="btn-modal-submit" id="submitReviewBtn">
+                        <i class="fas fa-paper-plane"></i> Submit Review
+                    </button>
+                    <button class="btn-modal-cancel" id="skipReviewBtn">Skip for now</button>
+                </div>
             </div>
         </div>
     </div>
@@ -450,8 +667,14 @@
             userType: "{{ user.user_type|default:''|escapejs }}",
             canApply: "{{ user.user_type|default:''|escapejs }}" === "freelancer" && "{{ job.status|default:''|escapejs }}" === "OPEN" && "{{ has_applied|yesno:'true,false' }}" === "false",
             isClient: "{{ user.user_type|default:''|escapejs }}" === "client",
-            applyUrl: "{% url 'apply_job' job.id %}"
+            applyUrl: "{% url 'apply_job' job.id %}",
+            jobId: {{ job.id }},
+            canChat: {{ can_chat|yesno:"true,false" }},
+            jobStatus: "{{ job.status|escapejs }}",
+            isHiredFreelancer: {{ is_hired_freelancer|yesno:"true,false" }},
+            showReview: {% if user.user_type == 'client' and job.status == 'COMPLETED' and not has_review %}true{% else %}false{% endif %}
         };
     </script>
     <script src="{% static 'core/js/job_view.js' %}"></script>
 {% endblock %}
+

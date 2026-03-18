@@ -1,0 +1,96 @@
+{% load static %}
+<!-- Global Floating Chat Widget -->
+{% if user.is_authenticated and user.user_type %}
+<div id="globalChatWidget" class="chat-widget" style="display:none;">
+    <div class="chat-widget-header">
+        <div class="chat-widget-title">
+            <i class="fas fa-comments"></i>
+            <span id="chatWidgetTitle">Messages</span>
+        </div>
+        <div class="chat-widget-actions">
+            <button class="chat-widget-btn" id="chatBackBtn" style="display:none;" title="Back">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <button class="chat-widget-btn" id="chatMinimizeBtn" title="Close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Chat List View -->
+    <div id="chatListView" class="chat-view">
+        <div class="chat-tabs">
+            <button class="chat-tab active" data-tab="ongoing">
+                ON GOING
+                <span class="tab-badge" id="ongoingBadge" style="display:none;">0</span>
+            </button>
+            <button class="chat-tab" data-tab="completed">
+                COMPLETED
+                <span class="tab-badge" id="completedBadge" style="display:none;">0</span>
+            </button>
+        </div>
+        <div class="chat-list-container">
+            <div id="chatListOngoing" class="chat-list active"></div>
+            <div id="chatListCompleted" class="chat-list"></div>
+        </div>
+    </div>
+
+    <!-- Chat Conversation View -->
+    <div id="chatConvoView" class="chat-view" style="display:none;">
+        <div class="chat-convo-header">
+            <div class="chat-convo-avatar" id="convoAvatar">?</div>
+            <div class="chat-convo-info">
+                <div class="chat-convo-name" id="convoName"></div>
+                <div class="chat-convo-job" id="convoJob"></div>
+            </div>
+        </div>
+        <div class="chat-messages-container" id="chatMessagesContainer">
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="typing-indicator" id="typingIndicator" style="display:none;">
+                <span class="typing-dots"><span></span><span></span><span></span></span>
+                <span id="typingText">typing...</span>
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <div class="chat-file-preview" id="chatFilePreview" style="display:none;">
+                <span id="chatFileName"></span>
+                <button class="chat-file-remove" id="chatFileRemove"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="chat-input-row">
+                <button class="chat-attach-btn" id="chatAttachBtn" title="Attach file">
+                    <i class="fas fa-paperclip"></i>
+                </button>
+                <input type="file" id="chatFileInput" style="display:none;" accept="image/*,video/*,.pdf,.doc,.docx,.zip,.rar,.txt,.psd,.ai,.xls,.xlsx,.csv">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Type a message..." autocomplete="off">
+                <button class="chat-send-btn" id="chatSendBtn" title="Send">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Media Viewer Modal -->
+<div class="media-viewer-overlay" id="mediaViewer" style="display:none;">
+    <div class="media-viewer-header">
+        <span id="mediaViewerName"></span>
+        <button class="media-viewer-close" id="mediaViewerClose"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="media-viewer-content" id="mediaViewerContent"></div>
+</div>
+
+<!-- Hidden config for JS -->
+<script>
+    window.chatConfig = {
+        userId: {{ user.id }},
+        username: "{{ user.username|escapejs }}",
+        userType: "{{ user.user_type|escapejs }}",
+        csrfToken: "{{ csrf_token }}",
+        urls: {
+            chatList: "{% url 'chat_list' %}",
+            unreadCount: "{% url 'unread_count' %}",
+        }
+    };
+</script>
+{% endif %}
+

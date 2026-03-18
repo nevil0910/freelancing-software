@@ -26,6 +26,22 @@ urlpatterns = [
     path('active-jobs/', views.active_jobs, name='active_jobs'),
     path('job/<int:job_id>/update-deadline/', views.update_deadline, name='update_deadline'),
 
+    # Submission & Review URLs
+    path('job/<int:job_id>/submit-work/', views.submit_work, name='submit_work'),
+    path('job/<int:job_id>/review-submission/', views.review_submission, name='review_submission'),
+    path('job/<int:job_id>/submit-review/', views.submit_review, name='submit_review'),
+    path('earnings/', views.earnings_view, name='earnings'),
+
+    # Chat API URLs
+    path('job/<int:job_id>/chat/send/', views.send_message, name='chat_send'),
+    path('job/<int:job_id>/chat/messages/', views.get_messages, name='chat_messages'),
+    path('job/<int:job_id>/chat/mark-seen/', views.mark_seen, name='chat_mark_seen'),
+    path('job/<int:job_id>/chat/typing/', views.set_typing, name='chat_set_typing'),
+    path('job/<int:job_id>/chat/typing-status/', views.get_typing, name='chat_get_typing'),
+    path('api/chat-list/', views.get_chat_list, name='chat_list'),
+    path('api/unread-count/', views.get_unread_count, name='unread_count'),
+    path('api/pending-reviews/', views.get_pending_reviews, name='pending_reviews'),
+
     # API endpoints
     path('check-username/', views.check_username_availability, name='check_username'),
     path('check-email/', views.check_email_availability, name='check_email'),
