@@ -4,99 +4,99 @@
 {% block title %}Freelancer Dashboard - {{ APP_NAME }}{% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'core/css/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/dashboard.css' %}">
 {% endblock %}
 
 {% block page_container_class %}dashboard-container{% endblock %}
 
 {% block content %}
-        {% include 'core/freelancer_sidebar.html' %}
-        
-        <!-- Main Content -->
-        <main class="main-content">
-            <div class="section-header">
-                <h1 class="section-title">Welcome, {{ user.first_name }}!</h1>
-                <p class="section-subtitle">Here's your freelancer dashboard overview</p>
+{% include 'core/freelancer_sidebar.html' %}
+
+<!-- Main Content -->
+<main class="main-content">
+    <div class="section-header">
+        <h1 class="section-title">Welcome, {{ user.first_name }}!</h1>
+        <p class="section-subtitle">Here's your freelancer dashboard overview</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-briefcase"></i>
             </div>
-            
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-briefcase"></i>
-                    </div>
-                    <div class="stat-content">
-                        <h3 class="stat-number">{{ active_jobs }}</h3>
-                        <p class="stat-label">Active Projects</p>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-paper-plane"></i>
-                    </div>
-                    <div class="stat-content">
-                        <h3 class="stat-number">{{ submitted_proposals }}</h3>
-                        <p class="stat-label">Submitted Proposals</p>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-rupee-sign"></i>
-                    </div>
-                    <div class="stat-content">
-                        <h3 class="stat-number">₹{{ total_earnings }}</h3>
-                        <p class="stat-label">Total Earnings</p>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <div class="stat-content">
-                        <h3 class="stat-number">{{ completed_jobs }}</h3>
-                        <p class="stat-label">Completed Jobs</p>
-                    </div>
-                </div>
+            <div class="stat-content">
+                <h3 class="stat-number">{{ active_jobs }}</h3>
+                <p class="stat-label">Active Projects</p>
             </div>
-            
-            <div class="quick-actions">
-                <h2 class="subsection-title">Quick Actions</h2>
-                <div class="action-cards">
-                    <a href="{% url 'browse_jobs' %}" class="action-card" style="text-decoration: none; color: inherit;">
-                        <i class="fas fa-search"></i>
-                        <h3>Browse Jobs</h3>
-                        <p>Find new opportunities and projects</p>
-                    </a>
-                    <a href="{% url 'my_proposals' %}" class="action-card" style="text-decoration: none; color: inherit;">
-                        <i class="fas fa-paper-plane"></i>
-                        <h3>My Proposals</h3>
-                        <p>Track your submitted proposals</p>
-                    </a>
-                    <a href="{% url 'active_jobs' %}" class="action-card" style="text-decoration: none; color: inherit;">
-                        <i class="fas fa-briefcase"></i>
-                        <h3>Active Jobs</h3>
-                        <p>View your currently active in-progress jobs</p>
-                    </a>
-                    <a href="{% url 'earnings' %}" class="action-card" style="text-decoration: none; color: inherit;">
-                        <i class="fas fa-rupee-sign"></i>
-                        <h3>View Earnings</h3>
-                        <p>Check your earnings and payments</p>
-                    </a>
-                </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-paper-plane"></i>
             </div>
-        </main>
+            <div class="stat-content">
+                <h3 class="stat-number">{{ submitted_proposals }}</h3>
+                <p class="stat-label">Submitted Proposals</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fa-solid fa-money-bill-1-wave"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-number">₹{{ total_earnings }}</h3>
+                <p class="stat-label">Total Earnings</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-star"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-number">{{ completed_jobs }}</h3>
+                <p class="stat-label">Completed Jobs</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="quick-actions">
+        <h2 class="subsection-title">Quick Actions</h2>
+        <div class="action-cards">
+            <a href="{% url 'browse_jobs' %}" class="action-card" style="text-decoration: none; color: inherit;">
+                <i class="fas fa-search"></i>
+                <h3>Browse Jobs</h3>
+                <p>Find new opportunities and projects</p>
+            </a>
+            <a href="{% url 'my_proposals' %}" class="action-card" style="text-decoration: none; color: inherit;">
+                <i class="fas fa-paper-plane"></i>
+                <h3>My Proposals</h3>
+                <p>Track your submitted proposals</p>
+            </a>
+            <a href="{% url 'active_jobs' %}" class="action-card" style="text-decoration: none; color: inherit;">
+                <i class="fas fa-briefcase"></i>
+                <h3>Active Jobs</h3>
+                <p>View your currently active in-progress jobs</p>
+            </a>
+            <a href="{% url 'earnings' %}" class="action-card" style="text-decoration: none; color: inherit;">
+                <i class="fa-solid fa-money-bill-1-wave"></i>
+                <h3>View Earnings</h3>
+                <p>Check your earnings and payments</p>
+            </a>
+        </div>
+    </div>
+</main>
 {% endblock %}
 
 {% block extra_js %}
-    <script>
-        // Prevent back navigation to cached login page
-        (function() {
+<script>
+    // Prevent back navigation to cached login page
+    (function () {
+        history.pushState(null, null, location.href);
+        window.addEventListener('popstate', function () {
             history.pushState(null, null, location.href);
-            window.addEventListener('popstate', function() {
-                history.pushState(null, null, location.href);
-            });
-        })();
-    </script>
+        });
+    })();
+</script>
 {% endblock %}
