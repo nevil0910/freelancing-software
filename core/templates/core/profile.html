@@ -13,37 +13,12 @@
 {% block page_container_class %}dashboard-container{% endblock %}
 
 {% block content %}
-{% if is_owner %}
-{% include 'core/freelancer_sidebar.html' %}
-{% else %}
-<aside class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-        <div class="user-avatar-small">{{ user.first_name|first|upper }}</div>
-        <span class="sidebar-username">{{ user.first_name }}</span>
-    </div>
-    <nav class="sidebar-nav">
-        {% if user.is_authenticated and user.user_type == 'freelancer' %}
-        <a href="{% url 'profile_view' user.username %}" class="nav-item">
-            <i class="fas fa-user"></i><span class="nav-text">My Profile</span>
-        </a>
-        <a href="{% url 'dashboard' %}" class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-            <i class="fas fa-home"></i><span class="nav-text">Dashboard</span>
-        </a>
-        <a href="{% url 'browse_jobs' %}" class="nav-item"><i class="fas fa-search"></i><span class="nav-text">Browse Jobs</span></a>
-        {% elif user.is_authenticated and user.user_type == 'client' %}
-        <a href="{% url 'dashboard' %}" class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-            <i class="fas fa-home"></i><span class="nav-text">Dashboard</span>
-        </a>
-        {% endif %}
-    </nav>
-    <div class="sidebar-footer">
-        {% if user.is_authenticated %}
-        <a href="{% url 'logout' %}" class="nav-item logout-item">
-            <i class="fas fa-sign-out-alt"></i><span class="nav-text">Logout</span>
-        </a>
-        {% endif %}
-    </div>
-</aside>
+{% if user.is_authenticated %}
+    {% if user.user_type == 'freelancer' %}
+        {% include 'core/freelancer_sidebar.html' %}
+    {% elif user.user_type == 'client' %}
+        {% include 'core/client_sidebar.html' %}
+    {% endif %}
 {% endif %}
 
 <!-- ═══════════════════════════════ MAIN ══════════════════════════════════ -->
@@ -597,9 +572,28 @@ const postCommentSubmit = document.getElementById('postCommentSubmit');
 
 let currentPostId = null;
 
-postModalClose.addEventListener('click', () => closeModal(postViewModal));
+function closePostModal() {
+    closeModal(postViewModal);
+    currentPostId = null;
+    currentSlideIndex = 0;
+    // Stop any playing video BEFORE wiping DOM (prevents ghost audio)
+    postModalMedia.querySelectorAll('video').forEach(v => {
+        v.pause();
+        v.src = '';   // detach the media stream
+        v.load();     // force browser to release the resource
+    });
+    postModalMedia.innerHTML = ''; // Now safe to wipe
+    // CRITICAL: always re-enable the info card so it never acts as an invisible blocker
+    const infoCard = document.querySelector('.pm-info-card');
+    if (infoCard) {
+        infoCard.style.opacity = '0';
+        infoCard.style.pointerEvents = 'none';
+    }
+}
+
+postModalClose.addEventListener('click', closePostModal);
 postViewModal.addEventListener('click', (e) => {
-    if (e.target === postViewModal) closeModal(postViewModal);
+    if (e.target === postViewModal) closePostModal();
 });
 
 const pmMediaCard = document.getElementById('pmMediaCard');
@@ -685,6 +679,30 @@ function openPostModal(post) {
     renderSlide(currentSlideIndex);
 }
 
+/* ─── Media helpers ──────────────────────────────────────────────────── */
+function isVideo(url) {
+    if (!url) return false;
+    const clean = url.split('?')[0].toLowerCase();
+    return clean.endsWith('.mp4') || clean.endsWith('.mov') ||
+           clean.endsWith('.webm') || clean.endsWith('.ogg') ||
+           clean.endsWith('.avi') || clean.includes('/video/');
+}
+
+function fixCloudinaryUrl(url, resourceType) {
+    if (!url) return url;
+    // Cloudinary URLs with /auto/ must be rewritten to the correct delivery type
+    if (url.includes('/auto/upload/')) {
+        const deliveryType = (resourceType === 'video') ? 'video' : 'image';
+        return url.replace('/auto/upload/', `/${deliveryType}/upload/`);
+    }
+    // Also fix older pattern without /upload/ segment
+    if (url.includes('/auto/')) {
+        const deliveryType = (resourceType === 'video') ? 'video' : 'image';
+        return url.replace('/auto/', `/${deliveryType}/`);
+    }
+    return url;
+}
+
 function renderSlide(index) {
     if (currentMediaFiles.length === 0) return;
     
@@ -693,10 +711,15 @@ function renderSlide(index) {
     
     const mediaItem = currentMediaFiles[index];
     let mUrl = mediaItem.url || '';
-    const isVid = mediaItem.resource_type === 'video' || isVideo(mUrl);
-    if (mUrl.includes('/auto/')) {
-        mUrl = mUrl.replace('/auto/', isVid ? '/video/' : '/image/');
-    }
+    
+    // Determine if video: prefer explicit resource_type from backend, then URL inspection
+    const resourceType = mediaItem.resource_type || (isVideo(mUrl) ? 'video' : 'image');
+    const isVid = resourceType === 'video';
+    
+    // Fix Cloudinary /auto/ delivery type in URL
+    mUrl = fixCloudinaryUrl(mUrl, resourceType);
+    
+    console.log('[PostMedia] url:', mUrl, '| type:', resourceType, '| isVid:', isVid);
 
     const onMediaLoaded = (w, h) => {
         if (!postViewModal.classList.contains('open') || currentSlideIndex !== index) return;
@@ -729,6 +752,8 @@ function renderSlide(index) {
         const vid = document.createElement('video');
         vid.src = mUrl;
         vid.controls = true;
+        vid.preload = 'metadata';
+        vid.playsInline = true;
         vid.style.opacity = '0';
         vid.style.transition = 'opacity 0.4s ease';
         vid.style.maxWidth = '100%';
@@ -737,12 +762,29 @@ function renderSlide(index) {
         vid.style.zIndex = '2';
         postModalMedia.appendChild(vid);
         
-        vid.addEventListener('loadeddata', function onMeta() {
-            vid.removeEventListener('loadeddata', onMeta);
+        vid.addEventListener('loadedmetadata', function onMeta() {
+            vid.removeEventListener('loadedmetadata', onMeta);
             if (currentSlideIndex !== index) return;
             vid.style.opacity = '1';
             onMediaLoaded(vid.videoWidth || 640, vid.videoHeight || 480);
+            
+            // Attempt to autoplay muted if required, else just try playing.
+            let playPromise = vid.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    // Browser autoplay policy prevented playback. User will use controls.
+                });
+            }
         });
+
+        // Fail-safe to avoid infinite spinner if metadata fails somehow
+        setTimeout(() => {
+            if (vid.style.opacity === '0' && currentSlideIndex === index) {
+                vid.style.opacity = '1';
+                onMediaLoaded(640, 480);
+            }
+        }, 1500);
+
     } else {
         const img = document.createElement('img');
         img.alt = 'Post slide';
@@ -777,11 +819,23 @@ function appendComment(c) {
     const div = document.createElement('div');
     div.className = 'comment-item';
     const u = c.user__username || c.username || 'User';
+    const utype = (c.user__user_type || c.user_type || '').toLowerCase();
     const ago = timeAgo(new Date(c.created_at));
+    
+    let badge = '';
+    if (utype === 'freelancer') {
+        badge = `<span class="comment-role-badge freelancer">Freelancer</span>`;
+    } else if (utype === 'client') {
+        badge = `<span class="comment-role-badge client">Client</span>`;
+    }
+
     div.innerHTML = `
         <div class="comment-avatar">${u[0].toUpperCase()}</div>
         <div class="comment-body">
-            <span class="comment-author">${escHtml(u)}</span>
+            <div class="comment-header-row" style="display: flex; align-items: center; gap: 6px;">
+                <span class="comment-author">${escHtml(u)}</span>
+                ${badge}
+            </div>
             <span class="comment-text">${escHtml(c.text)}</span>
             <span class="comment-time">${ago}</span>
         </div>`;
@@ -968,11 +1022,14 @@ document.querySelectorAll('.post-cell[data-post-id]').forEach(cell => {
             const data = await res.json();
             if (data.success) {
                 const post = data.posts.find(p => p.id === postId);
-                if (post) openPostModal(post); // Will gracefully transition once media hits
+                // IF user hasn't cancelled the modal by clicking outside while it fetched
+                if (post && currentPostId === postId) {
+                    openPostModal(post); 
+                }
             }
         } catch (err) { 
             console.error(err); 
-            closeModal(postViewModal); 
+            if (currentPostId === postId) closePostModal(); 
         }
     });
     // Delete button (server-rendered cells)

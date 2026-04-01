@@ -306,6 +306,7 @@ class Post(models.Model):
 class PostMedia(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='media_files')
     media = CloudinaryField(resource_type='auto', blank=False, null=False)
+    resource_type = models.CharField(max_length=10, default='image')  # 'image' or 'video'
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

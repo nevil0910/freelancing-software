@@ -27,7 +27,7 @@ def _build_post_json(post, user, media_files_override=None):
     liked = PostLike.objects.filter(user=user, post=post).exists() if user.is_authenticated else False
     comments = list(
         post.comments.select_related('user').values(
-            'id', 'text', 'user__username', 'created_at'
+            'id', 'text', 'user__username', 'user__user_type', 'created_at'
         )
     )
     # Convert datetimes to ISO strings
@@ -40,15 +40,23 @@ def _build_post_json(post, user, media_files_override=None):
     else:
         # Get from PostMedia relation
         for pm in post.media_files.all():
+            # Use stored resource_type on the PM record if available
+            rt = getattr(pm, 'resource_type', None) or ''
+            
             if hasattr(pm.media, 'url'):
                 m_url = pm.media.url
             else:
-                import cloudinary
-                m_url = cloudinary.CloudinaryImage(str(pm.media)).build_url(secure=True)
+                pub = str(pm.media)
+                if rt == 'video':
+                    import cloudinary
+                    m_url = cloudinary.CloudinaryVideo(pub).build_url(secure=True)
+                else:
+                    import cloudinary
+                    m_url = cloudinary.CloudinaryImage(pub).build_url(secure=True)
             
-            rt = getattr(pm.media, 'resource_type', None)
+            # Infer resource_type from URL if not stored
             if not rt:
-                rt = 'video' if any(m_url.lower().endswith(ext) for ext in ('.mp4', '.mov', '.webm')) else 'image'
+                rt = 'video' if ('/video/' in m_url or any(m_url.lower().endswith(e) for e in ('.mp4', '.mov', '.webm'))) else 'image'
             media_files.append({'url': m_url, 'resource_type': rt})
             
         # Fallback for old posts without PostMedia
@@ -211,7 +219,7 @@ def add_post(request):
             public_id = result['public_id']
             secure_url = result['secure_url']
 
-            PostMedia.objects.create(post=post, media=public_id)
+            PostMedia.objects.create(post=post, media=public_id, resource_type=resource_type)
             media_files_data.append({
                 'url': secure_url,
                 'resource_type': resource_type
@@ -280,6 +288,7 @@ def add_comment(request, post_id):
             'id': comment.id,
             'text': comment.text,
             'user__username': comment.user.username,
+            'user__user_type': comment.user.user_type,
             'created_at': comment.created_at.isoformat(),
         }
     })
