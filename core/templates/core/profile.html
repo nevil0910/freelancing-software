@@ -1,0 +1,1018 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}{{ profile_user.get_full_name|default:profile_user.username }} - Profile | {{ APP_NAME }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/profile.css' %}">
+<!-- Cropper.js -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+{% endblock %}
+
+{% block page_container_class %}dashboard-container{% endblock %}
+
+{% block content %}
+{% if is_owner %}
+{% include 'core/freelancer_sidebar.html' %}
+{% else %}
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="user-avatar-small">{{ user.first_name|first|upper }}</div>
+        <span class="sidebar-username">{{ user.first_name }}</span>
+    </div>
+    <nav class="sidebar-nav">
+        {% if user.is_authenticated and user.user_type == 'freelancer' %}
+        <a href="{% url 'profile_view' user.username %}" class="nav-item">
+            <i class="fas fa-user"></i><span class="nav-text">My Profile</span>
+        </a>
+        <a href="{% url 'dashboard' %}" class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+            <i class="fas fa-home"></i><span class="nav-text">Dashboard</span>
+        </a>
+        <a href="{% url 'browse_jobs' %}" class="nav-item"><i class="fas fa-search"></i><span class="nav-text">Browse Jobs</span></a>
+        {% elif user.is_authenticated and user.user_type == 'client' %}
+        <a href="{% url 'dashboard' %}" class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+            <i class="fas fa-home"></i><span class="nav-text">Dashboard</span>
+        </a>
+        {% endif %}
+    </nav>
+    <div class="sidebar-footer">
+        {% if user.is_authenticated %}
+        <a href="{% url 'logout' %}" class="nav-item logout-item">
+            <i class="fas fa-sign-out-alt"></i><span class="nav-text">Logout</span>
+        </a>
+        {% endif %}
+    </div>
+</aside>
+{% endif %}
+
+<!-- ═══════════════════════════════ MAIN ══════════════════════════════════ -->
+<main class="main-content">
+
+    <!-- ── Profile Header ─────────────────────────────────────────────── -->
+    <div class="profile-header">
+        <div class="profile-avatar-wrap">
+            {% if profile.profile_photo %}
+            <img src="{{ profile.profile_photo.url }}" alt="{{ profile_user.username }}'s photo" class="profile-avatar" id="profileAvatarImg">
+            {% else %}
+            <div class="profile-avatar-initials" id="profileAvatarInitials">
+                {{ profile_user.first_name|first|upper }}{{ profile_user.last_name|first|upper }}
+            </div>
+            {% endif %}
+            {% if is_owner %}
+            <button class="edit-photo-btn" id="editPhotoBtn" title="Edit profile photo">
+                <i class="fas fa-camera"></i>
+            </button>
+            <input type="file" id="photoFileInput" accept="image/jpeg,image/png" style="display:none;">
+            {% endif %}
+        </div>
+
+        <div class="profile-info">
+            <p class="profile-username">@{{ profile_user.username }}</p>
+            <h1 class="profile-fullname">{{ profile_user.get_full_name|default:profile_user.username }}</h1>
+
+            <div class="profile-rating">
+                <span class="rating-stars">
+                    {% with r=profile.rating %}
+                    {% if r >= 1 %}<i class="fas fa-star"></i>{% else %}<i class="far fa-star"></i>{% endif %}
+                    {% if r >= 2 %}<i class="fas fa-star"></i>{% else %}<i class="far fa-star"></i>{% endif %}
+                    {% if r >= 3 %}<i class="fas fa-star"></i>{% else %}<i class="far fa-star"></i>{% endif %}
+                    {% if r >= 4 %}<i class="fas fa-star"></i>{% else %}<i class="far fa-star"></i>{% endif %}
+                    {% if r >= 5 %}<i class="fas fa-star"></i>{% else %}<i class="far fa-star"></i>{% endif %}
+                    {% endwith %}
+                </span>
+                <span class="rating-value">
+                    {% if profile.rating %}{{ profile.rating }}{% else %}No ratings yet{% endif %}
+                </span>
+            </div>
+
+            {% if profile.bio %}
+            <p class="profile-bio">{{ profile.bio }}</p>
+            {% endif %}
+
+            <div class="profile-actions">
+                {% if is_owner %}
+                <button class="btn-add-post" id="openAddPostModal">
+                    <i class="fas fa-plus"></i> Add Post
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Posts Section ──────────────────────────────────────────────── -->
+    <div class="posts-section-title">
+        <i class="fas fa-th"></i> Portfolio
+    </div>
+
+    <!-- Category filter pills -->
+    <div class="category-filters" id="categoryFilters">
+        <button class="filter-pill {% if not selected_category %}active{% endif %}" data-category="">All</button>
+        {% for val, lbl in category_choices %}
+        <button class="filter-pill {% if selected_category == val %}active{% endif %}" data-category="{{ val }}">{{ lbl }}</button>
+        {% endfor %}
+    </div>
+
+    <!-- Posts grid -->
+    <div class="posts-grid" id="postsGrid">
+        {% for post in posts %}
+        <div class="post-cell" data-post-id="{{ post.id }}" data-category="{{ post.category }}">
+            {% if post.first_media_info %}
+                {% with media_url=post.first_media_info.url res_type=post.first_media_info.resource_type %}
+                {% if res_type == 'video' or '.mp4' in media_url or '.mov' in media_url or '.webm' in media_url %}
+                <video data-raw-url="{{ media_url }}" muted preload="metadata" loading="lazy"></video>
+                <span class="post-video-badge"><i class="fas fa-play-circle"></i></span>
+                {% else %}
+                <img data-raw-url="{{ media_url }}" alt="Post" loading="lazy">
+                {% endif %}
+                {% endwith %}
+                {% if post.has_multiple_media %}
+                <span class="post-carousel-badge"><i class="fas fa-copy"></i></span>
+                {% endif %}
+            {% endif %}
+            <div class="post-cell-overlay">
+                <span><i class="fas fa-heart"></i> {{ post.likes_count }}</span>
+                <span><i class="fas fa-comment"></i> {{ post.comments_count }}</span>
+            </div>
+            <span class="post-cat-badge">{{ post.get_category_display }}</span>
+            {% if is_owner %}
+            <button class="post-delete-btn" data-post-id="{{ post.id }}" title="Delete post">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+            {% endif %}
+        </div>
+        {% empty %}
+        <div class="posts-empty" id="emptyState">
+            <i class="fas fa-images"></i>
+            <p>{% if is_owner %}No posts yet. Click <strong>Add Post</strong> to share your work!{% else %}No posts yet.{% endif %}</p>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <script>
+        // Resolve Cloudinary /auto/ URLs to /image/ or /video/ on page load
+        document.querySelectorAll('.post-cell video[data-raw-url], .post-cell img[data-raw-url]').forEach(el => {
+            let url = el.getAttribute('data-raw-url');
+            if (url) {
+                if (url.includes('/auto/')) {
+                    url = url.replace('/auto/', el.tagName === 'VIDEO' ? '/video/' : '/image/');
+                }
+                el.src = url;
+            }
+        });
+    </script>
+
+</main><!-- /main-content -->
+
+
+<!-- ═══════════════ CROP MODAL (Profile Photo) ═══════════════════════════ -->
+<div class="modal-overlay" id="cropModal">
+    <div class="modal-card">
+        <button class="modal-close" id="cropModalClose"><i class="fas fa-times"></i></button>
+        <h2 class="modal-title"><i class="fas fa-crop-alt"></i> Crop Profile Photo</h2>
+        <div class="crop-container">
+            <img id="cropImage" src="" alt="Crop preview">
+        </div>
+        <div class="upload-spinner" id="cropSpinner">
+            <div class="spinner-ring"></div> Uploading…
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" id="cropCancelBtn">Cancel</button>
+            <button class="btn-confirm" id="cropConfirmBtn"><i class="fas fa-check"></i> Save Photo</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- ═══════════════ ADD POST MODAL ════════════════════════════════════════ -->
+{% if is_owner %}
+<div class="modal-overlay add-post-modal" id="addPostModal">
+    <div class="modal-card">
+        <button class="modal-close" id="addPostClose"><i class="fas fa-times"></i></button>
+        <h2 class="modal-title"><i class="fas fa-plus-circle"></i> New Post</h2>
+
+        <!-- File drop zone -->
+        <div class="file-drop-zone" id="fileDropZone">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p>Drag & drop or <strong>click to browse</strong></p>
+            <small>JPEG, PNG, MP4 · Max 10 files · 50 MB each</small>
+            <input type="file" id="postFileInput" accept="image/jpeg,image/png,video/mp4" multiple style="display:none;">
+        </div>
+
+        <!-- Preview -->
+        <div class="file-preview" id="filePreview" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px;"></div>
+
+        <!-- Form fields -->
+        <div class="post-form-group">
+            <label><i class="fas fa-tag"></i> Category</label>
+            <select id="postCategory">
+                {% for val, lbl in category_choices %}
+                <option value="{{ val }}">{{ lbl }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="post-form-group">
+            <label><i class="fas fa-align-left"></i> Caption</label>
+            <textarea id="postCaption" placeholder="Describe your work…" rows="3"></textarea>
+        </div>
+
+        <div class="upload-spinner" id="postSpinner">
+            <div class="spinner-ring"></div> Uploading…
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn-cancel" id="addPostCancelBtn">Cancel</button>
+            <button class="btn-confirm" id="addPostSubmitBtn"><i class="fas fa-paper-plane"></i> Post</button>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+
+<!-- ═══════════════ POST VIEW MODAL ══════════════════════════════════════ -->
+<div class="post-modal-overlay" id="postViewModal">
+
+    <!-- Close button — outside both cards -->
+    <button class="modal-close-post" id="postModalClose"><i class="fas fa-times"></i></button>
+
+    <!-- CARD 1: Dynamic media -->
+    <div class="pm-media-card" id="pmMediaCard">
+        <div class="pm-media-inner" id="postModalMedia"></div>
+        <!-- Carousel Controls -->
+        <button class="carousel-btn prev" id="pmPrevBtn" style="display:none;"><i class="fas fa-chevron-left"></i></button>
+        <button class="carousel-btn next" id="pmNextBtn" style="display:none;"><i class="fas fa-chevron-right"></i></button>
+        <div class="carousel-dots" id="pmDots" style="display:none;"></div>
+    </div>
+
+    <!-- CARD 2: Fixed comment panel -->
+    <div class="pm-info-card">
+        <div class="post-modal-header">
+            <div class="post-modal-avatar" id="postModalAvatar"></div>
+            <span class="post-modal-username" id="postModalUsername"></span>
+        </div>
+        <div class="post-modal-caption" id="postModalCaption"></div>
+        <div class="post-modal-likes">
+            <button class="like-btn" id="postLikeBtn">
+                <i class="far fa-heart"></i>
+                <i class="fas fa-heart"></i>
+            </button>
+            <span class="likes-count" id="postLikesCount">0 likes</span>
+        </div>
+        <div class="post-modal-comments" id="postCommentsList"></div>
+        <div class="post-modal-comment-input">
+            <textarea id="commentTextarea" placeholder="Add a comment…" rows="1"></textarea>
+            <button id="postCommentSubmit">Post</button>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<!-- Cropper.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+
+<script>
+/* ─── Config ─────────────────────────────────────────────────────────── */
+const IS_OWNER = {{ is_owner|yesno:"true,false" }};
+const IS_AUTH  = {{ user.is_authenticated|yesno:"true,false" }};
+const PROFILE_USERNAME = "{{ profile_user.username }}";
+const CSRF_TOKEN = "{{ csrf_token }}";
+
+const URLS = {
+    updatePhoto  : "{% url 'update_profile_photo' %}",
+    addPost      : "{% url 'add_post' %}",
+    filterPosts  : "{% url 'filter_posts' username=profile_user.username %}",
+    toggleLike   : (id) => `/api/post/${id}/like/`,
+    addComment   : (id) => `/api/post/${id}/comment/`,
+    deletePost   : (id) => `/profile/delete-post/${id}/`,
+};
+
+/* ─── Helpers ────────────────────────────────────────────────────────── */
+function csrfHeaders() {
+    return { 'X-CSRFToken': CSRF_TOKEN };
+}
+
+function openModal(el)  { el.classList.add('open'); document.body.style.overflow = 'hidden'; }
+function closeModal(el) { el.classList.remove('open'); document.body.style.overflow = ''; }
+
+function isVideo(url) {
+    return /\.(mp4|mov|webm|avi|mkv)(\?|$)/i.test(url);
+}
+
+/* ─── DOM refs ───────────────────────────────────────────────────────── */
+const cropModal      = document.getElementById('cropModal');
+const cropImage      = document.getElementById('cropImage');
+const cropConfirmBtn = document.getElementById('cropConfirmBtn');
+const cropCancelBtn  = document.getElementById('cropCancelBtn');
+const cropModalClose = document.getElementById('cropModalClose');
+const cropSpinner    = document.getElementById('cropSpinner');
+
+const addPostModal   = document.getElementById('addPostModal');
+const postViewModal  = document.getElementById('postViewModal');
+const postsGrid      = document.getElementById('postsGrid');
+const emptyState     = document.getElementById('emptyState');
+
+let cropper = null;
+
+/* ══════════════════════════════════════════════════════════════════════
+   SECTION 1 — PROFILE PHOTO CROPPING
+   ════════════════════════════════════════════════════════════════════ */
+if (IS_OWNER) {
+    const editPhotoBtn   = document.getElementById('editPhotoBtn');
+    const photoFileInput = document.getElementById('photoFileInput');
+
+    editPhotoBtn.addEventListener('click', () => photoFileInput.click());
+
+    photoFileInput.addEventListener('change', function () {
+        const file = this.files[0];
+        if (!file) return;
+        if (!['image/jpeg', 'image/png'].includes(file.type)) {
+            alert('Only JPEG or PNG images are accepted.');
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            cropImage.src = e.target.result;
+            openModal(cropModal);
+            // Destroy old cropper before creating a new one
+            if (cropper) { cropper.destroy(); cropper = null; }
+            cropper = new Cropper(cropImage, {
+                aspectRatio: 1,
+                viewMode: 1,
+                dragMode: 'move',
+                autoCropArea: 0.8,
+                responsive: true,
+            });
+        };
+        reader.readAsDataURL(file);
+    });
+
+    [cropCancelBtn, cropModalClose].forEach(btn => {
+        btn.addEventListener('click', () => {
+            closeModal(cropModal);
+            if (cropper) { cropper.destroy(); cropper = null; }
+            photoFileInput.value = '';
+        });
+    });
+
+    cropConfirmBtn.addEventListener('click', () => {
+        if (!cropper) return;
+        const canvas = cropper.getCroppedCanvas({ width: 256, height: 256 });
+        if (!canvas) return;
+
+        cropConfirmBtn.disabled = true;
+        cropSpinner.classList.add('active');
+
+        canvas.toBlob(async (blob) => {
+            const formData = new FormData();
+            formData.append('photo', blob, 'profile.jpg');
+
+            try {
+                const res  = await fetch(URLS.updatePhoto, {
+                    method: 'POST',
+                    headers: csrfHeaders(),
+                    body: formData,
+                });
+                const data = await res.json();
+                if (data.success) {
+                    // Update avatar in the DOM
+                    const wrap   = document.querySelector('.profile-avatar-wrap');
+                    let imgEl    = document.getElementById('profileAvatarImg');
+                    const initEl = document.getElementById('profileAvatarInitials');
+                    if (!imgEl) {
+                        imgEl = document.createElement('img');
+                        imgEl.id = 'profileAvatarImg';
+                        imgEl.className = 'profile-avatar';
+                        imgEl.alt = 'Profile photo';
+                        if (initEl) initEl.replaceWith(imgEl);
+                        else wrap.prepend(imgEl);
+                    }
+                    imgEl.src = data.url + '?t=' + Date.now();
+                    closeModal(cropModal);
+                    cropper.destroy(); cropper = null;
+                    photoFileInput.value = '';
+                } else {
+                    alert('Upload failed: ' + (data.error || 'Unknown error'));
+                }
+            } catch (err) {
+                alert('Upload error: ' + err.message);
+            } finally {
+                cropConfirmBtn.disabled = false;
+                cropSpinner.classList.remove('active');
+            }
+        }, 'image/jpeg', 0.92);
+    });
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   SECTION 2 — ADD POST MODAL
+   ════════════════════════════════════════════════════════════════════ */
+if (IS_OWNER && addPostModal) {
+    const openAddPostBtn  = document.getElementById('openAddPostModal');
+    const addPostClose    = document.getElementById('addPostClose');
+    const addPostCancelBtn = document.getElementById('addPostCancelBtn');
+    const fileDropZone    = document.getElementById('fileDropZone');
+    const postFileInput   = document.getElementById('postFileInput');
+    const filePreview     = document.getElementById('filePreview');
+    const postCategoryEl  = document.getElementById('postCategory');
+    const postCaptionEl   = document.getElementById('postCaption');
+    const postSpinner     = document.getElementById('postSpinner');
+    const addPostSubmitBtn = document.getElementById('addPostSubmitBtn');
+
+    let selectedPostFile = null;
+
+    openAddPostBtn.addEventListener('click', () => {
+        resetAddPostForm();
+        openModal(addPostModal);
+    });
+
+    function closeAddPost() {
+        closeModal(addPostModal);
+        resetAddPostForm();
+    }
+
+    [addPostClose, addPostCancelBtn].forEach(b => b.addEventListener('click', closeAddPost));
+
+    // File drop zone click
+    fileDropZone.addEventListener('click', () => postFileInput.click());
+
+    // Drag & drop
+    fileDropZone.addEventListener('dragover', (e) => { e.preventDefault(); fileDropZone.classList.add('drag-over'); });
+    fileDropZone.addEventListener('dragleave', () => fileDropZone.classList.remove('drag-over'));
+    fileDropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        fileDropZone.classList.remove('drag-over');
+        if (e.dataTransfer.files.length) handlePostFiles(e.dataTransfer.files);
+    });
+
+    postFileInput.addEventListener('change', function () {
+        if (this.files.length) handlePostFiles(this.files);
+    });
+
+    function handlePostFiles(filesList) {
+        const allowed = ['image/jpeg', 'image/png', 'video/mp4'];
+        
+        let validFiles = Array.from(filesList).filter(f => allowed.includes(f.type) && f.size <= 50 * 1024 * 1024);
+        
+        if (validFiles.length === 0) {
+            alert('No valid files found. Max 50MB, JPEG/PNG/MP4 only.');
+            return;
+        }
+
+        if (selectedPostFiles.length + validFiles.length > 10) {
+            alert('Maximum 10 files allowed.');
+            validFiles = validFiles.slice(0, 10 - selectedPostFiles.length);
+        }
+
+        selectedPostFiles = [...selectedPostFiles, ...validFiles];
+        renderPreviews();
+    }
+
+    function renderPreviews() {
+        if (selectedPostFiles.length > 0) {
+            filePreview.style.display = 'flex';
+            fileDropZone.style.display = selectedPostFiles.length >= 10 ? 'none' : 'block';
+            filePreview.innerHTML = '';
+            
+            selectedPostFiles.forEach((file, index) => {
+                const url = URL.createObjectURL(file);
+                const wrapper = document.createElement('div');
+                wrapper.style.position = 'relative';
+                wrapper.style.flexShrink = '0';
+                wrapper.style.width = '100px';
+                wrapper.style.height = '100px';
+                
+                let el;
+                if (file.type === 'video/mp4') {
+                    el = document.createElement('video');
+                    el.src = url;
+                } else {
+                    el = document.createElement('img');
+                    el.src = url;
+                }
+                el.style.width = '100%';
+                el.style.height = '100%';
+                el.style.objectFit = 'cover';
+                el.style.borderRadius = '8px';
+                
+                const rmBtn = document.createElement('button');
+                rmBtn.innerHTML = '&times;';
+                rmBtn.style.position = 'absolute';
+                rmBtn.style.top = '4px';
+                rmBtn.style.right = '4px';
+                rmBtn.style.background = 'rgba(0,0,0,0.6)';
+                rmBtn.style.color = '#fff';
+                rmBtn.style.border = 'none';
+                rmBtn.style.borderRadius = '50%';
+                rmBtn.style.width = '20px';
+                rmBtn.style.height = '20px';
+                rmBtn.style.cursor = 'pointer';
+                rmBtn.style.lineHeight = '1';
+                rmBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    selectedPostFiles.splice(index, 1);
+                    URL.revokeObjectURL(url);
+                    renderPreviews();
+                };
+                
+                wrapper.appendChild(el);
+                wrapper.appendChild(rmBtn);
+                filePreview.appendChild(wrapper);
+            });
+        } else {
+            resetAddPostForm();
+        }
+    }
+
+    function resetAddPostForm() {
+        selectedPostFiles = [];
+        postFileInput.value = '';
+        filePreview.innerHTML = '';
+        filePreview.style.display = 'none';
+        fileDropZone.style.display = 'block';
+        postCaptionEl.value = '';
+        if (postCategoryEl) postCategoryEl.selectedIndex = 0;
+        fileDropZone.classList.remove('drag-over');
+    }
+
+    addPostSubmitBtn.addEventListener('click', async () => {
+        if (selectedPostFiles.length === 0) { alert('Please select a file.'); return; }
+
+        addPostSubmitBtn.disabled = true;
+        postSpinner.classList.add('active');
+
+        const formData = new FormData();
+        selectedPostFiles.forEach(f => formData.append('media', f));
+        formData.append('caption', postCaptionEl.value.trim());
+        formData.append('category', postCategoryEl.value);
+
+        try {
+            const res  = await fetch(URLS.addPost, {
+                method : 'POST',
+                headers: csrfHeaders(),
+                body   : formData,
+            });
+            const data = await res.json();
+            if (data.success) {
+                closeAddPost();
+                prependPostCell(data.post);
+            } else {
+                alert('Upload failed: ' + (data.error || 'Unknown error'));
+            }
+        } catch (err) {
+            alert('Error: ' + err.message);
+        } finally {
+            addPostSubmitBtn.disabled = false;
+            postSpinner.classList.remove('active');
+        }
+    });
+
+    function prependPostCell(post) {
+        // Remove empty state if present
+        if (emptyState) emptyState.remove();
+
+        const cell = buildPostCell(post);
+        postsGrid.prepend(cell);
+        bindCellEvents(cell, post);
+    }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   SECTION 3 — POST VIEW MODAL
+   ════════════════════════════════════════════════════════════════════ */
+const postModalClose    = document.getElementById('postModalClose');
+const postModalMedia    = document.getElementById('postModalMedia');
+const postModalAvatar   = document.getElementById('postModalAvatar');
+const postModalUsername = document.getElementById('postModalUsername');
+const postModalCaption  = document.getElementById('postModalCaption');
+const postLikeBtn       = document.getElementById('postLikeBtn');
+const postLikesCount    = document.getElementById('postLikesCount');
+const postCommentsList  = document.getElementById('postCommentsList');
+const commentTextarea   = document.getElementById('commentTextarea');
+const postCommentSubmit = document.getElementById('postCommentSubmit');
+
+let currentPostId = null;
+
+postModalClose.addEventListener('click', () => closeModal(postViewModal));
+postViewModal.addEventListener('click', (e) => {
+    if (e.target === postViewModal) closeModal(postViewModal);
+});
+
+const pmMediaCard = document.getElementById('pmMediaCard');
+
+function fitMediaCard(naturalW, naturalH) {
+    /* Compute display size clamped to 70vw × 80vh, preserving aspect ratio */
+    const maxW = Math.floor(window.innerWidth  * 0.70);
+    const maxH = Math.floor(window.innerHeight * 0.80);
+    const ratio = naturalW / naturalH;
+    let w = naturalW, h = naturalH;
+    if (w > maxW) { w = maxW; h = Math.round(w / ratio); }
+    if (h > maxH) { h = maxH; w = Math.round(h * ratio); }
+    pmMediaCard.style.width  = w + 'px';
+    pmMediaCard.style.height = h + 'px';
+}
+
+function showLoadingModal(postId) {
+    currentPostId = postId;
+    pmMediaCard.style.width  = '150px';
+    pmMediaCard.style.height = '150px';
+    
+    postModalMedia.innerHTML = `
+        <div id="modalSpinner" class="upload-spinner active" style="position: absolute; display: flex; align-items: center; justify-content: center; inset: 0; z-index: 10;">
+            <div class="spinner-ring"></div>
+        </div>
+    `;
+    
+    const infoCard = document.querySelector('.pm-info-card');
+    infoCard.style.opacity = '0';
+    infoCard.style.transition = 'opacity 0.3s ease';
+    infoCard.style.pointerEvents = 'none';
+    
+    openModal(postViewModal);
+}
+
+let currentMediaFiles = [];
+let currentSlideIndex = 0;
+
+const pmPrevBtn = document.getElementById('pmPrevBtn');
+const pmNextBtn = document.getElementById('pmNextBtn');
+const pmDots = document.getElementById('pmDots');
+
+pmPrevBtn.addEventListener('click', () => {
+    if (currentSlideIndex > 0) {
+        currentSlideIndex--;
+        renderSlide(currentSlideIndex);
+    }
+});
+
+pmNextBtn.addEventListener('click', () => {
+    if (currentSlideIndex < currentMediaFiles.length - 1) {
+        currentSlideIndex++;
+        renderSlide(currentSlideIndex);
+    }
+});
+
+function openPostModal(post) {
+    if (currentPostId && currentPostId !== post.id) return;
+    currentPostId = post.id;
+    
+    currentMediaFiles = post.media_files && post.media_files.length ? post.media_files : [{ url: post.media_url, resource_type: post.resource_type }];
+    currentSlideIndex = 0;
+
+    if (!postViewModal.classList.contains('open')) {
+        showLoadingModal(post.id);
+    }
+
+    // Set info panel text
+    const initial = (post.owner || 'U')[0].toUpperCase();
+    postModalAvatar.textContent  = initial;
+    postModalUsername.textContent = '@' + post.owner;
+    if (post.caption) {
+        postModalCaption.innerHTML = `<span class="caption-username">${post.owner}</span>${escHtml(post.caption)}`;
+    } else {
+        postModalCaption.innerHTML = '';
+    }
+    postLikesCount.textContent = post.likes_count + ' like' + (post.likes_count !== 1 ? 's' : '');
+    postLikeBtn.classList.toggle('liked', !!post.liked);
+    postCommentsList.innerHTML = '';
+    (post.comments || []).forEach(appendComment);
+    commentTextarea.value = '';
+
+    renderSlide(currentSlideIndex);
+}
+
+function renderSlide(index) {
+    if (currentMediaFiles.length === 0) return;
+    
+    pmPrevBtn.style.display = index > 0 ? 'flex' : 'none';
+    pmNextBtn.style.display = index < currentMediaFiles.length - 1 ? 'flex' : 'none';
+    
+    const mediaItem = currentMediaFiles[index];
+    let mUrl = mediaItem.url || '';
+    const isVid = mediaItem.resource_type === 'video' || isVideo(mUrl);
+    if (mUrl.includes('/auto/')) {
+        mUrl = mUrl.replace('/auto/', isVid ? '/video/' : '/image/');
+    }
+
+    const onMediaLoaded = (w, h) => {
+        if (!postViewModal.classList.contains('open') || currentSlideIndex !== index) return;
+        
+        fitMediaCard(w, h);
+        
+        const spinner = document.getElementById('modalSpinner');
+        if (spinner) {
+            spinner.style.opacity = '0';
+            setTimeout(() => { if (spinner) spinner.remove(); }, 350);
+        }
+
+        const infoCard = document.querySelector('.pm-info-card');
+        infoCard.style.opacity = '1';
+        infoCard.style.pointerEvents = 'all';
+    };
+
+    if (!document.getElementById('modalSpinner')) {
+        postModalMedia.innerHTML = `
+            <div id="modalSpinner" class="upload-spinner active" style="position: absolute; display: flex; align-items: center; justify-content: center; inset: 0; z-index: 10;">
+                <div class="spinner-ring"></div>
+            </div>`;
+    } else {
+        Array.from(postModalMedia.children).forEach(el => {
+            if (el.id !== 'modalSpinner') el.remove();
+        });
+    }
+
+    if (isVid) {
+        const vid = document.createElement('video');
+        vid.src = mUrl;
+        vid.controls = true;
+        vid.style.opacity = '0';
+        vid.style.transition = 'opacity 0.4s ease';
+        vid.style.maxWidth = '100%';
+        vid.style.maxHeight = '100%';
+        vid.style.position = 'relative';
+        vid.style.zIndex = '2';
+        postModalMedia.appendChild(vid);
+        
+        vid.addEventListener('loadeddata', function onMeta() {
+            vid.removeEventListener('loadeddata', onMeta);
+            if (currentSlideIndex !== index) return;
+            vid.style.opacity = '1';
+            onMediaLoaded(vid.videoWidth || 640, vid.videoHeight || 480);
+        });
+    } else {
+        const img = document.createElement('img');
+        img.alt = 'Post slide';
+        img.style.opacity = '0';
+        img.style.transition = 'opacity 0.4s ease';
+        img.style.maxWidth = '100%';
+        img.style.maxHeight = '100%';
+        img.style.position = 'relative';
+        img.style.zIndex = '2';
+        postModalMedia.appendChild(img);
+        
+        img.addEventListener('load', function onLoad() {
+            img.removeEventListener('load', onLoad);
+            if (currentSlideIndex !== index) return;
+            img.style.opacity = '1';
+            onMediaLoaded(img.naturalWidth, img.naturalHeight);
+        });
+        img.src = mUrl;
+    }
+
+    if (currentMediaFiles.length > 1) {
+        pmDots.style.display = 'flex';
+        pmDots.innerHTML = currentMediaFiles.map((_, i) => `<span class="dot ${i === index ? 'active' : ''}"></span>`).join('');
+    } else {
+        pmDots.style.display = 'none';
+        pmDots.innerHTML = '';
+    }
+}
+
+
+function appendComment(c) {
+    const div = document.createElement('div');
+    div.className = 'comment-item';
+    const u = c.user__username || c.username || 'User';
+    const ago = timeAgo(new Date(c.created_at));
+    div.innerHTML = `
+        <div class="comment-avatar">${u[0].toUpperCase()}</div>
+        <div class="comment-body">
+            <span class="comment-author">${escHtml(u)}</span>
+            <span class="comment-text">${escHtml(c.text)}</span>
+            <span class="comment-time">${ago}</span>
+        </div>`;
+    postCommentsList.appendChild(div);
+    postCommentsList.scrollTop = postCommentsList.scrollHeight;
+}
+
+/* Like toggle */
+postLikeBtn.addEventListener('click', async () => {
+    if (!IS_AUTH) { alert('Please log in to like posts.'); return; }
+    if (!currentPostId) return;
+    try {
+        const res  = await fetch(URLS.toggleLike(currentPostId), {
+            method : 'POST',
+            headers: csrfHeaders(),
+        });
+        const data = await res.json();
+        if (data.success) {
+            postLikeBtn.classList.toggle('liked', data.liked);
+            postLikesCount.textContent = data.likes_count + ' like' + (data.likes_count !== 1 ? 's' : '');
+            // Update cell overlay
+            const cell = postsGrid.querySelector(`.post-cell[data-post-id="${currentPostId}"]`);
+            if (cell) {
+                const heartSpan = cell.querySelector('.post-cell-overlay span:first-child');
+                if (heartSpan) heartSpan.innerHTML = `<i class="fas fa-heart"></i> ${data.likes_count}`;
+            }
+        }
+    } catch (err) { console.error(err); }
+});
+
+/* Add comment */
+async function submitComment() {
+    if (!IS_AUTH) { alert('Please log in to comment.'); return; }
+    const text = commentTextarea.value.trim();
+    if (!text || !currentPostId) return;
+
+    try {
+        const res  = await fetch(URLS.addComment(currentPostId), {
+            method : 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
+            body   : JSON.stringify({ text }),
+        });
+        const data = await res.json();
+        if (data.success) {
+            commentTextarea.value = '';
+            appendComment(data.comment);
+            // Update cell overlay comment count
+            const cell = postsGrid.querySelector(`.post-cell[data-post-id="${currentPostId}"]`);
+            if (cell) {
+                const commentSpan = cell.querySelector('.post-cell-overlay span:last-child');
+                if (commentSpan) {
+                    const cur = parseInt(commentSpan.textContent) || 0;
+                    commentSpan.innerHTML = `<i class="fas fa-comment"></i> ${cur + 1}`;
+                }
+            }
+        }
+    } catch (err) { console.error(err); }
+}
+
+postCommentSubmit.addEventListener('click', submitComment);
+commentTextarea.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitComment(); }
+});
+
+/* ══════════════════════════════════════════════════════════════════════
+   SECTION 4 — CATEGORY FILTER (AJAX)
+   ════════════════════════════════════════════════════════════════════ */
+const categoryFilters = document.getElementById('categoryFilters');
+
+categoryFilters.addEventListener('click', async (e) => {
+    const pill = e.target.closest('.filter-pill');
+    if (!pill) return;
+
+    categoryFilters.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+
+    const category = pill.dataset.category;
+    const url = URLS.filterPosts + (category ? `?category=${encodeURIComponent(category)}` : '');
+
+    try {
+        const res  = await fetch(url);
+        const data = await res.json();
+        if (data.success) renderPosts(data.posts);
+    } catch (err) { console.error(err); }
+});
+
+function renderPosts(posts) {
+    postsGrid.innerHTML = '';
+    if (!posts.length) {
+        postsGrid.innerHTML = `<div class="posts-empty"><i class="fas fa-images"></i><p>No posts in this category.</p></div>`;
+        return;
+    }
+    posts.forEach(post => {
+        const cell = buildPostCell(post);
+        postsGrid.appendChild(cell);
+        bindCellEvents(cell, post);
+    });
+}
+
+function buildPostCell(post) {
+    const cell = document.createElement('div');
+    cell.className = 'post-cell';
+    cell.dataset.postId  = post.id;
+    cell.dataset.category = post.category;
+
+    let mediaFiles = post.media_files && post.media_files.length ? post.media_files : [{ url: post.media_url, resource_type: post.resource_type }];
+    let firstMedia = mediaFiles[0];
+    let mediaUrl = firstMedia.url || '';
+    const isVid = firstMedia.resource_type === 'video' || isVideo(mediaUrl);
+    
+    if (mediaUrl.includes('/auto/')) {
+        mediaUrl = mediaUrl.replace('/auto/', isVid ? '/video/' : '/image/');
+    }
+
+    let mediaHtml = '';
+    if (isVid) {
+        mediaHtml = `<video src="${mediaUrl}" muted preload="metadata" loading="lazy"></video>
+                     <span class="post-video-badge"><i class="fas fa-play-circle"></i></span>`;
+    } else {
+        mediaHtml = `<img src="${mediaUrl}" alt="Post" loading="lazy">`;
+    }
+
+    let carouselHtml = mediaFiles.length > 1 ? `<span class="post-carousel-badge"><i class="fas fa-copy"></i></span>` : '';
+
+    const deleteBtn = IS_OWNER
+        ? `<button class="post-delete-btn" data-post-id="${post.id}" title="Delete"><i class="fas fa-trash-alt"></i></button>`
+        : '';
+
+    cell.innerHTML = `
+        ${mediaHtml}
+        ${carouselHtml}
+        <div class="post-cell-overlay">
+            <span><i class="fas fa-heart"></i> ${post.likes_count}</span>
+            <span><i class="fas fa-comment"></i> ${post.comments_count}</span>
+        </div>
+        <span class="post-cat-badge">${escHtml(post.category_display)}</span>
+        ${deleteBtn}
+    `;
+    return cell;
+}
+
+function bindCellEvents(cell, post) {
+    // Click to open post modal
+    cell.addEventListener('click', (e) => {
+        if (e.target.closest('.post-delete-btn')) return;
+        showLoadingModal(post.id);
+        openPostModal(post);
+    });
+    // Delete
+    const delBtn = cell.querySelector('.post-delete-btn');
+    if (delBtn) {
+        delBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            if (!confirm('Delete this post?')) return;
+            try {
+                const res = await fetch(URLS.deletePost(post.id), {
+                    method : 'POST',
+                    headers: csrfHeaders(),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    cell.remove();
+                    if (!postsGrid.querySelector('.post-cell')) {
+                        postsGrid.innerHTML = `<div class="posts-empty" id="emptyState">
+                            <i class="fas fa-images"></i>
+                            <p>No posts yet. Click <strong>Add Post</strong> to share your work!</p>
+                        </div>`;
+                    }
+                }
+            } catch (err) { console.error(err); }
+        });
+    }
+}
+
+/* Bind existing cells (server-rendered) */
+document.querySelectorAll('.post-cell[data-post-id]').forEach(cell => {
+    const postId = parseInt(cell.dataset.postId);
+    // Fetch post data lazily only when clicked
+    cell.addEventListener('click', async (e) => {
+        if (e.target.closest('.post-delete-btn')) return;
+        showLoadingModal(postId); // Instantiate skeleton loading box before fetch
+        try {
+            const res  = await fetch(`/api/profile/${PROFILE_USERNAME}/posts/`);
+            const data = await res.json();
+            if (data.success) {
+                const post = data.posts.find(p => p.id === postId);
+                if (post) openPostModal(post); // Will gracefully transition once media hits
+            }
+        } catch (err) { 
+            console.error(err); 
+            closeModal(postViewModal); 
+        }
+    });
+    // Delete button (server-rendered cells)
+    const delBtn = cell.querySelector('.post-delete-btn');
+    if (delBtn) {
+        delBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            if (!confirm('Delete this post?')) return;
+            try {
+                const res  = await fetch(URLS.deletePost(postId), {
+                    method : 'POST',
+                    headers: csrfHeaders(),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    cell.remove();
+                    if (!postsGrid.querySelector('.post-cell')) {
+                        postsGrid.innerHTML = `<div class="posts-empty">
+                            <i class="fas fa-images"></i>
+                            <p>No posts yet. Click <strong>Add Post</strong> to share your work!</p>
+                        </div>`;
+                    }
+                }
+            } catch (err) { console.error(err); }
+        });
+    }
+});
+
+/* ── Utility ─────────────────────────────────────────────────────────── */
+function escHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function timeAgo(date) {
+    const secs = Math.floor((Date.now() - date) / 1000);
+    if (secs < 60)  return 'just now';
+    if (secs < 3600) return Math.floor(secs / 60) + 'm';
+    if (secs < 86400) return Math.floor(secs / 3600) + 'h';
+    return Math.floor(secs / 86400) + 'd';
+}
+</script>
+{% endblock %}

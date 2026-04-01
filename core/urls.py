@@ -45,4 +45,13 @@ urlpatterns = [
     # API endpoints
     path('check-username/', views.check_username_availability, name='check_username'),
     path('check-email/', views.check_email_availability, name='check_email'),
+
+    # Profile & Posts URLs
+    path('profile/add-post/', views.add_post, name='add_post'),
+    path('profile/update-photo/', views.update_profile_photo, name='update_profile_photo'),
+    path('profile/delete-post/<int:post_id>/', views.delete_post, name='delete_post'),
+    path('profile/<str:username>/', views.profile_view, name='profile_view'),
+    path('api/post/<int:post_id>/like/', views.toggle_like, name='toggle_like'),
+    path('api/post/<int:post_id>/comment/', views.add_comment, name='add_comment'),
+    path('api/profile/<str:username>/posts/', views.filter_posts, name='filter_posts'),
 ]

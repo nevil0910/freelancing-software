@@ -3,7 +3,8 @@ from django.contrib import admin
 # Register your models here.
 from .models import (
     CustomUser, Job, PasswordResetOTP, SignupOTP,
-    ChatMessage, TypingStatus, JobSubmission, SubmissionFile, Earning, Review
+    ChatMessage, TypingStatus, JobSubmission, SubmissionFile, Earning, Review,
+    FreelancerProfile, Post, PostLike, Comment
 )
 
 admin.site.register(CustomUser)
@@ -65,3 +66,26 @@ class ReviewAdmin(admin.ModelAdmin):
 
 admin.site.register(TypingStatus)
 
+
+@admin.register(FreelancerProfile)
+class FreelancerProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'rating', 'contact_number')
+    search_fields = ('user__username', 'user__email')
+
+
+@admin.register(Post)
+class PostAdmin(admin.ModelAdmin):
+    list_display = ('user', 'category', 'created_at')
+    list_filter = ('category', 'created_at')
+    search_fields = ('user__username', 'caption')
+
+
+@admin.register(PostLike)
+class PostLikeAdmin(admin.ModelAdmin):
+    list_display = ('user', 'post', 'created_at')
+
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ('user', 'post', 'created_at')
+    search_fields = ('user__username', 'text')

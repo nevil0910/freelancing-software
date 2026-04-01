@@ -22,3 +22,7 @@ from .services.chat_api import (
     send_message, get_messages, mark_seen,
     set_typing, get_typing, get_chat_list, get_unread_count
 )
+from .services.profile import (
+    profile_view, update_profile_photo, add_post, delete_post,
+    toggle_like, add_comment, filter_posts
+)

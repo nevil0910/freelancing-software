@@ -6,7 +6,7 @@
             </div>
             
             <nav class="sidebar-nav">
-                <a href="#" class="nav-item">
+                <a href="{% url 'profile_view' request.user.username %}" class="nav-item{% if request.resolver_match.url_name == 'profile_view' %} active{% endif %}">
                     <i class="fas fa-user"></i>
                     <span class="nav-text">Profile</span>
                 </a>

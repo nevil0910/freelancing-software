@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 from datetime import timedelta
+from cloudinary.models import CloudinaryField
 
 # Custom user model with an extra field for user type (client or freelancer)
 class CustomUser(AbstractUser):
@@ -223,3 +224,119 @@ class Review(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+
+
+# ── Profile ──────────────────────────────────────────────────────────────────
+class FreelancerProfile(models.Model):
+    """Extended profile for freelancer users."""
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='freelancer_profile')
+    profile_photo = CloudinaryField('image', blank=True, null=True)
+    contact_number = models.CharField(max_length=20, blank=True, null=True)
+    bio = models.TextField(blank=True, null=True)
+    rating = models.FloatField(default=0)
+
+    def __str__(self):
+        return f"Profile of {self.user.username}"
+
+    @classmethod
+    def get_or_create_for(cls, user):
+        """Get or create profile for a user."""
+        profile, _ = cls.objects.get_or_create(user=user)
+        return profile
+
+
+# ── Post ─────────────────────────────────────────────────────────────────────
+class Post(models.Model):
+    """Portfolio post by a freelancer."""
+    CATEGORY_CHOICES = (
+        ('web_dev', 'Web Development'),
+        ('mobile_dev', 'Mobile Development'),
+        ('design', 'Graphic Design'),
+        ('writing', 'Content Writing'),
+        ('marketing', 'Digital Marketing'),
+        ('data_entry', 'Data Entry'),
+        ('seo', 'SEO & Analytics'),
+        ('video_edit', 'Video Editing'),
+        ('ai_ml', 'AI & Machine Learning'),
+        ('other', 'Other'),
+    )
+
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='posts')
+    media = CloudinaryField(resource_type='auto', blank=True, null=True) # Legacy single media
+    caption = models.TextField(blank=True, null=True)
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='other')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Post by {self.user.username} [{self.category}]"
+
+    @property
+    def likes_count(self):
+        return self.likes.count()
+
+    @property
+    def comments_count(self):
+        return self.comments.count()
+
+    @property
+    def has_multiple_media(self):
+        return self.media_files.count() > 1
+
+    @property
+    def first_media_info(self):
+        first_media = self.media_files.first()
+        if first_media:
+            url = first_media.media.url if hasattr(first_media.media, 'url') else str(first_media.media)
+            rt = getattr(first_media.media, 'resource_type', None)
+            if not rt:
+                rt = 'video' if any(url.lower().endswith(ext) for ext in ('.mp4', '.mov', '.webm')) else 'image'
+            return {'url': url, 'resource_type': rt}
+        elif self.media:
+            url = self.media.url if hasattr(self.media, 'url') else str(self.media)
+            rt = getattr(self.media, 'resource_type', None)
+            if not rt:
+                rt = 'video' if any(url.lower().endswith(ext) for ext in ('.mp4', '.mov', '.webm')) else 'image'
+            return {'url': url, 'resource_type': rt}
+        return None
+
+    class Meta:
+        ordering = ['-created_at']
+
+# ── PostMedia (Carousel Support) ───────────────────────────────────────────────
+class PostMedia(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='media_files')
+    media = CloudinaryField(resource_type='auto', blank=False, null=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"Media for post #{self.post.id}"
+
+
+# ── PostLike ──────────────────────────────────────────────────────────────────
+class PostLike(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='post_likes')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='likes')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = [('user', 'post')]
+
+    def __str__(self):
+        return f"{self.user.username} liked post #{self.post.id}"
+
+
+# ── Comment ───────────────────────────────────────────────────────────────────
+class Comment(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='post_comments')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"{self.user.username} commented on post #{self.post.id}"
