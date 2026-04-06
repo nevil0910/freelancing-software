@@ -214,6 +214,7 @@ def add_post(request):
             result = cloudinary.uploader.upload(
                 file,
                 resource_type=resource_type,
+                type='upload',  # Ensures public access
                 folder=f'freelancehub/posts/{request.user.username}',
             )
             public_id = result['public_id']

@@ -41,6 +41,7 @@ urlpatterns = [
     path('api/chat-list/', views.get_chat_list, name='chat_list'),
     path('api/unread-count/', views.get_unread_count, name='unread_count'),
     path('api/pending-reviews/', views.get_pending_reviews, name='pending_reviews'),
+    path('api/chat-file/<int:message_id>/download/', views.download_chat_file, name='download_chat_file'),
 
     # API endpoints
     path('check-username/', views.check_username_availability, name='check_username'),

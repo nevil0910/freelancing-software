@@ -1,6 +1,8 @@
 import json
 import cloudinary.uploader
-from django.http import JsonResponse
+import requests
+from urllib.parse import quote
+from django.http import JsonResponse, HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
@@ -64,6 +66,7 @@ def send_message(request, job_id):
             result = cloudinary.uploader.upload(
                 file,
                 resource_type=resource_type,
+                type='upload',  # Ensures public access (default for raw is 'private')
                 folder=f'freelancehub/chat/{job_id}'
             )
             file_url = result['secure_url']
@@ -320,3 +323,81 @@ def get_unread_count(request):
         'ongoing': ongoing_unread,
         'completed': completed_unread
     })
+
+
+@login_required
+@require_GET
+def download_chat_file(request, message_id):
+    """Proxy endpoint to download chat files from Cloudinary."""
+    import cloudinary.utils
+    import hashlib
+    import time
+    from django.conf import settings
+    
+    message = get_object_or_404(ChatMessage, id=message_id)
+    
+    # Check if user has access to this chat
+    if not can_access_chat(request.user, message.job):
+        return HttpResponseForbidden('Access denied')
+    
+    # Only allow download for non-image/video files
+    if not message.file_url or message.file_type in ['image', 'video']:
+        return HttpResponseForbidden('This file type cannot be downloaded this way')
+    
+    try:
+        # Extract public_id from Cloudinary URL
+        # URL format: https://res.cloudinary.com/cloud/raw/upload/v123/folder/file.pdf
+        url_parts = message.file_url.split('/upload/')
+        if len(url_parts) == 2:
+            path_after_upload = url_parts[1]
+            # Remove version number if present
+            if '/' in path_after_upload and path_after_upload.split('/')[0].startswith('v'):
+                public_id = '/'.join(path_after_upload.split('/')[1:])
+            else:
+                public_id = path_after_upload
+            
+            # Build Cloudinary API download URL with authentication
+            cloud_name = settings.CLOUDINARY_STORAGE['CLOUD_NAME']
+            api_key = settings.CLOUDINARY_STORAGE['API_KEY']
+            api_secret = settings.CLOUDINARY_STORAGE['API_SECRET']
+            
+            timestamp = int(time.time())
+            
+            # Create signature for authenticated download
+            # Format: attachment=true&public_id=xxx&timestamp=xxx&type=upload{api_secret}
+            to_sign = f"attachment=true&public_id={public_id}&timestamp={timestamp}&type=upload{api_secret}"
+            signature = hashlib.sha1(to_sign.encode('utf-8')).hexdigest()
+            
+            # Build authenticated download URL
+            download_url = (
+                f"https://api.cloudinary.com/v1_1/{cloud_name}/raw/download?"
+                f"api_key={api_key}&"
+                f"attachment=true&"
+                f"public_id={quote(public_id)}&"
+                f"signature={signature}&"
+                f"timestamp={timestamp}&"
+                f"type=upload"
+            )
+            
+            # Fetch from Cloudinary
+            response = requests.get(download_url, stream=True, timeout=30)
+            response.raise_for_status()
+            
+            # Return file to user
+            file_response = HttpResponse(
+                response.content, 
+                content_type=response.headers.get('Content-Type', 'application/octet-stream')
+            )
+            
+            filename = quote(message.file_name.encode('utf-8'))
+            file_response['Content-Disposition'] = f'attachment; filename="{message.file_name}"; filename*=UTF-8\'\'{filename}'
+            
+            return file_response
+        else:
+            return JsonResponse({'error': 'Invalid Cloudinary URL format'}, status=400)
+            
+    except requests.RequestException as e:
+        return JsonResponse({'error': f'Failed to download file: {str(e)}'}, status=500)
+    except Exception as e:
+        return JsonResponse({'error': f'Error processing file: {str(e)}'}, status=500)
+

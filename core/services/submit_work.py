@@ -73,6 +73,7 @@ def submit_work(request, job_id):
             result = cloudinary.uploader.upload(
                 f,
                 resource_type=resource_type,
+                type='upload',  # Ensures public access
                 folder=f'freelancehub/submissions/{job_id}'
             )
             sf = SubmissionFile.objects.create(

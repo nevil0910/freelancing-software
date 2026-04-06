@@ -20,7 +20,7 @@ from .services.submit_review import submit_review, get_pending_reviews
 from .services.earnings import earnings_view
 from .services.chat_api import (
     send_message, get_messages, mark_seen,
-    set_typing, get_typing, get_chat_list, get_unread_count
+    set_typing, get_typing, get_chat_list, get_unread_count, download_chat_file
 )
 from .services.profile import (
     profile_view, update_profile_photo, add_post, delete_post,

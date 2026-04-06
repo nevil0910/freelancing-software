@@ -328,7 +328,9 @@
             } else if (msg.file_type === 'video') {
                 content += '<div class="chat-msg-file"><video class="chat-msg-video" src="' + escapeHtml(msg.file_url) + '" onclick="window.openMediaViewer(\'' + escapeHtml(msg.file_url) + '\', \'' + escapeHtml(msg.file_name) + '\', \'video\')" poster=""></video><div style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin-top:4px;cursor:pointer;" onclick="window.openMediaViewer(\'' + escapeHtml(msg.file_url) + '\', \'' + escapeHtml(msg.file_name) + '\', \'video\')"><i class="fas fa-play-circle"></i> Play video</div></div>';
             } else {
-                content += '<div class="chat-msg-file"><a href="' + escapeHtml(msg.file_url) + '" download="' + escapeHtml(msg.file_name) + '" class="chat-msg-file-link"><i class="fas fa-file-download"></i> ' + escapeHtml(msg.file_name) + '</a></div>';
+                // For non-image/video files, use Django download proxy endpoint
+                const downloadUrl = '/api/chat-file/' + msg.id + '/download/';
+                content += '<div class="chat-msg-file"><a href="' + downloadUrl + '" class="chat-msg-file-link"><i class="fas fa-file-download"></i> ' + escapeHtml(msg.file_name) + '</a></div>';
             }
         }
 
