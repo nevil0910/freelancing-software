@@ -527,7 +527,7 @@ window.reviewSubmission = function (action) {
             } else if (msg.file_type === 'video') {
                 html += '<div class="chat-msg-file"><div style="font-size:0.78rem;color:#c084fc;cursor:pointer;" onclick="window.openMediaViewer(\'' + escHtml(msg.file_url) + '\',\'' + escHtml(msg.file_name) + '\',\'video\')"><i class="fas fa-play-circle"></i> ' + escHtml(msg.file_name) + '</div></div>';
             } else {
-                html += '<div class="chat-msg-file"><a href="' + escHtml(msg.file_url) + '" target="_blank" class="chat-msg-file-link"><i class="fas fa-file-download"></i> ' + escHtml(msg.file_name) + '</a></div>';
+                html += '<div class="chat-msg-file"><a href="' + escHtml(msg.file_url) + '" download="' + escHtml(msg.file_name) + '" class="chat-msg-file-link"><i class="fas fa-file-download"></i> ' + escHtml(msg.file_name) + '</a></div>';
             }
         }
         if (msg.text) html += '<div class="chat-msg-text">' + escHtml(msg.text) + '</div>';

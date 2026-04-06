@@ -33,7 +33,7 @@
     </button>
 
     {% include 'core/chat_widget.html' %}
-    <script src="{% static 'core/js/chat_widget.js' %}"></script>
+    <script src="{% static 'core/js/chat_widget.js' %}" async></script>
     {% endif %}
 
     {% block extra_js %}{% endblock %}

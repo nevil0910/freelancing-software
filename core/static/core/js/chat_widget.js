@@ -11,7 +11,7 @@
     const CFG = window.chatConfig;
     const POLL_MESSAGES = 3000;
     const POLL_TYPING = 2000;
-    const POLL_UNREAD = 10000;
+    const POLL_UNREAD = 15000;  // Reduced frequency: 15s instead of 10s
     let msgPollTimer = null;
     let typingPollTimer = null;
     let unreadPollTimer = null;
@@ -57,7 +57,13 @@
         const state = {
             open: widget.style.display !== 'none',
             jobId: currentJobId,
-            view: convoView.style.display !== 'none' ? 'convo' : 'list'
+            view: convoView.style.display !== 'none' ? 'convo' : 'list',
+            // Save conversation info for restoration
+            convoInfo: convoView.style.display !== 'none' ? {
+                name: convoName.textContent,
+                initial: convoAvatar.textContent,
+                jobTitle: convoJob.textContent
+            } : null
         };
         sessionStorage.setItem('fh_chat_state', JSON.stringify(state));
     }
@@ -70,7 +76,20 @@
             if (state.open) {
                 showWidget();
                 if (state.view === 'convo' && state.jobId) {
-                    openConversation(state.jobId);
+                    // Restore conversation with saved user info
+                    const info = state.convoInfo || {};
+                    // Don't pass "Loading..." as valid name
+                    const name = info.name !== 'Loading...' ? info.name : null;
+                    const initial = info.initial !== '?' ? info.initial : null;
+                    setTimeout(() => openConversation(
+                        state.jobId, 
+                        name, 
+                        initial, 
+                        info.jobTitle
+                    ), 100);
+                } else if (state.view === 'list') {
+                    // Defer chat list load to avoid blocking page render
+                    setTimeout(loadChatList, 100);
                 }
             }
         } catch (e) { /* ignore */ }
@@ -276,8 +295,10 @@
                 // Update conversation header if we have data
                 if (initial && data.messages.length > 0) {
                     const firstOther = data.messages.find(m => m.sender_id !== CFG.userId);
-                    if (firstOther && !convoName.textContent) {
+                    if (firstOther && (!convoName.textContent || convoName.textContent === 'Loading...')) {
                         convoName.textContent = firstOther.sender;
+                        convoAvatar.textContent = firstOther.sender.charAt(0).toUpperCase();
+                        titleEl.textContent = firstOther.sender;
                     }
                 }
 
@@ -307,7 +328,7 @@
             } else if (msg.file_type === 'video') {
                 content += '<div class="chat-msg-file"><video class="chat-msg-video" src="' + escapeHtml(msg.file_url) + '" onclick="window.openMediaViewer(\'' + escapeHtml(msg.file_url) + '\', \'' + escapeHtml(msg.file_name) + '\', \'video\')" poster=""></video><div style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin-top:4px;cursor:pointer;" onclick="window.openMediaViewer(\'' + escapeHtml(msg.file_url) + '\', \'' + escapeHtml(msg.file_name) + '\', \'video\')"><i class="fas fa-play-circle"></i> Play video</div></div>';
             } else {
-                content += '<div class="chat-msg-file"><a href="' + escapeHtml(msg.file_url) + '" target="_blank" class="chat-msg-file-link"><i class="fas fa-file-download"></i> ' + escapeHtml(msg.file_name) + '</a></div>';
+                content += '<div class="chat-msg-file"><a href="' + escapeHtml(msg.file_url) + '" download="' + escapeHtml(msg.file_name) + '" class="chat-msg-file-link"><i class="fas fa-file-download"></i> ' + escapeHtml(msg.file_name) + '</a></div>';
             }
         }
 
@@ -521,9 +542,6 @@
         }
     }
 
-    unreadPollTimer = setInterval(pollUnread, POLL_UNREAD);
-    pollUnread(); // Initial
-
     // ─── Media Viewer ───
     window.openMediaViewer = function (url, name, type) {
         if (!mediaViewer) return;
@@ -587,7 +605,21 @@
         currentJobId: function () { return currentJobId; }
     };
 
-    // ─── Restore State on Load ───
-    restoreState();
+    // ─── Initialize on DOMContentLoaded ───
+    function initialize() {
+        // Start unread badge polling (deferred to avoid blocking page load)
+        unreadPollTimer = setInterval(pollUnread, POLL_UNREAD);
+        setTimeout(pollUnread, 1000); // Initial poll after 1s
+        
+        // Restore previous session state
+        restoreState();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initialize);
+    } else {
+        // DOM already loaded, initialize after short delay
+        setTimeout(initialize, 50);
+    }
 
 })();

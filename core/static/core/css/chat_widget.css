@@ -395,17 +395,30 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.1);
+    padding: 10px 14px;
+    background: rgba(0, 0, 0, 0.35);  /* Darker background for better contrast */
     border-radius: 8px;
-    color: #c084fc;
+    color: #ffffff;  /* White text for better visibility */
     text-decoration: none;
-    font-size: 0.8rem;
-    transition: background 0.2s ease;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.chat-msg-file-link i {
+    color: #c084fc;  /* Purple icon for download */
+    font-size: 0.95rem;
 }
 
 .chat-msg-file-link:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(0, 0, 0, 0.5);
+    border-color: rgba(139, 92, 246, 0.4);
+    transform: translateY(-1px);
+}
+
+.chat-msg-file-link:hover i {
+    color: #e0c3fc;  /* Lighter purple on hover */
 }
 
 .chat-msg-meta {
