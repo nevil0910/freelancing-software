@@ -721,6 +721,11 @@ textarea.form-control {
     flex-shrink: 0;
 }
 
+.app-avatar-img {
+    object-fit: cover;
+    display: block;
+}
+
 .app-username {
     font-weight: 600;
     color: #e2e8f0;

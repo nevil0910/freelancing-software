@@ -12,6 +12,21 @@ class CustomUser(AbstractUser):
     )
     user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES, default='client')
 
+    @property
+    def avatar_initial(self):
+        source = self.first_name or self.username or '?'
+        return source[0].upper() if source else '?'
+
+    @property
+    def profile_photo_url(self):
+        try:
+            profile = self.freelancer_profile
+        except FreelancerProfile.DoesNotExist:
+            profile = None
+        if profile and profile.profile_photo:
+            return profile.profile_photo.url
+        return ''
+
 
 # OTP Model for Password Reset
 class PasswordResetOTP(models.Model):

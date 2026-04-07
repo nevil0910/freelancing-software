@@ -56,6 +56,11 @@ body {
     font-weight: 700;
 }
 
+.user-avatar-image {
+    object-fit: cover;
+    display: block;
+}
+
 .sidebar-user-info {
     display: flex;
     flex-direction: column;

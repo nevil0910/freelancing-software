@@ -1,5 +1,7 @@
 import json
 import cloudinary.uploader
+from io import BytesIO
+from PIL import Image
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
@@ -152,11 +154,25 @@ def update_profile_photo(request):
         return JsonResponse({'success': False, 'error': 'Only JPEG/PNG accepted.'}, status=400)
 
     try:
+        # Enforce backend resize + compression to keep avatar payload small and consistent.
+        image = Image.open(file)
+        if image.mode not in ('RGB', 'L'):
+            image = image.convert('RGB')
+        elif image.mode == 'L':
+            image = image.convert('RGB')
+
+        image = image.resize((256, 256), Image.Resampling.LANCZOS)
+        output = BytesIO()
+        image.save(output, format='JPEG', quality=85, optimize=True)
+        output.seek(0)
+
         result = cloudinary.uploader.upload(
-            file,
+            output,
             resource_type='image',
             folder='freelancehub/profiles',
-            transformation=[{'width': 256, 'height': 256, 'crop': 'fill', 'gravity': 'face'}],
+            public_id=f"user_{request.user.id}_avatar",
+            overwrite=True,
+            format='jpg',
         )
         public_id = result['public_id']
         url = result['secure_url']

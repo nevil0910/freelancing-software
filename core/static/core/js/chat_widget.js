@@ -52,6 +52,24 @@
 
     if (!widget || !chatBtn) return;
 
+    function renderAvatarHTML(avatarUrl, initial, className) {
+        if (avatarUrl) {
+            return '<img src="' + escapeHtml(avatarUrl) + '" alt="avatar" class="chat-avatar-img">';
+        }
+        return escapeHtml(initial || '?');
+    }
+
+    function setConvoAvatar(avatarUrl, initial) {
+        if (avatarUrl) {
+            convoAvatar.innerHTML = '<img src="' + escapeHtml(avatarUrl) + '" alt="avatar" class="chat-avatar-img">';
+            convoAvatar.dataset.avatarUrl = avatarUrl;
+        } else {
+            convoAvatar.dataset.avatarUrl = '';
+            convoAvatar.innerHTML = '';
+            convoAvatar.textContent = initial || '?';
+        }
+    }
+
     // ─── Session Persistence ───
     function saveState() {
         const state = {
@@ -61,8 +79,9 @@
             // Save conversation info for restoration
             convoInfo: convoView.style.display !== 'none' ? {
                 name: convoName.textContent,
-                initial: convoAvatar.textContent,
-                jobTitle: convoJob.textContent
+                initial: (convoName.textContent && convoName.textContent[0]) ? convoName.textContent[0].toUpperCase() : '?',
+                jobTitle: convoJob.textContent,
+                avatarUrl: convoAvatar.dataset.avatarUrl || ''
             } : null
         };
         sessionStorage.setItem('fh_chat_state', JSON.stringify(state));
@@ -85,7 +104,8 @@
                         state.jobId, 
                         name, 
                         initial, 
-                        info.jobTitle
+                        info.jobTitle,
+                        info.avatarUrl
                     ), 100);
                 } else if (state.view === 'list') {
                     // Defer chat list load to avoid blocking page render
@@ -192,7 +212,7 @@
             else completedCount += chat.unread_count;
 
             const html = '<div class="chat-list-item" data-job-id="' + chat.job_id + '" data-other="' + escapeHtml(chat.chat_label || chat.other_user) + '" data-initial="' + escapeHtml(chat.other_initial) + '" data-title="' + escapeHtml(chat.job_title) + '">' +
-                '<div class="chat-list-avatar">' + escapeHtml(chat.other_initial) + '</div>' +
+                '<div class="chat-list-avatar" data-avatar-url="' + escapeHtml(chat.other_avatar_url || '') + '">' + renderAvatarHTML(chat.other_avatar_url, chat.other_initial, 'chat-list-avatar') + '</div>' +
                 '<div class="chat-list-info">' +
                 '<div class="chat-list-name">' + escapeHtml(chat.chat_label || chat.other_user) + '</div>' +
                 '<div class="chat-list-preview">' + escapeHtml(preview) + '</div>' +
@@ -220,7 +240,8 @@
                 const other = this.dataset.other;
                 const initial = this.dataset.initial;
                 const jobTitle = this.dataset.title;
-                openConversation(jobId, other, initial, jobTitle);
+                const avatarUrl = this.querySelector('.chat-list-avatar')?.dataset.avatarUrl || '';
+                openConversation(jobId, other, initial, jobTitle, avatarUrl);
             });
         });
     }
@@ -236,7 +257,7 @@
     }
 
     // ─── Open Conversation ───
-    function openConversation(jobId, otherUser, otherInitial, jobTitle) {
+    function openConversation(jobId, otherUser, otherInitial, jobTitle, otherAvatarUrl) {
         currentJobId = jobId;
         lastMsgId = 0;
         messagesEl.innerHTML = '';
@@ -246,10 +267,10 @@
             // Will get info from loaded messages or list
             convoName.textContent = 'Loading...';
             convoJob.textContent = '';
-            convoAvatar.textContent = '?';
+            setConvoAvatar('', '?');
         } else {
             convoName.textContent = otherUser;
-            convoAvatar.textContent = otherInitial;
+            setConvoAvatar(otherAvatarUrl, otherInitial);
             convoJob.textContent = jobTitle;
         }
 
@@ -297,7 +318,7 @@
                     const firstOther = data.messages.find(m => m.sender_id !== CFG.userId);
                     if (firstOther && (!convoName.textContent || convoName.textContent === 'Loading...')) {
                         convoName.textContent = firstOther.sender;
-                        convoAvatar.textContent = firstOther.sender.charAt(0).toUpperCase();
+                        setConvoAvatar(firstOther.sender_avatar_url, firstOther.sender_initial || firstOther.sender.charAt(0).toUpperCase());
                         titleEl.textContent = firstOther.sender;
                     }
                 }

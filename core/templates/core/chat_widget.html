@@ -84,6 +84,8 @@
     window.chatConfig = {
         userId: {{ user.id }},
         username: "{{ user.username|escapejs }}",
+        userAvatarUrl: "{{ user.profile_photo_url|default:''|escapejs }}",
+        userAvatarInitial: "{{ user.avatar_initial|escapejs }}",
         userType: "{{ user.user_type|escapejs }}",
         csrfToken: "{{ csrf_token }}",
         urls: {
@@ -93,4 +95,3 @@
     };
 </script>
 {% endif %}
-

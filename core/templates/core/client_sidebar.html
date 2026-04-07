@@ -1,7 +1,11 @@
 <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <div class="user-avatar-small">{{ user.first_name|first|upper }}</div>
+                {% if user.profile_photo_url %}
+                <img src="{{ user.profile_photo_url }}" alt="{{ user.username }} avatar" class="user-avatar-small user-avatar-image">
+                {% else %}
+                <div class="user-avatar-small">{{ user.avatar_initial }}</div>
+                {% endif %}
                 <div class="sidebar-user-info">
                     <span class="sidebar-username">{{ user.first_name }}</span>
                     <a href="{% url 'edit_profile' %}" class="sidebar-edit-link">

@@ -92,6 +92,8 @@ def send_message(request, job_id):
             'id': msg.id,
             'sender': msg.sender.username,
             'sender_id': msg.sender.id,
+            'sender_initial': msg.sender.avatar_initial,
+            'sender_avatar_url': msg.sender.profile_photo_url,
             'text': msg.message,
             'file_url': msg.file_url,
             'file_name': msg.file_name,
@@ -116,7 +118,7 @@ def get_messages(request, job_id):
     except (ValueError, TypeError):
         after_id = 0
 
-    messages_qs = ChatMessage.objects.filter(job=job)
+    messages_qs = ChatMessage.objects.filter(job=job).select_related('sender__freelancer_profile')
     if after_id > 0:
         messages_qs = messages_qs.filter(id__gt=after_id)
 
@@ -126,6 +128,8 @@ def get_messages(request, job_id):
             'id': msg.id,
             'sender': msg.sender.username,
             'sender_id': msg.sender.id,
+            'sender_initial': msg.sender.avatar_initial,
+            'sender_avatar_url': msg.sender.profile_photo_url,
             'text': msg.message,
             'file_url': msg.file_url,
             'file_name': msg.file_name,
@@ -216,7 +220,7 @@ def get_chat_list(request):
         jobs = Job.objects.filter(
             client=user,
             status__in=['IN_PROGRESS', 'SUBMITTED', 'COMPLETED']
-        ).select_related('hired_freelancer')
+        ).select_related('hired_freelancer__freelancer_profile')
     else:
         # Include jobs where hired_freelancer=user OR has accepted application
         job_ids_via_app = Application.objects.filter(
@@ -226,7 +230,7 @@ def get_chat_list(request):
         ).values_list('job_id', flat=True)
         jobs = Job.objects.filter(
             id__in=job_ids_via_app
-        ).select_related('client', 'hired_freelancer')
+        ).select_related('client', 'hired_freelancer__freelancer_profile')
 
     chat_list = []
     for job in jobs:
@@ -246,7 +250,7 @@ def get_chat_list(request):
             if not other_user:
                 acc_app = Application.objects.filter(
                     job=job, status='ACCEPTED'
-                ).select_related('freelancer').first()
+                ).select_related('freelancer__freelancer_profile').first()
                 other_user = acc_app.freelancer if acc_app else None
         else:
             other_user = job.client
@@ -269,6 +273,7 @@ def get_chat_list(request):
             'job_status': job.status,
             'other_user': other_display_name,
             'other_initial': other_initial,
+            'other_avatar_url': other_user.profile_photo_url if other_user else '',
             'unread_count': unread_count,
             'last_message': {
                 'text': last_msg.message if last_msg else None,
@@ -400,4 +405,3 @@ def download_chat_file(request, message_id):
         return JsonResponse({'error': f'Failed to download file: {str(e)}'}, status=500)
     except Exception as e:
         return JsonResponse({'error': f'Error processing file: {str(e)}'}, status=500)
-

@@ -102,6 +102,10 @@ if (IS_OWNER) {
                         else wrap.prepend(imgEl);
                     }
                     imgEl.src = data.url + '?t=' + Date.now();
+                    const sidebarAvatar = document.querySelector('.user-avatar-small');
+                    if (sidebarAvatar && sidebarAvatar.tagName === 'IMG') {
+                        sidebarAvatar.src = data.url + '?t=' + Date.now();
+                    }
                     closeModal(cropModal);
                     cropper.destroy(); cropper = null;
                     photoFileInput.value = '';

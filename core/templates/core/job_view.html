@@ -203,7 +203,11 @@
                             {% for app in applications %}
                                 {% if app.status == 'ACCEPTED' %}
                                 <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
-                                    <div class="app-avatar">{{ app.freelancer.first_name|first|upper }}</div>
+                                    {% if app.freelancer.profile_photo_url %}
+                                    <img src="{{ app.freelancer.profile_photo_url }}" alt="{{ app.freelancer.username }} avatar" class="app-avatar app-avatar-img">
+                                    {% else %}
+                                    <div class="app-avatar">{{ app.freelancer.avatar_initial }}</div>
+                                    {% endif %}
                                     <div>
                                         <div class="app-username">{{ app.freelancer.username }}</div>
                                         <div class="app-date">Accepted {{ app.updated_at|date:"M d, Y" }}</div>
@@ -577,7 +581,11 @@
                     <div class="application-item {{ app.status|lower }}" id="appItem{{ app.id }}">
                         <div class="app-header">
                             <div class="app-freelancer-info">
-                                <div class="app-avatar">{{ app.freelancer.first_name|first|upper }}</div>
+                                {% if app.freelancer.profile_photo_url %}
+                                <img src="{{ app.freelancer.profile_photo_url }}" alt="{{ app.freelancer.username }} avatar" class="app-avatar app-avatar-img">
+                                {% else %}
+                                <div class="app-avatar">{{ app.freelancer.avatar_initial }}</div>
+                                {% endif %}
                                 <div>
                                     <div class="app-username">{{ app.freelancer.username }}</div>
                                     <div class="app-date">Applied {{ app.created_at|date:"M d, Y" }}</div>
@@ -677,4 +685,3 @@
     </script>
     <script src="{% static 'core/js/job_view.js' %}"></script>
 {% endblock %}
-

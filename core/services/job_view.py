@@ -28,7 +28,7 @@ def job_view(request, job_id):
 
     if user.user_type == 'client':
         job = get_object_or_404(Job, id=job_id, client=user)
-        applications = job.applications.select_related('freelancer').all()
+        applications = job.applications.select_related('freelancer__freelancer_profile').all()
         has_applied = False
         user_application = None
         if job.status in ('IN_PROGRESS', 'SUBMITTED'):
@@ -82,7 +82,7 @@ def job_view(request, job_id):
     # Get the actual hired freelancer (via field or accepted application)
     actual_freelancer = job.hired_freelancer
     if not actual_freelancer:
-        acc_app = Application.objects.filter(job=job, status='ACCEPTED').select_related('freelancer').first()
+        acc_app = Application.objects.filter(job=job, status='ACCEPTED').select_related('freelancer__freelancer_profile').first()
         actual_freelancer = acc_app.freelancer if acc_app else None
 
     if actual_freelancer:
@@ -111,5 +111,4 @@ def job_view(request, job_id):
         'actual_freelancer': actual_freelancer,
     }
     return render(request, 'core/job_view.html', context)
-
 
