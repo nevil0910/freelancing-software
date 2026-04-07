@@ -3,6 +3,9 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.shortcuts import render
 from django.db import transaction
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from ..models import CustomUser, FreelancerProfile, EmailChangeOTP
 from .email import generate_otp, send_email_change_otp, send_email_async
 
@@ -184,4 +187,37 @@ def update_profile(request):
         
     except Exception as e:
         return JsonResponse({'success': False, 'error': f'Failed to update profile: {str(e)}'}, status=500)
+
+
+@login_required
+@require_POST
+def change_password(request):
+    """Change password from edit profile page."""
+    user = request.user
+    current_password = request.POST.get('current_password', '')
+    new_password = request.POST.get('new_password', '')
+    confirm_password = request.POST.get('confirm_password', '')
+
+    if not current_password or not new_password or not confirm_password:
+        return JsonResponse({'success': False, 'error': 'All password fields are required.'}, status=400)
+
+    if not user.check_password(current_password):
+        return JsonResponse({'success': False, 'error': 'Current password is incorrect.'}, status=400)
+
+    if new_password != confirm_password:
+        return JsonResponse({'success': False, 'error': 'New password and confirm password do not match.'}, status=400)
+
+    if current_password == new_password:
+        return JsonResponse({'success': False, 'error': 'New password must be different from current password.'}, status=400)
+
+    try:
+        validate_password(new_password, user=user)
+    except ValidationError as e:
+        return JsonResponse({'success': False, 'error': ' '.join(e.messages)}, status=400)
+
+    user.set_password(new_password)
+    user.save(update_fields=['password'])
+    update_session_auth_hash(request, user)
+
+    return JsonResponse({'success': True, 'message': 'Password updated successfully.'})
 

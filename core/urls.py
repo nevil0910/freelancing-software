@@ -50,6 +50,7 @@ urlpatterns = [
     # Profile & Posts URLs
     path('profile/edit/', views.edit_profile_view, name='edit_profile'),
     path('profile/update/', views.update_profile, name='update_profile'),
+    path('profile/change-password/', views.change_password, name='change_password'),
     path('profile/send-email-otp/', views.send_email_change_otp_view, name='send_email_otp'),
     path('profile/verify-email-otp/', views.verify_email_change_otp_view, name='verify_email_otp'),
     path('profile/add-post/', views.add_post, name='add_post'),

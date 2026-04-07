@@ -6,6 +6,7 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'core/css/dashboard.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/edit_profile.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
 {% endblock %}
 
 {% block page_container_class %}dashboard-container{% endblock %}
@@ -29,6 +30,20 @@
         <h1><i class="fas fa-user-edit"></i> Edit Profile</h1>
          </div>
         <div class="edit-profile-card">
+            <div class="profile-photo-section">
+                <div class="profile-avatar-wrap">
+                    {% if user.profile_photo_url %}
+                    <img src="{{ user.profile_photo_url }}" alt="{{ user.username }} profile photo" class="profile-avatar" id="profileAvatarImg">
+                    {% else %}
+                    <div class="profile-avatar-initials" id="profileAvatarInitials">{{ user.avatar_initial }}</div>
+                    {% endif %}
+                    <button class="edit-photo-btn" id="editPhotoBtn" title="Edit profile photo" type="button">
+                        <i class="fas fa-camera"></i>
+                    </button>
+                    <input type="file" id="photoFileInput" accept="image/jpeg,image/png" style="display:none;">
+                </div>
+            </div>
+
             <form id="editProfileForm">
                 {% csrf_token %}
                 
@@ -128,6 +143,60 @@
                 </div>
                 {% endif %}
 
+                <div class="password-section">
+                    <h3><i class="fas fa-lock"></i> Reset Password</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="currentPassword">Current Password <span class="required">*</span></label>
+                            <div class="password-input-wrapper">
+                                <input type="password" id="currentPassword" name="current_password" placeholder="Enter current password">
+                                <button type="button" class="toggle-password" aria-label="Toggle current password">
+                                    <i class="fa-solid fa-eye"></i>
+                                    <i class="fa-solid fa-eye-slash" style="display:none;"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="newPassword">New Password <span class="required">*</span></label>
+                            <div class="password-input-wrapper">
+                                <input type="password" id="newPassword" name="new_password" placeholder="Enter new password">
+                                <button type="button" class="toggle-password" aria-label="Toggle new password">
+                                    <i class="fa-solid fa-eye"></i>
+                                    <i class="fa-solid fa-eye-slash" style="display:none;"></i>
+                                </button>
+                                <div class="password-tooltip" id="passwordTooltip">
+                                    <div class="tooltip-arrow"></div>
+                                    <div class="tooltip-content">
+                                        <div class="tooltip-title">Password Requirements</div>
+                                        <div class="requirement" id="req-length"><span class="requirement-icon">✗</span><span>At least 8 characters</span></div>
+                                        <div class="requirement" id="req-uppercase"><span class="requirement-icon">✗</span><span>One uppercase letter (A-Z)</span></div>
+                                        <div class="requirement" id="req-number"><span class="requirement-icon">✗</span><span>One number (0-9)</span></div>
+                                        <div class="requirement" id="req-special"><span class="requirement-icon">✗</span><span>One special character (!@#$%^&*)</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirm New Password <span class="required">*</span></label>
+                            <div class="password-input-wrapper">
+                                <input type="password" id="confirmPassword" name="confirm_password" placeholder="Confirm new password">
+                                <button type="button" class="toggle-password" aria-label="Toggle confirm password">
+                                    <i class="fa-solid fa-eye"></i>
+                                    <i class="fa-solid fa-eye-slash" style="display:none;"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="password-footer">
+                        <button type="button" class="btn-save btn-password" id="changePasswordBtn">
+                            <i class="fas fa-key"></i> Update Password
+                        </button>
+                        <a href="{% url 'forgot_password' %}" class="forgot-password-link">Forgot password?</a>
+                    </div>
+                </div>
+
                 <div class="form-actions">
                     <a href="{% url 'dashboard' %}" class="btn-cancel">
                         <i class="fas fa-times"></i> Cancel
@@ -146,8 +215,27 @@
         </div>
     </div>
 </main>
+
+<div class="modal-overlay" id="cropModal">
+    <div class="modal-card">
+        <button class="modal-close" id="cropModalClose" type="button"><i class="fas fa-times"></i></button>
+        <h2 class="modal-title"><i class="fas fa-crop-alt"></i> Crop Profile Photo</h2>
+        <div class="crop-container">
+            <img id="cropImage" src="" alt="Crop preview">
+        </div>
+        <div class="upload-spinner" id="cropSpinner">
+            <div class="spinner-ring"></div> Uploading...
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" id="cropCancelBtn" type="button">Cancel</button>
+            <button class="btn-confirm" id="cropConfirmBtn" type="button"><i class="fas fa-check"></i> Save Photo</button>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'core/js/account_validation.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js" defer></script>
 <script src="{% static 'core/js/edit_profile.js' %}"></script>
 {% endblock %}

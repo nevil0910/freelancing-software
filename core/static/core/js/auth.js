@@ -162,107 +162,37 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Password validation function
+// Re-export shared utilities for backward compatibility
 function validatePassword(password) {
-    const requirements = {
-        length: password.length >= 8,
-        uppercase: /[A-Z]/.test(password),
-        number: /[0-9]/.test(password),
-        special: /[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\\/`~;]/.test(password)
-    };
-    
-    // Update UI for each requirement
-    updateRequirement('req-length', requirements.length);
-    updateRequirement('req-uppercase', requirements.uppercase);
-    updateRequirement('req-number', requirements.number);
-    updateRequirement('req-special', requirements.special);
-    
-    return Object.values(requirements).every(Boolean);
+    return window.AccountValidation.validatePassword(password);
 }
 
 function isPasswordValid(password) {
-    return password.length >= 8 &&
-           /[A-Z]/.test(password) &&
-           /[0-9]/.test(password) &&
-           /[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\\/`~;]/.test(password);
+    return window.AccountValidation.isPasswordValid(password);
 }
 
-function updateRequirement(elementId, isValid) {
-    const element = document.getElementById(elementId);
-    if (element) {
-        const icon = element.querySelector('.requirement-icon');
-        if (isValid) {
-            element.classList.add('valid');
-            element.classList.remove('invalid');
-            icon.textContent = '✓';
-        } else {
-            element.classList.add('invalid');
-            element.classList.remove('valid');
-            icon.textContent = '✗';
-        }
-    }
-}
-
-// Check username availability via AJAX
 function checkUsernameAvailability(username) {
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    
-    fetch('/check-username/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-CSRFToken': csrftoken
-        },
-        body: `username=${encodeURIComponent(username)}`
-    })
-        .then(response => response.json())
-        .then(data => {
-            const usernameAvailability = document.getElementById('usernameAvailability');
-            if (data.available) {
-                usernameAvailability.textContent = '✓ Username is available';
-                usernameAvailability.classList.remove('checking', 'taken');
-                usernameAvailability.classList.add('available');
-            } else {
-                usernameAvailability.textContent = '✗ Username is already taken';
-                usernameAvailability.classList.remove('checking', 'available');
-                usernameAvailability.classList.add('taken');
-            }
-        })
+    const usernameAvailability = document.getElementById('usernameAvailability');
+    return window.AccountValidation
+        .checkUsernameAvailability(username, csrftoken, usernameAvailability)
         .catch(error => {
             console.error('Error checking username:', error);
-            const usernameAvailability = document.getElementById('usernameAvailability');
-            usernameAvailability.classList.remove('show', 'checking', 'available', 'taken');
+            if (usernameAvailability) {
+                usernameAvailability.classList.remove('show', 'checking', 'available', 'taken');
+            }
         });
 }
 
-// Check email availability via AJAX
 function checkEmailAvailability(email) {
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    
-    fetch('/check-email/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-CSRFToken': csrftoken
-        },
-        body: `email=${encodeURIComponent(email)}`
-    })
-        .then(response => response.json())
-        .then(data => {
-            const emailAvailability = document.getElementById('emailAvailability');
-            if (data.available) {
-                emailAvailability.textContent = '✓ Email is available';
-                emailAvailability.classList.remove('checking', 'taken');
-                emailAvailability.classList.add('available');
-            } else {
-                emailAvailability.textContent = '✗ Email is already registered';
-                emailAvailability.classList.remove('checking', 'available');
-                emailAvailability.classList.add('taken');
-            }
-        })
+    const emailAvailability = document.getElementById('emailAvailability');
+    return window.AccountValidation
+        .checkEmailAvailability(email, csrftoken, emailAvailability)
         .catch(error => {
             console.error('Error checking email:', error);
-            const emailAvailability = document.getElementById('emailAvailability');
-            emailAvailability.classList.remove('show', 'checking', 'available', 'taken');
+            if (emailAvailability) {
+                emailAvailability.classList.remove('show', 'checking', 'available', 'taken');
+            }
         });
 }

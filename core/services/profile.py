@@ -143,9 +143,6 @@ def profile_view(request, username):
 @require_POST
 def update_profile_photo(request):
     """Upload a cropped profile photo (sent as file blob) to Cloudinary."""
-    if request.user.user_type != 'freelancer':
-        return JsonResponse({'success': False, 'error': 'Freelancers only.'}, status=403)
-
     file = request.FILES.get('photo')
     if not file:
         return JsonResponse({'success': False, 'error': 'No file provided.'}, status=400)
