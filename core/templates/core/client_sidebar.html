@@ -27,6 +27,9 @@
                     <i class="fas fa-briefcase"></i>
                     <span class="nav-text">Posted Jobs</span>
                 </a>
+                <a href="{% url 'review_proposals' %}" class="nav-item{% if request.resolver_match.url_name == 'review_proposals' %} active{% endif %}">
+                    <i class="fas fa-file-alt"></i>
+                    <span class="nav-text">Review Proposals</span>
             </nav>
             
             <div class="sidebar-footer">

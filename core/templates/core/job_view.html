@@ -6,6 +6,7 @@
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'core/css/dashboard.css' %}">
     <link rel="stylesheet" href="{% static 'core/css/job_view.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/star_rating.css' %}">
 {% endblock %}
 
 {% block page_container_class %}dashboard-container{% endblock %}
@@ -214,10 +215,14 @@
                                     </div>
                                     {% if freelancer_rating %}
                                     <span class="app-rating" style="margin-left:auto;">
-                                        <i class="fas fa-star" style="color:#fbbf24;"></i> {{ freelancer_rating.average }}
+                                        <span class="rating-stars app-rating-stars" data-rating="{{ freelancer_rating.average }}"></span>
+                                        {{ freelancer_rating.average }}
                                         <span style="font-size:0.7rem;color:rgba(255,255,255,0.35);">({{ freelancer_rating.count }})</span>
                                     </span>
                                     {% endif %}
+                                    <a href="{% url 'profile_view' app.freelancer.username %}" class="btn-profile" style="margin-left:10px;">
+                                        <i class="fas fa-user"></i> Profile
+                                    </a>
                                 </div>
                                 {% endif %}
                             {% endfor %}
@@ -290,7 +295,7 @@
                         {% else %}
                         <!-- OPEN status: full edit + applications + danger zone -->
 
-                        {% if job.status != 'CLOSED' %}
+                        {% if job.status == 'OPEN' %}
                         <div class="panel-card">
                             <p class="panel-card-title">
                                 <i class="fas fa-users"></i> Applications
@@ -300,6 +305,13 @@
                                 View Applications
                                 <span class="app-count-badge" id="appCountBadge">{{ applications|length }}</span>
                             </button>
+                        </div>
+                        {% else %}
+                        <div class="panel-card">
+                            <p class="panel-card-title">
+                                <i class="fas fa-lock"></i> Applications
+                            </p>
+                            <span class="app-status-badge app-status-rejected">Closed</span>
                         </div>
                         {% endif %}
 
@@ -592,6 +604,14 @@
                                 </div>
                             </div>
                             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                                {% if app.review_avg > 0 %}
+                                <span class="app-rating-label">
+                                    <i class="fas fa-star"></i> {{ app.review_avg }}
+                                </span>
+                                {% endif %}
+                                <a href="{% url 'profile_view' app.freelancer.username %}" class="btn-profile">
+                                    <i class="fas fa-user"></i> Profile
+                                </a>
                                 <span class="app-status-badge app-status-{{ app.status|lower }}" id="appStatus{{ app.id }}">
                                     {{ app.get_status_display }}
                                 </span>
@@ -683,5 +703,6 @@
             showReview: {% if user.user_type == 'client' and job.status == 'COMPLETED' and not has_review %}true{% else %}false{% endif %}
         };
     </script>
+    <script src="{% static 'core/js/star_rating.js' %}"></script>
     <script src="{% static 'core/js/job_view.js' %}"></script>
 {% endblock %}

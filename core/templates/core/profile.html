@@ -6,6 +6,7 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'core/css/dashboard.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/profile.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/star_rating.css' %}">
 <!-- Cropper.js -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
 {% endblock %}
@@ -47,14 +48,7 @@
             <h1 class="profile-fullname">{{ profile_user.get_full_name|default:profile_user.username }}</h1>
 
             <div class="profile-rating">
-                <span class="rating-stars">
-                    {% with r=profile.rating %}
-                    {% if r >= 1 %}<i class="fas fa-star"></i>{% else %}<i class="far fa-star"></i>{% endif %}
-                    {% if r >= 2 %}<i class="fas fa-star"></i>{% else %}<i class="far fa-star"></i>{% endif %}
-                    {% if r >= 3 %}<i class="fas fa-star"></i>{% else %}<i class="far fa-star"></i>{% endif %}
-                    {% if r >= 4 %}<i class="fas fa-star"></i>{% else %}<i class="far fa-star"></i>{% endif %}
-                    {% if r >= 5 %}<i class="fas fa-star"></i>{% else %}<i class="far fa-star"></i>{% endif %}
-                    {% endwith %}
+                <span class="rating-stars" data-rating="{% if profile.rating %}{{ profile.rating }}{% else %}0{% endif %}">
                 </span>
                 <span class="rating-value">
                     {% if profile.rating %}{{ profile.rating }}{% else %}No ratings yet{% endif %}
@@ -69,6 +63,11 @@
                 {% if is_owner %}
                 <button class="btn-add-post" id="openAddPostModal">
                     <i class="fas fa-plus"></i> Add Post
+                </button>
+                {% endif %}
+                {% if reviews %}
+                <button class="btn-reviews" id="openReviewsModal">
+                    <i class="fas fa-comments"></i> Reviews
                 </button>
                 {% endif %}
             </div>
@@ -249,6 +248,33 @@
 
 </div>
 
+<div class="modal-overlay" id="reviewsModal">
+    <div class="modal-card reviews-modal-card">
+        <button class="modal-close" id="reviewsModalClose"><i class="fas fa-times"></i></button>
+        <h2 class="modal-title"><i class="fas fa-star"></i> Reviews</h2>
+        <div class="reviews-list">
+            {% for review in reviews %}
+            <div class="review-item">
+                <div class="review-item-top">
+                    <div>
+                        <div class="review-client">
+                            By {{ review.client.get_full_name|default:review.client.username }}
+                        </div>
+                        <div class="review-date">{{ review.created_at|date:"M d, Y" }}</div>
+                    </div>
+                    <div class="rating-stars review-stars" data-rating="{{ review.rating }}"></div>
+                </div>
+                <p class="review-comment">
+                    {{ review.comment|default:"No written comment provided." }}
+                </p>
+            </div>
+            {% empty %}
+            <p class="reviews-empty">No reviews yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 
@@ -272,6 +298,7 @@
     };
 </script>
 
+<script src="{% static 'core/js/star_rating.js' %}" defer></script>
 <script src="{% static 'core/js/profile.js' %}" defer></script>
 
 {% endblock %}

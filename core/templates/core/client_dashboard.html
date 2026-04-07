@@ -34,8 +34,8 @@
                         <i class="fas fa-file-alt"></i>
                     </div>
                     <div class="stat-content">
-                        <h3 class="stat-number">{{ proposals_received }}</h3>
-                        <p class="stat-label">Proposals Received</p>
+                        <h3 class="stat-number budget" data-amount="{{ total_spent }}">₹{{ total_spent }}</h3>
+                        <p class="stat-label">Total Spent</p>
                     </div>
                 </div>
                 
@@ -51,11 +51,11 @@
                 
                 <div class="stat-card">
                     <div class="stat-icon">
-                        <i class="fas fa-users"></i>
+                        <i class="fas fa-check-double"></i>
                     </div>
                     <div class="stat-content">
-                        <h3 class="stat-number">{{ hired_freelancers }}</h3>
-                        <p class="stat-label">Hired Freelancers</p>
+                        <h3 class="stat-number">{{ completed_projects }}</h3>
+                        <p class="stat-label">Completed Projects</p>
                     </div>
                 </div>
             </div>
@@ -73,11 +73,11 @@
                         <h3>View Posted Jobs</h3>
                         <p>Manage your existing job postings</p>
                     </a>
-                    <div class="action-card">
+                    <a href="{% url 'review_proposals' %}" class="action-card" style="text-decoration: none; color: inherit;">
                         <i class="fas fa-file-alt"></i>
                         <h3>Review Proposals</h3>
                         <p>Check proposals from freelancers</p>
-                    </div>
+                    </a>
                 </div>
             </div>
         </main>
@@ -85,6 +85,25 @@
 
 {% block extra_js %}
     <script>
+        function formatINR(amount) {
+            const num = parseFloat(amount);
+            if (num < 1000) return `₹${num.toFixed(0)}`;
+            if (num < 100000) {
+                const t = num / 1000;
+                return `₹${t % 1 === 0 ? t.toFixed(0) : t.toFixed(1)}k`;
+            }
+            if (num < 10000000) {
+                const l = num / 100000;
+                return `₹${l % 1 === 0 ? l.toFixed(0) : l.toFixed(2)} L`;
+            }
+            const c = num / 10000000;
+            return `₹${c % 1 === 0 ? c.toFixed(0) : c.toFixed(2)} Cr`;
+        }
+
+        document.querySelectorAll('.budget[data-amount]').forEach(function (el) {
+            el.textContent = formatINR(el.getAttribute('data-amount'));
+        });
+
         // Prevent back navigation to cached login page
         (function() {
             history.pushState(null, null, location.href);

@@ -23,11 +23,20 @@ def accept_application(request, application_id):
     application.status = 'ACCEPTED'
     application.save()
 
-    # Set the job to IN_PROGRESS when a freelancer is accepted
+    # Set the job to IN_PROGRESS only when required seats are filled.
     job = application.job
     if job.status == 'OPEN':
-        job.status = 'IN_PROGRESS'
-        job.hired_freelancer = application.freelancer
-        job.save()
+        accepted_count = job.applications.filter(status='ACCEPTED').count()
+        if accepted_count >= max(1, job.required_freelancers):
+            job.status = 'IN_PROGRESS'
+            if not job.hired_freelancer:
+                job.hired_freelancer = application.freelancer
+            job.save()
 
-    return JsonResponse({'success': True, 'status': 'ACCEPTED', 'message': 'Application accepted. Job is now In Progress.'})
+    if job.status == 'IN_PROGRESS':
+        message = 'Application accepted. Job is now In Progress.'
+    else:
+        pending = max(1, job.required_freelancers) - job.applications.filter(status='ACCEPTED').count()
+        message = f'Application accepted. Need {pending} more accepted application(s) to start.'
+
+    return JsonResponse({'success': True, 'status': 'ACCEPTED', 'message': message})

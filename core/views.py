@@ -4,6 +4,7 @@ from .services.password_reset import forgot_password, verify_otp, reset_password
 from .services.availability import check_username_availability, check_email_availability
 from .services.post_job import post_job
 from .services.my_jobs import my_jobs
+from .services.review_proposals import review_proposals, review_job_applications
 from .services.close_job import close_job
 from .services.job_view import job_view
 from .services.apply_job import apply_job

@@ -15,6 +15,8 @@ urlpatterns = [
     # Job Management URLs
     path('post-job/', views.post_job, name='post_job'),
     path('my-jobs/', views.my_jobs, name='my_jobs'),
+    path('review-proposals/', views.review_proposals, name='review_proposals'),
+    path('review-proposals/<int:job_id>/applications/', views.review_job_applications, name='review_job_applications'),
     path('close-job/<int:job_id>/', views.close_job, name='close_job'),
     path('browse-jobs/', views.browse_jobs, name='browse_jobs'),
     path('job/<int:job_id>/', views.job_view, name='job_view'),

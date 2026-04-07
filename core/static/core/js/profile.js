@@ -810,3 +810,30 @@ function timeAgo(date) {
     if (secs < 86400) return Math.floor(secs / 3600) + 'h';
     return Math.floor(secs / 86400) + 'd';
 }
+
+if (typeof renderStarRating === 'function') {
+    document.querySelectorAll('.rating-stars[data-rating], .review-stars[data-rating]').forEach((el) => {
+        const rating = parseFloat(el.getAttribute('data-rating') || '0');
+        if (rating > 0) {
+            renderStarRating(rating, el);
+        }
+    });
+}
+
+const openReviewsModalBtn = document.getElementById('openReviewsModal');
+const reviewsModal = document.getElementById('reviewsModal');
+const reviewsModalClose = document.getElementById('reviewsModalClose');
+
+if (openReviewsModalBtn && reviewsModal) {
+    openReviewsModalBtn.addEventListener('click', () => openModal(reviewsModal));
+}
+
+if (reviewsModalClose && reviewsModal) {
+    reviewsModalClose.addEventListener('click', () => closeModal(reviewsModal));
+}
+
+if (reviewsModal) {
+    reviewsModal.addEventListener('click', (e) => {
+        if (e.target === reviewsModal) closeModal(reviewsModal);
+    });
+}

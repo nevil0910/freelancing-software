@@ -226,6 +226,15 @@ if (config.isClient) {
     };
 }
 
+if (typeof renderStarRating === 'function') {
+    document.querySelectorAll('.app-rating-stars[data-rating]').forEach(function (el) {
+        const rating = parseFloat(el.getAttribute('data-rating') || '0');
+        if (rating > 0) {
+            renderStarRating(rating, el);
+        }
+    });
+}
+
 // ============================================================
 // Set min date on deadline input (client edit form)
 // ============================================================

@@ -9,7 +9,7 @@ from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.cache import never_cache
 from django.contrib import messages
 
-from ..models import CustomUser, FreelancerProfile, Post, PostLike, Comment
+from ..models import CustomUser, FreelancerProfile, Post, PostLike, Comment, Review
 
 
 ALLOWED_MIMETYPES = {'image/jpeg', 'image/png', 'video/mp4'}
@@ -126,6 +126,13 @@ def profile_view(request, username):
     category_choices = Post.CATEGORY_CHOICES
     selected_category = request.GET.get('category', '')
 
+    reviews = (
+        Review.objects
+        .filter(freelancer=profile_user)
+        .select_related('client', 'job')
+        .order_by('-created_at')
+    )
+
     context = {
         'profile_user': profile_user,
         'profile': profile,
@@ -133,6 +140,7 @@ def profile_view(request, username):
         'posts': posts_qs,
         'category_choices': category_choices,
         'selected_category': selected_category,
+        'reviews': reviews,
     }
     return render(request, 'core/profile.html', context)
 

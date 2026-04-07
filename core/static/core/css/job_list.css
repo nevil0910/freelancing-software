@@ -251,6 +251,179 @@
     border: 1px solid rgba(102, 126, 234, 0.3);
 }
 
+.applications-open-btn {
+    cursor: pointer;
+    font: inherit;
+}
+
+/* Applications modal (review_proposals) */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.78);
+    z-index: 9000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-box {
+    width: min(96vw, 720px);
+    max-height: 88vh;
+    overflow: hidden;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(20, 20, 42, 0.96);
+    backdrop-filter: blur(14px);
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-wide {
+    width: min(96vw, 860px);
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 16px 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.modal-title {
+    color: #f8fafc;
+    font-weight: 700;
+}
+
+.modal-close {
+    border: 0;
+    background: rgba(255, 255, 255, 0.08);
+    color: #cbd5e1;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.modal-body {
+    padding: 16px 18px;
+    overflow: auto;
+}
+
+.application-item {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 12px;
+}
+
+.app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.app-freelancer-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.app-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.app-avatar-img {
+    object-fit: cover;
+}
+
+.app-username {
+    color: #f1f5f9;
+    font-weight: 600;
+}
+
+.app-date {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.8rem;
+}
+
+.app-message {
+    color: rgba(255, 255, 255, 0.78);
+    background: rgba(255, 255, 255, 0.02);
+    border-left: 3px solid rgba(102, 126, 234, 0.45);
+    padding: 10px;
+    border-radius: 8px;
+    line-height: 1.55;
+}
+
+.app-status-badge {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.app-status-pending  { background: rgba(245,158,11,0.15);  color: #fbbf24; border: 1px solid rgba(245,158,11,0.3);  }
+.app-status-accepted { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+.app-status-rejected { background: rgba(239,68,68,0.12);  color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
+
+.app-rating-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.75);
+    padding: 4px 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    line-height: 1;
+}
+
+.app-rating-label i {
+    color: #fbbf24;
+    font-size: 0.8rem;
+}
+
+.btn-profile {
+    padding: 8px 16px;
+    background: rgba(102, 126, 234, 0.1);
+    border: 1.5px solid rgba(102, 126, 234, 0.3);
+    border-radius: 8px;
+    color: #a5b4fc;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+}
+
+.btn-profile:hover {
+    background: rgba(102, 126, 234, 0.2);
+}
+
 /* Action Buttons */
 .action-buttons {
     display: flex;

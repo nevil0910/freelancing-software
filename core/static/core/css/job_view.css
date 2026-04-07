@@ -753,6 +753,23 @@ textarea.form-control {
     color: #fbbf24;
 }
 
+.app-rating-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.75);
+    padding: 4px 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    line-height: 1;
+}
+
+.app-rating-label i {
+    color: #fbbf24;
+    font-size: 0.8rem;
+}
+
 .app-status-badge {
     padding: 4px 12px;
     border-radius: 20px;

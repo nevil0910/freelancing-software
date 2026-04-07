@@ -136,17 +136,15 @@ def dashboard(request):
 
     if user.user_type == 'client':
         posted_jobs = Job.objects.filter(client=user).count()
-        proposals_received = Application.objects.filter(job__client=user).count()
+        total_spent = Earning.objects.filter(job__client=user).aggregate(total=Sum('amount'))['total'] or 0
         active_projects = Job.objects.filter(client=user, status='IN_PROGRESS').count()
-        hired_freelancers = Job.objects.filter(
-            client=user, hired_freelancer__isnull=False
-        ).values('hired_freelancer').distinct().count()
+        completed_projects = Job.objects.filter(client=user, status__in=['COMPLETED', 'CLOSED']).count()
 
         context = {
             'posted_jobs': posted_jobs,
-            'proposals_received': proposals_received,
+            'total_spent': total_spent,
             'active_projects': active_projects,
-            'hired_freelancers': hired_freelancers,
+            'completed_projects': completed_projects,
         }
         return render(request, 'core/client_dashboard.html', context)
     else:

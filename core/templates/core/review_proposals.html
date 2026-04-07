@@ -1,0 +1,245 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Review Proposals - {{ APP_NAME }}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'core/css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/job_list.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/job_view.css' %}">
+{% endblock %}
+
+{% block page_container_class %}dashboard-container{% endblock %}
+
+{% block content %}
+        {% include 'core/client_sidebar.html' %}
+        <main class="main-content">
+            <a href="{% url 'dashboard' %}" class="btn-back">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+            <div class="jobs-container">
+                <div class="page-header">
+                    <h1><i class="fas fa-file-alt"></i> Review Proposals</h1>
+                </div>
+
+                <div class="jobs-table-container">
+                    {% if jobs %}
+                        <table class="jobs-table">
+                            <thead>
+                                <tr>
+                                    <th>Job Title</th>
+                                    <th>Category</th>
+                                    <th>Deadline</th>
+                                    <th>Applications</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for job in jobs %}
+                                <tr>
+                                    <td><div class="job-title" title="{{ job.title }}">{{ job.title }}</div></td>
+                                    <td><span class="category-badge">{{ job.get_category_display }}</span></td>
+                                    <td>{{ job.deadline|date:"M d, Y" }}</td>
+                                    <td>
+                                        {% if job.status == 'OPEN' %}
+                                        <button class="applications-count applications-open-btn"
+                                                data-job-id="{{ job.id }}"
+                                                data-job-title="{{ job.title|escape }}">
+                                            <i class="fas fa-file-alt"></i> {{ job.applications_count }}
+                                        </button>
+                                        {% else %}
+                                        <span class="badge badge-closed">Closed</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-{{ job.status|lower|cut:'_' }}">{{ job.get_status_display }}</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-file-alt"></i>
+                            <h3>No Jobs Yet</h3>
+                            <p>Post jobs to start receiving proposals.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </main>
+
+        <div class="modal-overlay" id="applicationsModal">
+            <div class="modal-box modal-wide">
+                <div class="modal-header">
+                    <span class="modal-title">
+                        <i class="fas fa-users"></i>
+                        Freelancer Applications
+                        <span id="applicationsMeta" style="font-weight:400;color:rgba(255,255,255,0.5);font-size:0.9rem;"></span>
+                    </span>
+                    <button class="modal-close" id="closeApplicationsModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-alert" id="appActionAlert"></div>
+                    <div id="applicationsList"></div>
+                </div>
+            </div>
+        </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const applicationsModal = document.getElementById('applicationsModal');
+    const closeApplicationsModal = document.getElementById('closeApplicationsModal');
+    const applicationsList = document.getElementById('applicationsList');
+    const applicationsMeta = document.getElementById('applicationsMeta');
+
+    function openApplicationsModalFn() {
+        applicationsModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeApplicationsModalFn() {
+        applicationsModal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    closeApplicationsModal.addEventListener('click', closeApplicationsModalFn);
+    applicationsModal.addEventListener('click', function (e) {
+        if (e.target === applicationsModal) closeApplicationsModalFn();
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && applicationsModal.classList.contains('active')) {
+            closeApplicationsModalFn();
+        }
+    });
+
+    function appCardHtml(app) {
+        const avatar = app.avatar_url
+            ? `<img src="${app.avatar_url}" alt="${app.freelancer_username} avatar" class="app-avatar app-avatar-img">`
+            : `<div class="app-avatar">${app.avatar_initial}</div>`;
+
+        const ratingHtml = app.review_avg > 0
+            ? `<span class="app-rating-label"><i class="fas fa-star"></i> ${app.review_avg}</span>`
+            : '';
+
+        return `
+            <div class="application-item ${app.status.toLowerCase()}" id="appItem${app.id}">
+                <div class="app-header">
+                    <div class="app-freelancer-info">
+                        ${avatar}
+                        <div>
+                            <div class="app-username">${app.freelancer_username}</div>
+                            <div class="app-date">Applied ${app.created_at}</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                        ${ratingHtml}
+                        <a href="${app.profile_url}" class="btn-profile">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                        <span class="app-status-badge app-status-${app.status.toLowerCase()}" id="appStatus${app.id}">${app.status_display}</span>
+                    </div>
+                </div>
+                <div class="app-message">${app.message || ''}</div>
+                <div class="app-actions">
+                    ${app.status === 'PENDING' ? `
+                    <button class="btn-accept" onclick="handleApplication(${app.id}, 'accept')" id="acceptBtn${app.id}">
+                        <i class="fas fa-check"></i> Accept
+                    </button>
+                    <button class="btn-reject" onclick="handleApplication(${app.id}, 'reject')" id="rejectBtn${app.id}">
+                        <i class="fas fa-times"></i> Reject
+                    </button>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    window.handleApplication = function (appId, action) {
+        const url = action === 'accept'
+            ? '/application/' + appId + '/accept/'
+            : '/application/' + appId + '/reject/';
+
+        const acceptBtn = document.getElementById('acceptBtn' + appId);
+        const rejectBtn = document.getElementById('rejectBtn' + appId);
+        const alertEl = document.getElementById('appActionAlert');
+        if (!alertEl) return;
+
+        if (acceptBtn) acceptBtn.disabled = true;
+        if (rejectBtn) rejectBtn.disabled = true;
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+        })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (!data.success) {
+                    alertEl.className = 'modal-alert error';
+                    alertEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + (data.error || 'Failed');
+                    if (acceptBtn) acceptBtn.disabled = false;
+                    if (rejectBtn) rejectBtn.disabled = false;
+                    return;
+                }
+
+                const item = document.getElementById('appItem' + appId);
+                const statusBadge = document.getElementById('appStatus' + appId);
+                if (item && statusBadge) {
+                    statusBadge.className = 'app-status-badge app-status-' + data.status.toLowerCase();
+                    statusBadge.textContent = data.status.charAt(0) + data.status.slice(1).toLowerCase();
+                    item.classList.remove('pending');
+                    item.classList.add(data.status.toLowerCase());
+                }
+                if (acceptBtn) acceptBtn.remove();
+                if (rejectBtn) rejectBtn.remove();
+
+                alertEl.className = 'modal-alert success';
+                alertEl.innerHTML = '<i class="fas fa-check-circle"></i> ' + (data.message || 'Updated');
+                setTimeout(function () {
+                    alertEl.className = 'modal-alert';
+                    alertEl.innerHTML = '';
+                }, 2500);
+            })
+            .catch(function () {
+                alertEl.className = 'modal-alert error';
+                alertEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Something went wrong.';
+                if (acceptBtn) acceptBtn.disabled = false;
+                if (rejectBtn) rejectBtn.disabled = false;
+            });
+    };
+
+    document.querySelectorAll('.applications-open-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const jobId = this.getAttribute('data-job-id');
+            const jobTitle = this.getAttribute('data-job-title') || '';
+            applicationsList.innerHTML = '<p style="color:rgba(255,255,255,0.65);">Loading applications...</p>';
+            applicationsMeta.textContent = '';
+            openApplicationsModalFn();
+
+            fetch(`/review-proposals/${jobId}/applications/`)
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (!data.success) {
+                        applicationsList.innerHTML = '<p style="color:#f87171;">Unable to load applications.</p>';
+                        return;
+                    }
+                    applicationsMeta.textContent = `(${data.applications.length})`;
+                    if (!data.applications.length) {
+                        applicationsList.innerHTML = '<div class="applications-empty"><i class="fas fa-inbox"></i><p>No applications received yet.</p></div>';
+                        return;
+                    }
+                    applicationsList.innerHTML = data.applications.map(appCardHtml).join('');
+                })
+                .catch(function () {
+                    applicationsList.innerHTML = '<p style="color:#f87171;">Unable to load applications.</p>';
+                });
+        });
+    });
+</script>
+{% endblock %}

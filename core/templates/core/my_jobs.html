@@ -73,10 +73,14 @@
                                         {{ job.deadline|date:"M d, Y" }}
                                     </td>
                                     <td>
+                                        {% if job.status == 'OPEN' %}
                                         <span class="applications-count">
                                             <i class="fas fa-file-alt"></i>
                                             {{ job.applications_count }}
                                         </span>
+                                        {% else %}
+                                        <span class="badge badge-closed">Closed</span>
+                                        {% endif %}
                                     </td>
                                     <td>
                                         <span class="badge badge-{{ job.status|lower|cut:'_' }}">

@@ -1,0 +1,41 @@
+.rating-stars {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    color: #fbbf24;
+}
+
+.rating-stars i {
+    font-size: inherit;
+}
+
+.fa-star-partial {
+    position: relative;
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    font-style: normal;
+    line-height: 1;
+}
+
+.fa-star-partial::before {
+    content: "\f005";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 400;
+    font-style: normal;
+    position: absolute;
+    left: 0;
+    color: rgba(251, 191, 36, 0.35);
+}
+
+.fa-star-partial::after {
+    content: "\f005";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    font-style: normal;
+    position: absolute;
+    left: 0;
+    width: var(--star-fill, 50%);
+    overflow: hidden;
+    color: #fbbf24;
+}

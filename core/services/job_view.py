@@ -29,6 +29,17 @@ def job_view(request, job_id):
     if user.user_type == 'client':
         job = get_object_or_404(Job, id=job_id, client=user)
         applications = job.applications.select_related('freelancer__freelancer_profile').all()
+        # Attach computed review averages per freelancer (do not rely on cached profile.rating).
+        freelancer_ids = [a.freelancer_id for a in applications]
+        rating_rows = (
+            Review.objects
+            .filter(freelancer_id__in=freelancer_ids)
+            .values('freelancer_id')
+            .annotate(avg_rating=Avg('rating'))
+        )
+        rating_map = {r['freelancer_id']: round(r['avg_rating'], 1) for r in rating_rows if r['avg_rating'] is not None}
+        for app in applications:
+            app.review_avg = rating_map.get(app.freelancer_id, 0)
         has_applied = False
         user_application = None
         if job.status in ('IN_PROGRESS', 'SUBMITTED'):
