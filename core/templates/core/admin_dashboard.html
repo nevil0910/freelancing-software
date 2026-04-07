@@ -1,0 +1,40 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}Admin Dashboard - {{ APP_NAME }}{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/dashboard.css' %}">{% endblock %}
+{% block page_container_class %}dashboard-container{% endblock %}
+{% block content %}
+{% include 'core/admin_sidebar.html' %}
+<main class="main-content">
+  <div class="section-header">
+    <h1 class="section-title">Admin Dashboard</h1>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-content">
+        <h3 class="stat-number">₹{{ platform_balance }}</h3>
+        <p class="stat-label">Platform Balance</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-content">
+        <h3 class="stat-number">₹{{ total_commission }}</h3>
+        <p class="stat-label">Total Earnings (Commission)</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-content">
+        <h3 class="stat-number">{{ pending_escrows }}</h3>
+        <p class="stat-label">Pending Escrows</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-content">
+        <h3 class="stat-number">{{ pending_refunds }}</h3>
+        <p class="stat-label">Pending Refunds</p>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}

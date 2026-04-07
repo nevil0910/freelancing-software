@@ -1,6 +1,7 @@
 from django.utils import timezone
 from datetime import timedelta
 from ..models import Job, Earning
+from .escrow import release_escrow_for_job
 
 
 def check_auto_complete():
@@ -25,8 +26,10 @@ def check_auto_complete():
         
         # Create earning record
         if job.hired_freelancer:
-            Earning.objects.get_or_create(
-                freelancer=job.hired_freelancer,
-                job=job,
-                defaults={'amount': job.budget}
-            )
+            released = release_escrow_for_job(job, job.hired_freelancer)
+            if not released:
+                Earning.objects.get_or_create(
+                    freelancer=job.hired_freelancer,
+                    job=job,
+                    defaults={'amount': job.budget}
+                )

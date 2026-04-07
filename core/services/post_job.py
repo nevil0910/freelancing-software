@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
 from ..forms import JobForm
+from .escrow import fund_escrow_for_job
 
 
 @login_required
@@ -24,6 +25,7 @@ def post_job(request):
             job.client = request.user
             job.status = 'OPEN'
             job.save()
+            fund_escrow_for_job(job)
             messages.success(request, 'Job posted successfully!')
             return redirect('my_jobs')
         else:

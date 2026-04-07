@@ -9,8 +9,15 @@ class CustomUser(AbstractUser):
     USER_TYPE_CHOICES = (
         ('client', 'Client'),
         ('freelancer', 'Freelancer'),
+        ('admin', 'Admin'),
     )
     user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES, default='client')
+    is_blocked = models.BooleanField(default=False)
+    blocked_reason = models.CharField(max_length=255, blank=True, default='')
+    blocked_at = models.DateTimeField(null=True, blank=True)
+    blocked_by = models.ForeignKey(
+        'self', null=True, blank=True, on_delete=models.SET_NULL, related_name='blocked_users'
+    )
 
     @property
     def avatar_initial(self):
@@ -243,6 +250,89 @@ class Earning(models.Model):
 
     class Meta:
         ordering = ['-earned_at']
+
+
+class Wallet(models.Model):
+    WALLET_TYPE_CHOICES = (
+        ('USER', 'User'),
+        ('PLATFORM', 'Platform'),
+    )
+    owner = models.OneToOneField(CustomUser, on_delete=models.CASCADE, null=True, blank=True, related_name='wallet')
+    wallet_type = models.CharField(max_length=12, choices=WALLET_TYPE_CHOICES, default='USER')
+    balance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['wallet_type'], condition=models.Q(wallet_type='PLATFORM'),
+                                    name='unique_platform_wallet'),
+        ]
+
+    def __str__(self):
+        if self.wallet_type == 'PLATFORM':
+            return f"Platform Wallet ₹{self.balance}"
+        return f"{self.owner.username} Wallet ₹{self.balance}"
+
+
+class Escrow(models.Model):
+    STATUS_CHOICES = (
+        ('FUNDED', 'Funded'),
+        ('RELEASED', 'Released'),
+        ('REFUNDED', 'Refunded'),
+    )
+    job = models.OneToOneField(Job, on_delete=models.CASCADE, related_name='escrow')
+    client = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='escrows')
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    commission_rate = models.DecimalField(max_digits=5, decimal_places=2, default=5.00)
+    commission_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    freelancer_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    status = models.CharField(max_length=12, choices=STATUS_CHOICES, default='FUNDED')
+    funded_at = models.DateTimeField(auto_now_add=True)
+    released_at = models.DateTimeField(null=True, blank=True)
+    refunded_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Escrow {self.job_id} {self.status} ₹{self.amount}"
+
+
+class WalletTransaction(models.Model):
+    DIRECTION_CHOICES = (
+        ('CREDIT', 'Credit'),
+        ('DEBIT', 'Debit'),
+    )
+    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, related_name='transactions')
+    direction = models.CharField(max_length=10, choices=DIRECTION_CHOICES)
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    reference_type = models.CharField(max_length=30, blank=True, default='')
+    reference_id = models.CharField(max_length=40, blank=True, default='')
+    note = models.CharField(max_length=255, blank=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.wallet_id} {self.direction} ₹{self.amount}"
+
+
+class RefundRequest(models.Model):
+    STATUS_CHOICES = (
+        ('PENDING', 'Pending'),
+        ('APPROVED', 'Approved'),
+        ('REJECTED', 'Rejected'),
+        ('REFUNDED', 'Refunded'),
+    )
+    job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='refund_requests')
+    client = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='refund_requests')
+    reason = models.TextField()
+    status = models.CharField(max_length=12, choices=STATUS_CHOICES, default='PENDING')
+    admin_note = models.TextField(blank=True, default='')
+    reviewed_by = models.ForeignKey(CustomUser, null=True, blank=True, on_delete=models.SET_NULL, related_name='reviewed_refunds')
+    created_at = models.DateTimeField(auto_now_add=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
 
 
 # Review Model for client reviews of freelancers

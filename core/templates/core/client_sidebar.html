@@ -30,6 +30,11 @@
                 <a href="{% url 'review_proposals' %}" class="nav-item{% if request.resolver_match.url_name == 'review_proposals' %} active{% endif %}">
                     <i class="fas fa-file-alt"></i>
                     <span class="nav-text">Review Proposals</span>
+                </a>
+                <a href="{% url 'client_refund_requests' %}" class="nav-item{% if request.resolver_match.url_name == 'client_refund_requests' %} active{% endif %}">
+                    <i class="fas fa-undo"></i>
+                    <span class="nav-text">Refund Requests</span>
+                </a>
             </nav>
             
             <div class="sidebar-footer">

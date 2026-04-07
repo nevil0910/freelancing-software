@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
 from django.utils import timezone
 from ..models import Job, Earning
+from .escrow import release_escrow_for_job
 
 
 @login_required
@@ -41,11 +42,13 @@ def review_submission(request, job_id):
             freelancer = acc_app.freelancer if acc_app else None
 
         if freelancer:
-            Earning.objects.get_or_create(
-                freelancer=freelancer,
-                job=job,
-                defaults={'amount': job.budget}
-            )
+            released = release_escrow_for_job(job, freelancer)
+            if not released:
+                Earning.objects.get_or_create(
+                    freelancer=freelancer,
+                    job=job,
+                    defaults={'amount': job.budget}
+                )
 
         return JsonResponse({
             'success': True,

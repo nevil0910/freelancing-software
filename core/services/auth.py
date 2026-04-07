@@ -101,6 +101,8 @@ def login_view(request):
                 user = None
 
         if user is not None:
+            if user.is_blocked:
+                return render(request, 'core/login.html', {'error': 'Your account is blocked. Contact support.'})
             login(request, user)
             return redirect("dashboard")
         else:
@@ -134,6 +136,17 @@ def dashboard(request):
 
     user = request.user
 
+    if user.is_superuser:
+        from ..models import Escrow, RefundRequest, Wallet
+        from django.db.models import Sum
+        platform_wallet = Wallet.objects.filter(wallet_type='PLATFORM').first()
+        context = {
+            'platform_balance': platform_wallet.balance if platform_wallet else 0,
+            'total_commission': Escrow.objects.filter(status='RELEASED').aggregate(total=Sum('commission_amount'))['total'] or 0,
+            'pending_escrows': Escrow.objects.filter(status='FUNDED').count(),
+            'pending_refunds': RefundRequest.objects.filter(status='PENDING').count(),
+        }
+        return render(request, 'core/admin_dashboard.html', context)
     if user.user_type == 'client':
         posted_jobs = Job.objects.filter(client=user).count()
         total_spent = Earning.objects.filter(job__client=user).aggregate(total=Sum('amount'))['total'] or 0

@@ -15,7 +15,9 @@
 
 {% block content %}
 {% if user.is_authenticated %}
-    {% if user.user_type == 'freelancer' %}
+    {% if user.is_superuser %}
+        {% include 'core/admin_sidebar.html' %}
+    {% elif user.user_type == 'freelancer' %}
         {% include 'core/freelancer_sidebar.html' %}
     {% elif user.user_type == 'client' %}
         {% include 'core/client_sidebar.html' %}
