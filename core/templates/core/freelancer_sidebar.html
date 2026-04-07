@@ -2,7 +2,12 @@
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="user-avatar-small">{{ user.first_name|first|upper }}</div>
-                <span class="sidebar-username">{{ user.first_name }}</span>
+                <div class="sidebar-user-info">
+                    <span class="sidebar-username">{{ user.first_name }}</span>
+                    <a href="{% url 'edit_profile' %}" class="sidebar-edit-link">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </a>
+                </div>
             </div>
             
             <nav class="sidebar-nav">

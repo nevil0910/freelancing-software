@@ -2,7 +2,7 @@ from django.contrib import admin
 
 # Register your models here.
 from .models import (
-    CustomUser, Job, PasswordResetOTP, SignupOTP,
+    CustomUser, Job, PasswordResetOTP, SignupOTP, EmailChangeOTP,
     ChatMessage, TypingStatus, JobSubmission, SubmissionFile, Earning, Review,
     FreelancerProfile, Post, PostLike, Comment
 )
@@ -89,3 +89,11 @@ class PostLikeAdmin(admin.ModelAdmin):
 class CommentAdmin(admin.ModelAdmin):
     list_display = ('user', 'post', 'created_at')
     search_fields = ('user__username', 'text')
+
+
+@admin.register(EmailChangeOTP)
+class EmailChangeOTPAdmin(admin.ModelAdmin):
+    list_display = ('user', 'new_email', 'otp', 'created_at', 'is_used')
+    list_filter = ('is_used', 'created_at')
+    search_fields = ('user__username', 'new_email', 'otp')
+    readonly_fields = ('created_at',)

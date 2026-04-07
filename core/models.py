@@ -58,6 +58,27 @@ class SignupOTP(models.Model):
         ordering = ['-created_at']
 
 
+# OTP Model for Email Change Verification
+class EmailChangeOTP(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='email_change_otps')
+    new_email = models.EmailField()
+    otp = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_used = models.BooleanField(default=False)
+
+    def is_valid(self):
+        """Check if OTP is still valid (not expired and not used)"""
+        from django.conf import settings
+        expiry_time = self.created_at + timedelta(minutes=getattr(settings, 'OTP_EXPIRY_MINUTES', 10))
+        return not self.is_used and timezone.now() < expiry_time
+
+    def __str__(self):
+        return f"Email Change OTP for {self.user.username} -> {self.new_email}"
+
+    class Meta:
+        ordering = ['-created_at']
+
+
 # Job Model for Client Job Postings
 class Job(models.Model):
     STATUS_CHOICES = (

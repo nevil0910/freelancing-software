@@ -48,6 +48,10 @@ urlpatterns = [
     path('check-email/', views.check_email_availability, name='check_email'),
 
     # Profile & Posts URLs
+    path('profile/edit/', views.edit_profile_view, name='edit_profile'),
+    path('profile/update/', views.update_profile, name='update_profile'),
+    path('profile/send-email-otp/', views.send_email_change_otp_view, name='send_email_otp'),
+    path('profile/verify-email-otp/', views.verify_email_change_otp_view, name='verify_email_otp'),
     path('profile/add-post/', views.add_post, name='add_post'),
     path('profile/update-photo/', views.update_profile_photo, name='update_profile_photo'),
     path('profile/delete-post/<int:post_id>/', views.delete_post, name='delete_post'),

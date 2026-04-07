@@ -26,3 +26,4 @@ from .services.profile import (
     profile_view, update_profile_photo, add_post, delete_post,
     toggle_like, add_comment, filter_posts
 )
+from .services.edit_profile import edit_profile_view, update_profile, send_email_change_otp_view, verify_email_change_otp_view

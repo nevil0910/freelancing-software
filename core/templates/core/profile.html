@@ -256,7 +256,6 @@
 <!-- Cropper.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js" defer></script>
 
-<!-- Django → JS Config -->
 <script>
     const IS_OWNER = {{ is_owner|yesno:"true,false" }};
     const IS_AUTH  = {{ user.is_authenticated|yesno:"true,false" }};

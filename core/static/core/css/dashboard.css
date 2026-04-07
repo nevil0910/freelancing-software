@@ -56,6 +56,12 @@ body {
     font-weight: 700;
 }
 
+.sidebar-user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
 .sidebar-username {
     font-weight: 600;
     white-space: nowrap;
@@ -65,6 +71,30 @@ body {
 
 .sidebar:hover .sidebar-username {
     opacity: 1;
+}
+
+.sidebar-edit-link {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+    text-decoration: none;
+    transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    opacity: 0;
+}
+
+.sidebar:hover .sidebar-edit-link {
+    opacity: 1;
+}
+
+.sidebar-edit-link:hover {
+    color: #8b5cf6;
+}
+
+.sidebar-edit-link i {
+    font-size: 0.75rem;
 }
 
 .sidebar-nav {

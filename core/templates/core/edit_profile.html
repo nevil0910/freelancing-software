@@ -1,0 +1,151 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Edit Profile | {{ APP_NAME }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/edit_profile.css' %}">
+{% endblock %}
+
+{% block page_container_class %}dashboard-container{% endblock %}
+
+{% block content %}
+{% if user.user_type == 'freelancer' %}
+    {% include 'core/freelancer_sidebar.html' %}
+{% elif user.user_type == 'client' %}
+    {% include 'core/client_sidebar.html' %}
+{% endif %}
+
+<main class="main-content">
+    <div class="page-header">
+        <h1><i class="fas fa-user-edit"></i> Edit Profile</h1>
+        <a href="{% url 'dashboard' %}" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <div class="edit-profile-container">
+        <div class="edit-profile-card">
+            <form id="editProfileForm">
+                {% csrf_token %}
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName">First Name <span class="required">*</span></label>
+                        <input 
+                            type="text" 
+                            id="firstName" 
+                            name="first_name" 
+                            value="{{ user.first_name }}" 
+                            required
+                            placeholder="Enter first name"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lastName">Last Name <span class="required">*</span></label>
+                        <input 
+                            type="text" 
+                            id="lastName" 
+                            name="last_name" 
+                            value="{{ user.last_name }}" 
+                            required
+                            placeholder="Enter last name"
+                        >
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="username">Username <span class="required">*</span></label>
+                        <input 
+                            type="text" 
+                            id="username" 
+                            name="username" 
+                            value="{{ user.username }}" 
+                            data-original="{{ user.username }}"
+                            required
+                            placeholder="Enter username"
+                            pattern="[a-zA-Z0-9_-]+"
+                            title="Only letters, numbers, underscores, and hyphens allowed"
+                        >
+                        <small class="form-hint">Only letters, numbers, underscores (_), and hyphens (-) allowed</small>
+                        <span class="availability-message" id="usernameAvailability"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email <span class="required">*</span></label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            value="{{ user.email }}" 
+                            data-original="{{ user.email }}"
+                            required
+                            placeholder="Enter email address"
+                        >
+                        <span class="availability-message" id="emailAvailability"></span>
+                        
+                        <!-- Send OTP Button (shown when email is available) -->
+                        <button type="button" id="sendOtpBtn" class="btn-send-otp" style="display: none;">
+                            Send OTP
+                        </button>
+                        
+                        <!-- OTP Section (hidden by default) -->
+                        <div id="otpSection" class="otp-section" style="display: none;">
+                            <div class="otp-input-group">
+                                <input 
+                                    type="text" 
+                                    id="emailOtp" 
+                                    placeholder="Enter 6-digit OTP"
+                                    maxlength="6"
+                                    pattern="[0-9]{6}"
+                                >
+                                <button type="button" id="verifyOtpBtn" class="btn-verify-otp">Verify</button>
+                            </div>
+                            <small class="otp-hint">OTP sent to your new email address. Check your inbox.</small>
+                            <span class="otp-status" id="otpStatus"></span>
+                        </div>
+                    </div>
+                </div>
+
+                {% if user.user_type == 'freelancer' %}
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="contactNumber">Contact Number <span class="optional">(Optional)</span></label>
+                        <input 
+                            type="tel" 
+                            id="contactNumber" 
+                            name="contact_number" 
+                            value="{{ user.freelancer_profile.contact_number|default:'' }}" 
+                            placeholder="Enter contact number"
+                            maxlength="20"
+                        >
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="form-actions">
+                    <a href="{% url 'dashboard' %}" class="btn-cancel">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn-save" id="saveBtn">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+
+            <!-- Loading Overlay -->
+            <div class="loading-overlay" id="loadingOverlay">
+                <div class="spinner"></div>
+                <p>Saving changes...</p>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'core/js/edit_profile.js' %}"></script>
+{% endblock %}
