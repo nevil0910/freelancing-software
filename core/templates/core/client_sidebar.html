@@ -15,10 +15,6 @@
             </div>
             
             <nav class="sidebar-nav">
-                <a href="#" class="nav-item">
-                    <i class="fas fa-user"></i>
-                    <span class="nav-text">Profile</span>
-                </a>
                 <a href="{% url 'dashboard' %}" class="nav-item{% if request.resolver_match.url_name == 'dashboard' %} active{% endif %}">
                     <i class="fas fa-home"></i>
                     <span class="nav-text">Dashboard</span>
