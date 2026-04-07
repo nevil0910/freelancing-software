@@ -12,6 +12,11 @@
     const POLL_MESSAGES = 3000;
     const POLL_TYPING = 2000;
     const POLL_UNREAD = 15000;  // Reduced frequency: 15s instead of 10s
+    const CHAT_LIST_CACHE_KEY = 'fh_chat_list_cache';
+    const CHAT_LIST_CACHE_TTL = 20000; // 20s
+    const CHAT_MSG_CACHE_PREFIX = 'fh_chat_messages_';
+    const CHAT_MSG_CACHE_TTL = 20000; // 20s
+    const CHAT_MSG_CACHE_MAX = 100;
     let msgPollTimer = null;
     let typingPollTimer = null;
     let unreadPollTimer = null;
@@ -68,6 +73,61 @@
             convoAvatar.innerHTML = '';
             convoAvatar.textContent = initial || '?';
         }
+    }
+
+    function readJSONSession(key) {
+        try {
+            const raw = sessionStorage.getItem(key);
+            return raw ? JSON.parse(raw) : null;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function writeJSONSession(key, value) {
+        try {
+            sessionStorage.setItem(key, JSON.stringify(value));
+        } catch (e) { /* ignore quota/serialization errors */ }
+    }
+
+    function getCachedChatList() {
+        const cached = readJSONSession(CHAT_LIST_CACHE_KEY);
+        if (!cached || !Array.isArray(cached.chats) || !cached.ts) return null;
+        if (Date.now() - cached.ts > CHAT_LIST_CACHE_TTL) return null;
+        return cached.chats;
+    }
+
+    function setCachedChatList(chats) {
+        writeJSONSession(CHAT_LIST_CACHE_KEY, { ts: Date.now(), chats: chats || [] });
+    }
+
+    function getMsgCacheKey(jobId) {
+        return CHAT_MSG_CACHE_PREFIX + String(jobId);
+    }
+
+    function getCachedMessages(jobId) {
+        const cached = readJSONSession(getMsgCacheKey(jobId));
+        if (!cached || !Array.isArray(cached.messages) || !cached.ts) return null;
+        if (Date.now() - cached.ts > CHAT_MSG_CACHE_TTL) return null;
+        return cached.messages;
+    }
+
+    function setCachedMessages(jobId, messages) {
+        const normalized = Array.isArray(messages) ? messages.slice(-CHAT_MSG_CACHE_MAX) : [];
+        writeJSONSession(getMsgCacheKey(jobId), { ts: Date.now(), messages: normalized });
+    }
+
+    function mergeAndCacheMessages(jobId, incoming) {
+        const existing = getCachedMessages(jobId) || [];
+        const map = new Map();
+        existing.forEach((m) => {
+            if (m && Number.isFinite(Number(m.id))) map.set(Number(m.id), m);
+        });
+        (incoming || []).forEach((m) => {
+            if (m && Number.isFinite(Number(m.id))) map.set(Number(m.id), m);
+        });
+        const merged = Array.from(map.values()).sort((a, b) => Number(a.id) - Number(b.id));
+        setCachedMessages(jobId, merged);
     }
 
     // ─── Session Persistence ───
@@ -177,10 +237,16 @@
 
     // ─── Load Chat List ───
     function loadChatList() {
+        const cachedChats = getCachedChatList();
+        if (cachedChats) {
+            renderChatList(cachedChats);
+        }
+
         fetch(CFG.urls.chatList, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
             .then(r => r.json())
             .then(data => {
                 if (!data.success) return;
+                setCachedChatList(data.chats);
                 renderChatList(data.chats);
             })
             .catch(console.error);
@@ -278,6 +344,16 @@
         showConvoView();
         saveState();
 
+        const cachedMessages = getCachedMessages(jobId);
+        if (cachedMessages && cachedMessages.length > 0) {
+            messagesEl.innerHTML = '';
+            cachedMessages.forEach(msg => {
+                appendMessage(msg);
+                lastMsgId = Math.max(lastMsgId, msg.id || 0);
+            });
+            scrollToBottom();
+        }
+
         // Load messages
         fetchMessages(jobId, true);
 
@@ -296,7 +372,9 @@
             .then(data => {
                 if (!data.success || data.messages.length === 0) {
                     if (initial && data.messages && data.messages.length === 0) {
-                        messagesEl.innerHTML = '<div class="chat-list-empty"><i class="fas fa-comments"></i><p>Start the conversation!</p></div>';
+                        if (!messagesEl.children.length) {
+                            messagesEl.innerHTML = '<div class="chat-list-empty"><i class="fas fa-comments"></i><p>Start the conversation!</p></div>';
+                        }
                     }
                     return;
                 }
@@ -312,6 +390,7 @@
                 });
 
                 scrollToBottom();
+                mergeAndCacheMessages(jobId, data.messages);
 
                 // Update conversation header if we have data
                 if (initial && data.messages.length > 0) {
@@ -449,6 +528,7 @@
                     appendMessage(data.message);
                     lastMsgId = Math.max(lastMsgId, data.message.id);
                     scrollToBottom();
+                    mergeAndCacheMessages(currentJobId, [data.message]);
                 }
             })
             .catch(err => {
