@@ -1,32 +1,48 @@
 {% extends 'core/base.html' %}
 {% load static %}
 {% block title %}Admin Refunds - {{ APP_NAME }}{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{% static 'core/css/dashboard.css' %}">{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/job_list.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/dashboard.css' %}">{% endblock %}
 {% block page_container_class %}dashboard-container{% endblock %}
 {% block content %}
 {% include 'core/admin_sidebar.html' %}
 <main class="main-content">
-  <div class="section-header"><h1 class="section-title">Refund Requests</h1></div>
+  <div class="section-header">
+    <h1 class="section-title">Refund Requests</h1>
+  </div>
   <div class="jobs-table-container">
     <table class="jobs-table">
-      <thead><tr><th>Job</th><th>Client</th><th>Reason</th><th>Status</th><th>Action</th></tr></thead>
+      <thead>
+        <tr>
+          <th>Job</th>
+          <th>Client</th>
+          <th>Reason</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
       <tbody>
-      {% for r in refunds %}
-      <tr>
-        <td>{{ r.job.title }}</td><td>{{ r.client.username }}</td><td>{{ r.reason }}</td>
-        <td><span class="badge badge-{{ r.status|lower }}">{{ r.status }}</span></td>
-        <td>
-          {% if r.status == 'PENDING' %}
-          <form method="post" action="{% url 'admin_refund_action' r.id %}" style="display:flex;gap:8px;align-items:center;">
-            {% csrf_token %}
-            <input type="text" name="note" placeholder="Note" style="padding:6px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:white;">
-            <button name="action" value="approve" class="btn-action btn-view">Approve</button>
-            <button name="action" value="reject" class="btn-action btn-close">Reject</button>
-          </form>
-          {% else %}—{% endif %}
-        </td>
-      </tr>
-      {% endfor %}
+        {% for r in refunds %}
+        <tr>
+          <td>{{ r.job.title }}</td>
+          <td>{{ r.client.username }}</td>
+          <td>{{ r.reason }}</td>
+          <td><span class="badge badge-{{ r.status|lower }}">{{ r.status }}</span></td>
+          <td>
+            {% if r.status == 'PENDING' %}
+            <form method="post" action="{% url 'admin_refund_action' r.id %}"
+              style="display:flex;gap:8px;align-items:center;">
+              {% csrf_token %}
+              <input type="text" name="note" placeholder="Note"
+                style="padding:6px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:white;">
+              <button name="action" value="approve" class="btn-action btn-view">Approve</button>
+              <button name="action" value="reject" class="btn-action btn-close">Reject</button>
+            </form>
+            {% else %}—{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
       </tbody>
     </table>
   </div>

@@ -215,13 +215,6 @@
                                         <div class="app-username">{{ app.freelancer.username }}</div>
                                         <div class="app-date">Accepted {{ app.updated_at|date:"M d, Y" }}</div>
                                     </div>
-                                    {% if freelancer_rating %}
-                                    <span class="app-rating" style="margin-left:auto;">
-                                        <span class="rating-stars app-rating-stars" data-rating="{{ freelancer_rating.average }}"></span>
-                                        {{ freelancer_rating.average }}
-                                        <span style="font-size:0.7rem;color:rgba(255,255,255,0.35);">({{ freelancer_rating.count }})</span>
-                                    </span>
-                                    {% endif %}
                                     <a href="{% url 'profile_view' app.freelancer.username %}" class="btn-profile" style="margin-left:10px;">
                                         <i class="fas fa-user"></i> Profile
                                     </a>

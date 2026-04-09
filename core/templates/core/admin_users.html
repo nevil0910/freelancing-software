@@ -1,31 +1,47 @@
 {% extends 'core/base.html' %}
 {% load static %}
 {% block title %}Admin Users - {{ APP_NAME }}{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{% static 'core/css/dashboard.css' %}">{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/job_list.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/dashboard.css' %}">{% endblock %}
 {% block page_container_class %}dashboard-container{% endblock %}
 {% block content %}
 {% include 'core/admin_sidebar.html' %}
 <main class="main-content">
-  <div class="section-header"><h1 class="section-title">Users</h1></div>
+  <div class="section-header">
+    <h1 class="section-title">Users</h1>
+  </div>
   <div class="jobs-table-container">
     <table class="jobs-table">
-      <thead><tr><th>Username</th><th>Type</th><th>Email</th><th>Status</th><th>Action</th></tr></thead>
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Type</th>
+          <th>Email</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
       <tbody>
-      {% for u in users %}
-      <tr>
-        <td>{{ u.username }}</td><td>{{ u.user_type }}</td><td>{{ u.email }}</td>
-        <td>{% if u.is_blocked %}<span class="badge badge-closed">Blocked</span>{% else %}<span class="badge badge-open">Active</span>{% endif %}</td>
-        <td>
-          <form method="post" action="{% url 'admin_toggle_block_user' u.id %}">
-            {% csrf_token %}
-            {% if not u.is_blocked %}
-              <input type="text" name="reason" placeholder="Reason (optional)" style="padding:6px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:white;">
-            {% endif %}
-            <button class="btn-action {% if u.is_blocked %}btn-view{% else %}btn-close{% endif %}">{% if u.is_blocked %}Unblock{% else %}Block{% endif %}</button>
-          </form>
-        </td>
-      </tr>
-      {% endfor %}
+        {% for u in users %}
+        <tr>
+          <td>{{ u.username }}</td>
+          <td>{{ u.user_type }}</td>
+          <td>{{ u.email }}</td>
+          <td>{% if u.is_blocked %}<span class="badge badge-closed">Blocked</span>{% else %}<span
+              class="badge badge-open">Active</span>{% endif %}</td>
+          <td>
+            <form method="post" action="{% url 'admin_toggle_block_user' u.id %}">
+              {% csrf_token %}
+              {% if not u.is_blocked %}
+              <input type="text" name="reason" placeholder="Reason (optional)"
+                style="padding:6px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:white;">
+              {% endif %}
+              <button class="btn-action {% if u.is_blocked %}btn-view{% else %}btn-close{% endif %}">{% if u.is_blocked %} Unblock {% else %} Block {% endif %}</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
       </tbody>
     </table>
   </div>

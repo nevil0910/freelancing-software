@@ -27,10 +27,12 @@
                 {% if messages %}
                     {% for message in messages %}
                         {% if 'logged out' not in message|lower %}
+                        {% if 'blocked' not in message|lower %}
                         <div class="alert alert-{{ message.tags }}">
                             <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"></i>
                             {{ message }}
                         </div>
+                        {% endif %}
                         {% endif %}
                     {% endfor %}
                 {% endif %}

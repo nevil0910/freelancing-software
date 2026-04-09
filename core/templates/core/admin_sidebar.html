@@ -1,25 +1,30 @@
 <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
-                {% if user.profile_photo_url %}
-                <img src="{{ user.profile_photo_url }}" alt="{{ user.username }} avatar" class="user-avatar-small user-avatar-image">
-                {% else %}
-                <div class="user-avatar-small">{{ user.avatar_initial }}</div>
-                {% endif %}
-                <div class="sidebar-user-info">
-                    <span class="sidebar-username">Admin</span>
-                </div>
-            </div>
+        {% if user.profile_photo_url %}
+        <img src="{{ user.profile_photo_url }}" alt="{{ user.username }} avatar"
+            class="user-avatar-small user-avatar-image">
+        {% else %}
+        <div class="user-avatar-small">{{ user.avatar_initial }}</div>
+        {% endif %}
+        <div class="sidebar-user-info">
+            <span class="sidebar-username">Admin</span>
+        </div>
+    </div>
     <nav class="sidebar-nav">
-        <a href="{% url 'admin_dashboard' %}" class="nav-item{% if request.resolver_match.url_name == 'admin_dashboard' %} active{% endif %}">
+        <a href="{% url 'admin_dashboard' %}"
+            class="nav-item{% if request.resolver_match.url_name == 'admin_dashboard' %} active{% endif %}">
             <i class="fas fa-home"></i><span class="nav-text">Dashboard</span>
         </a>
-        <a href="{% url 'admin_users' %}" class="nav-item{% if request.resolver_match.url_name == 'admin_users' %} active{% endif %}">
+        <a href="{% url 'admin_users' %}"
+            class="nav-item{% if request.resolver_match.url_name == 'admin_users' %} active{% endif %}">
             <i class="fas fa-users"></i><span class="nav-text">Users</span>
         </a>
-        <a href="{% url 'admin_refunds' %}" class="nav-item{% if request.resolver_match.url_name == 'admin_refunds' %} active{% endif %}">
+        <a href="{% url 'admin_refunds' %}"
+            class="nav-item{% if request.resolver_match.url_name == 'admin_refunds' %} active{% endif %}">
             <i class="fas fa-undo"></i><span class="nav-text">Refunds</span>
         </a>
-        <a href="{% url 'admin_transactions' %}" class="nav-item{% if request.resolver_match.url_name == 'admin_transactions' %} active{% endif %}">
+        <a href="{% url 'admin_transactions' %}"
+            class="nav-item{% if request.resolver_match.url_name == 'admin_transactions' %} active{% endif %}">
             <i class="fas fa-receipt"></i><span class="nav-text">Transactions</span>
         </a>
     </nav>

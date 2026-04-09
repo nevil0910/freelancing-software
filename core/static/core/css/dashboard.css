@@ -490,6 +490,50 @@ body {
     }
 }
 
+select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23667eea' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 20px;
+    padding-right: 45px;
+    cursor: pointer;
+    background-color: rgba(20, 20, 40, 0.5);
+}
+
+select:hover {
+    background-color: rgba(20, 20, 40, 0.7);
+    border-color: rgba(102, 126, 234, 0.5);
+}
+
+select:focus {
+    background-color: rgba(20, 20, 40, 0.8);
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 20px;
+}
+
+select option {
+    background-color: #1a1a2e;
+    color: #ffffff;
+    padding: 12px;
+    font-size: 1rem;
+}
+
+select option:hover,
+select option:checked {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #ffffff;
+}
+
+select option:disabled {
+    color: rgba(255, 255, 255, 0.4);
+    background-color: rgba(20, 20, 40, 0.5);
+}
+
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .sidebar {
