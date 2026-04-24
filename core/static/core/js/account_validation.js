@@ -81,7 +81,9 @@
             .then(response => response.json())
             .then(data => {
                 if (targetEl) {
-                    if (data.available) {
+                    if (data.error) {
+                        setAvailabilityState(targetEl, 'taken', `✗ ${data.error}`);
+                    } else if (data.available) {
                         setAvailabilityState(targetEl, 'available', '✓ Email is available');
                     } else {
                         setAvailabilityState(targetEl, 'taken', '✗ Email is already registered');

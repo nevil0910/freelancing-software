@@ -28,8 +28,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const cropModalClose = document.getElementById('cropModalClose');
     const cropSpinner = document.getElementById('cropSpinner');
 
-    let usernameTimeout = null;
-    let emailTimeout = null;
     let emailVerified = false;
     let cropper = null;
 
@@ -63,23 +61,39 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Reuse shared availability checker from account_validation.js
     usernameInput.addEventListener('input', function () {
-        const username = this.value.trim();
-        clearTimeout(usernameTimeout);
+        usernameAvailability.classList.remove('show', 'available', 'taken', 'checking');
+    });
+
+    usernameInput.addEventListener('blur', function () {
+        const raw = this.value.trim();
+        const username = raw.toLowerCase();
+        this.value = username;
+        const usernameRegex = /^[a-z0-9_-]{2,150}$/;
+        // Reset message if empty
+        if (username.length === 0 || username.length < 2) {
+            usernameAvailability.classList.remove('show', 'available', 'taken', 'checking');
+            return;
+        }
+        
         if (!username || username === originalUsername) {
             usernameAvailability.classList.remove('show', 'available', 'taken', 'checking');
             return;
         }
+        if (!usernameRegex.test(username)) {
+            AccountValidation.setAvailabilityState(usernameAvailability, 'taken', '✗ Invalid format');
+            return;
+        }
         AccountValidation.setAvailabilityState(usernameAvailability, 'checking', '⏳ Checking availability...');
-        usernameTimeout = setTimeout(() => {
-            AccountValidation.checkUsernameAvailability(username, csrfToken, usernameAvailability)
-                .catch(() => usernameAvailability.classList.remove('show', 'checking', 'available', 'taken'));
-        }, 500);
+        AccountValidation.checkUsernameAvailability(username, csrfToken, usernameAvailability)
+            .catch(() => usernameAvailability.classList.remove('show', 'checking', 'available', 'taken'));
     });
 
     emailInput.addEventListener('input', function () {
-        const email = this.value.trim();
-        clearTimeout(emailTimeout);
         resetOtpState();
+        emailAvailability.classList.remove('show', 'available', 'taken', 'checking');
+    });
+    emailInput.addEventListener('blur', function () {
+        const email = this.value.trim();
 
         if (!email || email === originalEmail) {
             emailAvailability.classList.remove('show', 'available', 'taken', 'checking');
@@ -87,19 +101,17 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         AccountValidation.setAvailabilityState(emailAvailability, 'checking', '⏳ Checking availability...');
-        emailTimeout = setTimeout(() => {
-            AccountValidation.checkEmailAvailability(email, csrfToken, emailAvailability)
-                .then((data) => {
-                    if (data.available) {
-                        sendOtpBtn.style.display = 'block';
-                        sendOtpBtn.disabled = false;
-                    }
+        AccountValidation.checkEmailAvailability(email, csrfToken, emailAvailability)
+            .then((data) => {
+                if (data.available) {
+                    sendOtpBtn.style.display = 'block';
+                    sendOtpBtn.disabled = false;
+                }
                 })
-                .catch(() => {
-                    emailAvailability.classList.remove('show', 'checking', 'available', 'taken');
-                    sendOtpBtn.style.display = 'none';
-                });
-        }, 500);
+            .catch(() => {
+                emailAvailability.classList.remove('show', 'checking', 'available', 'taken');
+                sendOtpBtn.style.display = 'none';
+            });
     });
 
     sendOtpBtn.addEventListener('click', function () {

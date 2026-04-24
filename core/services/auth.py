@@ -5,9 +5,11 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.contrib.auth.hashers import make_password
 from ..models import CustomUser, SignupOTP
 from .email import generate_otp, send_signup_otp_email, send_email_async
+from ..validators import UsernameValidate
 
 
 def home(request):
@@ -28,20 +30,36 @@ def signup(request):
     if request.method == 'POST':
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
-        username = request.POST.get('username')
-        email = request.POST.get('email')
+        username = UsernameValidate.normalize_username(request.POST.get('username'))
+        email = request.POST.get('email', '').strip().lower()
         password = request.POST.get('password')
         user_type = request.POST.get('user_type')
 
         if not username or not password or not email or not first_name or not last_name:
             return render(request, 'core/signup.html', {'error': 'Please provide all required fields'})
 
+        # Validate username format on backend (cannot rely on JS only)
+        try:
+            UsernameValidate.validate_username_format(username)
+        except ValidationError as e:
+            return render(request, 'core/signup.html', {'error': ' '.join(e.messages)})
+
+        # Validate email format and require 2+ char TLD like example.com
+        try:
+            validate_email(email)
+        except ValidationError:
+            return render(request, 'core/signup.html', {'error': 'Please enter a valid email address'})
+
+        import re
+        if not re.match(r'^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$', email):
+            return render(request, 'core/signup.html', {'error': 'Email domain must end with at least 2 letters'})
+
         # Check if username already exists
-        if CustomUser.objects.filter(username=username).exists():
+        if CustomUser.objects.filter(username__iexact=username).exists():
             return render(request, 'core/signup.html', {'error': 'Username already taken'})
 
         # Check if email already exists
-        if CustomUser.objects.filter(email=email).exists():
+        if CustomUser.objects.filter(email__iexact=email).exists():
             return render(request, 'core/signup.html', {'error': 'Email already taken'})
 
         # Validate password against Django's password validators
@@ -85,7 +103,8 @@ def login_view(request):
         return redirect('dashboard')
 
     if request.method == 'POST':
-        username_or_email = request.POST.get('username')
+        raw = request.POST.get('username')
+        username_or_email = raw.lower()
         password = request.POST.get('password')
 
         # Try to authenticate with username first

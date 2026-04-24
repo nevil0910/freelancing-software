@@ -31,3 +31,17 @@ class SpecialCharacterValidator:
 
     def get_help_text(self):
         return _("Your password must contain at least one special character.")
+
+class UsernameValidate:
+    USERNAME_REGEX = re.compile(r'^[a-zA-Z0-9._-]{2,30}$')
+
+    @staticmethod
+    def normalize_username(value: str) -> str:
+        return (value or '').strip().lower()
+
+    @staticmethod
+    def validate_username_format(username: str) -> None:
+        if not UsernameValidate.USERNAME_REGEX.fullmatch(username):
+            raise ValidationError(
+                _('Username must be at least 2 characters and contain only letters, numbers, underscores, and hyphens.')
+            )

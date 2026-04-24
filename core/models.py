@@ -3,6 +3,8 @@ from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 from datetime import timedelta
 from cloudinary.models import CloudinaryField
+from django.db.models.functions import Lower
+
 
 # Custom user model with an extra field for user type (client or freelancer)
 class CustomUser(AbstractUser):
@@ -33,6 +35,14 @@ class CustomUser(AbstractUser):
         if profile and profile.profile_photo:
             return profile.profile_photo.url
         return ''
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                Lower('username'),
+                name='uniq_customuser_username_ci'
+            )
+        ]
 
 
 # OTP Model for Password Reset

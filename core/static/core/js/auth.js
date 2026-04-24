@@ -2,6 +2,19 @@
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.querySelector('.auth-form');
     const inputs = document.querySelectorAll('.form-group input, .form-group select');
+
+    function showFormError(message) {
+        if (!form) return;
+        const oldMessage = document.querySelector('.auth-card .error-message.client-side-error');
+        if (oldMessage) {
+            oldMessage.remove();
+        }
+
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message show client-side-error';
+        errorDiv.innerHTML = `<span class="error-icon">⚠️</span><span>${message}</span>`;
+        form.parentNode.insertBefore(errorDiv, form);
+    }
     
     // Add focus effects to form inputs
     inputs.forEach(input => {
@@ -68,31 +81,35 @@ document.addEventListener('DOMContentLoaded', function() {
     // Real-time username availability check
     const usernameInput = document.getElementById('username');
     const usernameAvailability = document.getElementById('usernameAvailability');
-    let usernameTimeout;
-    
+
     if (usernameInput && usernameAvailability) {
-        usernameInput.addEventListener('input', function() {
-            const username = this.value.trim();
-            
-            // Clear previous timeout
-            clearTimeout(usernameTimeout);
-            
+        usernameInput.addEventListener('focus', function() {
+            usernameAvailability.classList.remove('show', 'available', 'taken', 'checking');
+        });
+        usernameInput.addEventListener('blur', function() {
+            const raw = this.value.trim();
+            const username = raw.toLowerCase();
+            this.value = username;
+
             // Reset message if empty
             if (username.length === 0) {
                 usernameAvailability.classList.remove('show', 'available', 'taken', 'checking');
                 return;
             }
-            
+            if(username.length === 1) {
+                usernameAvailability.textContent = 'Username must be at least 2 characters long.';
+                usernameAvailability.classList.add('show', 'taken');
+                usernameAvailability.classList.remove('checking', 'available');
+                return;
+            }
+
             // Show checking message
-            if (username.length > 0) {
+            const usernameRegex = /^[a-zA-Z0-9._-]{2,30}$/;
+            if (usernameRegex.test(username)) {
                 usernameAvailability.textContent = '⏳ Checking availability...';
                 usernameAvailability.classList.add('show', 'checking');
                 usernameAvailability.classList.remove('available', 'taken');
-                
-                // Debounce - wait 500ms after user stops typing
-                usernameTimeout = setTimeout(() => {
-                    checkUsernameAvailability(username);
-                }, 500);
+                checkUsernameAvailability(username);
             }
         });
     }
@@ -100,14 +117,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Real-time email availability check
     const emailInput = document.getElementById('email');
     const emailAvailability = document.getElementById('emailAvailability');
-    let emailTimeout;
     
     if (emailInput && emailAvailability) {
-        emailInput.addEventListener('input', function() {
+        emailInput.addEventListener('focus', function() {
+            emailAvailability.classList.remove('show', 'available', 'taken', 'checking');
+        });
+        emailInput.addEventListener('blur', function() {
             const email = this.value.trim();
-            
-            // Clear previous timeout
-            clearTimeout(emailTimeout);
             
             // Reset message if empty
             if (email.length === 0) {
@@ -116,16 +132,17 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // Basic email format validation
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,3}$/;
             if (emailRegex.test(email)) {
                 emailAvailability.textContent = '⏳ Checking availability...';
                 emailAvailability.classList.add('show', 'checking');
                 emailAvailability.classList.remove('available', 'taken');
-                
-                // Debounce - wait 500ms after user stops typing
-                emailTimeout = setTimeout(() => {
-                    checkEmailAvailability(email);
-                }, 500);
+                checkEmailAvailability(email);
+            }
+            else {
+                emailAvailability.textContent = '✗ Please enter a valid email (example: name@example.com)';
+                emailAvailability.classList.add('show', 'taken');
+                emailAvailability.classList.remove('checking', 'available');
             }
         });
     }
@@ -134,12 +151,44 @@ document.addEventListener('DOMContentLoaded', function() {
     if (form) {
         form.addEventListener('submit', function(e) {
             const button = form.querySelector('.btn-primary');
+            const usernameField = document.getElementById('username');
+            const emailField = document.getElementById('email');
+            const usernamePattern = /^[a-zA-Z0-9._-]{2,30}$/;
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,3}$/;
+
+            if (usernameField) {
+                usernameField.value = usernameField.value.trim().toLowerCase();
+                if (emailField) {
+                    if (!usernamePattern.test(usernameField.value)) {
+                        e.preventDefault();
+                        showFormError('Username must be at least 2 characters and use only letters, numbers, underscores, and hyphens.');
+                        return false;
+                    }
+                } else {
+                    const isUsername = usernamePattern.test(usernameField.value);
+                    const isEmail = emailPattern.test(usernameField.value);
+                    if (!isUsername && !isEmail) {
+                        e.preventDefault();
+                        showFormError('Enter a valid username or email.');
+                        return false;
+                    }
+                }
+            }
+
+            if (emailField) {
+                emailField.value = emailField.value.trim();
+                if (!emailPattern.test(emailField.value)) {
+                    e.preventDefault();
+                    showFormError('Please enter a valid email (example: name@example.com).');
+                    return false;
+                }
+            }
             
             // Check if on signup page and validate password
             if (passwordInput && passwordTooltip) {
                 if (!isPasswordValid(passwordInput.value)) {
                     e.preventDefault();
-                    alert('Please ensure your password meets all requirements.');
+                    showFormError('Please ensure your password meets all requirements.');
                     return false;
                 }
             }

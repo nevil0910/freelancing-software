@@ -44,7 +44,7 @@
                 <i class="fa-solid fa-money-bill-1-wave"></i>
             </div>
             <div class="stat-content">
-                <h3 class="stat-number">₹{{ total_earnings }}</h3>
+                <h3 class="stat-number" data-amount="{{ total_earnings }}">₹{{ total_earnings }}</h3>
                 <p class="stat-label">Total Earnings</p>
             </div>
         </div>
@@ -90,6 +90,24 @@
 
 {% block extra_js %}
 <script>
+    function formatINR(amount) {
+        const num = parseFloat(amount);
+        if (num < 1000) return `₹${num.toFixed(0)}`;
+        if (num < 100000) {
+            const t = num / 1000;
+            return `₹${t % 1 === 0 ? t.toFixed(0) : t.toFixed(1)}k`;
+        }
+        if (num < 10000000) {
+            const l = num / 100000;
+            return `₹${l % 1 === 0 ? l.toFixed(0) : l.toFixed(2)} L`;
+        }
+        const c = num / 10000000;
+        return `₹${c % 1 === 0 ? c.toFixed(0) : c.toFixed(2)} Cr`;
+    }
+
+    document.querySelectorAll('.stat-number[data-amount]').forEach(function (el) {
+        el.textContent = formatINR(el.getAttribute('data-amount'));
+    });
     // Prevent back navigation to cached login page
     (function () {
         history.pushState(null, null, location.href);
