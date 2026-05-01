@@ -172,6 +172,12 @@ cloudinary.config(
 # App Configuration
 APP_NAME = 'FreelanceHub'
 
+# Razorpay (Test Mode for project/demo use)
+RAZORPAY_ENABLED = config('RAZORPAY_ENABLED', default=False, cast=bool)
+RAZORPAY_KEY_ID = config('RAZORPAY_KEY_ID', default='')
+RAZORPAY_KEY_SECRET = config('RAZORPAY_KEY_SECRET', default='')
+RAZORPAY_CURRENCY = config('RAZORPAY_CURRENCY', default='INR')
+
 # Custom User Model
 AUTH_USER_MODEL = 'core.CustomUser'
 

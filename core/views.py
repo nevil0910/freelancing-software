@@ -3,6 +3,7 @@ from .services.auth import home, signup, login_view, logoutUser, dashboard, veri
 from .services.password_reset import forgot_password, verify_otp, reset_password
 from .services.availability import check_username_availability, check_email_availability
 from .services.post_job import post_job
+from .services.payments import create_post_job_order, verify_post_job_payment
 from .services.my_jobs import my_jobs
 from .services.review_proposals import review_proposals, review_job_applications
 from .services.admin_panel import (

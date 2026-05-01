@@ -3,7 +3,6 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
 from ..forms import JobForm
-from .escrow import fund_escrow_for_job
 
 
 @login_required
@@ -19,19 +18,9 @@ def post_job(request):
         return redirect('dashboard')
 
     if request.method == 'POST':
-        form = JobForm(request.POST)
-        if form.is_valid():
-            job = form.save(commit=False)
-            job.client = request.user
-            job.status = 'OPEN'
-            job.save()
-            fund_escrow_for_job(job)
-            messages.success(request, 'Job posted successfully!')
-            return redirect('my_jobs')
-        else:
-            # Form has validation errors
-            messages.error(request, 'Please correct the errors below.')
-    else:
-        form = JobForm()
+        messages.error(request, 'Please complete the payment checkout to post your job.')
+        return redirect('post_job')
+
+    form = JobForm()
 
     return render(request, 'core/post_job.html', {'form': form})

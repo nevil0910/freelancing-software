@@ -4,183 +4,305 @@
 {% block title %}Post a Job - {{ APP_NAME }}{% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'core/css/dashboard.css' %}">
-    <link rel="stylesheet" href="{% static 'core/css/post_job.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/post_job.css' %}">
 {% endblock %}
 
 {% block page_container_class %}dashboard-container{% endblock %}
 
 {% block content %}
-        {% include 'core/client_sidebar.html' %}
-        
-        <!-- Main Content -->
-        <main class="main-content">
-            <a href="{% url 'dashboard' %}" class="btn-back">
-                <i class="fas fa-arrow-left"></i> Back to Dashboard
-            </a>
-            <div class="form-container">
-                <div class="form-header">
-                    <h1><i class="fas fa-briefcase"></i> Post a New Job</h1>
-                    <p>Fill in the details below to create a job listing</p>
-                </div>
+{% include 'core/client_sidebar.html' %}
 
-                {% if messages %}
-                    {% for message in messages %}
-                        {% if 'logged out' not in message|lower %}
-                        {% if 'blocked' not in message|lower %}
-                        <div class="alert alert-{{ message.tags }}">
-                            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"></i>
-                            {{ message }}
-                        </div>
-                        {% endif %}
-                        {% endif %}
-                    {% endfor %}
+<!-- Main Content -->
+<main class="main-content">
+    <a href="{% url 'dashboard' %}" class="btn-back">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+    <div class="form-container">
+        <div class="form-header">
+            <h1><i class="fas fa-briefcase"></i> Post a New Job</h1>
+            <p>Fill in the details below to create a job listing</p>
+        </div>
+
+        {% if messages %}
+        {% for message in messages %}
+        {% if 'logged out' not in message|lower %}
+        {% if 'blocked' not in message|lower %}
+        {% if 'Refund' not in message|lower %}
+        <div class="alert alert-{{ message.tags }}">
+            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"></i>
+            {{ message }}
+        </div>
+        {% endif %}
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+
+        <form method="post" class="job-form">
+            {% csrf_token %}
+
+            <div class="form-group full-width">
+                <label for="{{ form.title.id_for_label }}">
+                    {{ form.title.label }} <span class="required">*</span>
+                </label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                {% for error in form.title.errors %}
+                <span class="error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    {{ error }}
+                </span>
+                {% endfor %}
                 {% endif %}
-
-                <form method="post" class="job-form">
-                    {% csrf_token %}
-                    
-                    <div class="form-group full-width">
-                        <label for="{{ form.title.id_for_label }}">
-                            {{ form.title.label }} <span class="required">*</span>
-                        </label>
-                        {{ form.title }}
-                        {% if form.title.errors %}
-                            {% for error in form.title.errors %}
-                                <span class="error-message">
-                                    <i class="fas fa-exclamation-circle"></i>
-                                    {{ error }}
-                                </span>
-                            {% endfor %}
-                        {% endif %}
-                    </div>
-
-                    <div class="form-group full-width">
-                        <label for="{{ form.tagline.id_for_label }}">
-                            {{ form.tagline.label }} <span class="required">*</span>
-                        </label>
-                        {{ form.tagline }}
-                        {% if form.tagline.errors %}
-                            {% for error in form.tagline.errors %}
-                                <span class="error-message">
-                                    <i class="fas fa-exclamation-circle"></i>
-                                    {{ error }}
-                                </span>
-                            {% endfor %}
-                        {% endif %}
-                    </div>
-
-                    <div class="form-group full-width">
-                        <label for="{{ form.description.id_for_label }}">
-                            {{ form.description.label }} <span class="required">*</span>
-                        </label>
-                        {{ form.description }}
-                        {% if form.description.errors %}
-                            {% for error in form.description.errors %}
-                                <span class="error-message">
-                                    <i class="fas fa-exclamation-circle"></i>
-                                    {{ error }}
-                                </span>
-                            {% endfor %}
-                        {% endif %}
-                    </div>
-
-                    <div class="form-group">
-                        <label for="{{ form.category.id_for_label }}">
-                            {{ form.category.label }} <span class="required">*</span>
-                        </label>
-                        {{ form.category }}
-                        <span class="help-text">Select the job category</span>
-                        {% if form.category.errors %}
-                            {% for error in form.category.errors %}
-                                <span class="error-message">
-                                    <i class="fas fa-exclamation-circle"></i>
-                                    {{ error }}
-                                </span>
-                            {% endfor %}
-                        {% endif %}
-                    </div>
-
-                    <div class="form-group">
-                        <label for="{{ form.budget.id_for_label }}">
-                            {{ form.budget.label }} <span class="required">*</span>
-                        </label>
-                        {{ form.budget }}
-                        <span class="help-text">Enter the budget in Indian Rupees (INR)</span>
-                        {% if form.budget.errors %}
-                            {% for error in form.budget.errors %}
-                                <span class="error-message">
-                                    <i class="fas fa-exclamation-circle"></i>
-                                    {{ error }}
-                                </span>
-                            {% endfor %}
-                        {% endif %}
-                    </div>
-
-                    <div class="form-group">
-                        <label for="{{ form.deadline.id_for_label }}">
-                            {{ form.deadline.label }} <span class="required">*</span>
-                        </label>
-                        {{ form.deadline }}
-                        <span class="help-text">Expected completion date</span>
-                        {% if form.deadline.errors %}
-                            {% for error in form.deadline.errors %}
-                                <span class="error-message">
-                                    <i class="fas fa-exclamation-circle"></i>
-                                    {{ error }}
-                                </span>
-                            {% endfor %}
-                        {% endif %}
-                    </div>
-
-                    <div class="form-group">
-                        <label for="{{ form.required_freelancers.id_for_label }}">
-                            {{ form.required_freelancers.label }} <span class="required">*</span>
-                        </label>
-                        {{ form.required_freelancers }}
-                        <span class="help-text">Number of freelancers needed for this job</span>
-                        {% if form.required_freelancers.errors %}
-                            {% for error in form.required_freelancers.errors %}
-                                <span class="error-message">
-                                    <i class="fas fa-exclamation-circle"></i>
-                                    {{ error }}
-                                </span>
-                            {% endfor %}
-                        {% endif %}
-                    </div>
-
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-paper-plane"></i>
-                            Post Job
-                        </button>
-                        <a href="{% url 'dashboard' %}" class="btn btn-secondary">
-                            <i class="fas fa-times"></i>
-                            Cancel
-                        </a>
-                    </div>
-                </form>
             </div>
-        </main>
+
+            <div class="form-group full-width">
+                <label for="{{ form.tagline.id_for_label }}">
+                    {{ form.tagline.label }} <span class="required">*</span>
+                </label>
+                {{ form.tagline }}
+                {% if form.tagline.errors %}
+                {% for error in form.tagline.errors %}
+                <span class="error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    {{ error }}
+                </span>
+                {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="form-group full-width">
+                <label for="{{ form.description.id_for_label }}">
+                    {{ form.description.label }} <span class="required">*</span>
+                </label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                {% for error in form.description.errors %}
+                <span class="error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    {{ error }}
+                </span>
+                {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.category.id_for_label }}">
+                    {{ form.category.label }} <span class="required">*</span>
+                </label>
+                {{ form.category }}
+                <span class="help-text">Select the job category</span>
+                {% if form.category.errors %}
+                {% for error in form.category.errors %}
+                <span class="error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    {{ error }}
+                </span>
+                {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.budget.id_for_label }}">
+                    {{ form.budget.label }} <span class="required">*</span>
+                </label>
+                {{ form.budget }}
+                <span class="help-text">Enter the budget in Indian Rupees (INR)</span>
+                {% if form.budget.errors %}
+                {% for error in form.budget.errors %}
+                <span class="error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    {{ error }}
+                </span>
+                {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.deadline.id_for_label }}">
+                    {{ form.deadline.label }} <span class="required">*</span>
+                </label>
+                {{ form.deadline }}
+                <span class="help-text">Expected completion date</span>
+                {% if form.deadline.errors %}
+                {% for error in form.deadline.errors %}
+                <span class="error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    {{ error }}
+                </span>
+                {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.required_freelancers.id_for_label }}">
+                    {{ form.required_freelancers.label }} <span class="required">*</span>
+                </label>
+                {{ form.required_freelancers }}
+                <span class="help-text">Number of freelancers needed for this job</span>
+                {% if form.required_freelancers.errors %}
+                {% for error in form.required_freelancers.errors %}
+                <span class="error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    {{ error }}
+                </span>
+                {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane"></i>
+                    Post Job
+                </button>
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</main>
 {% endblock %}
 
 {% block extra_js %}
-    <script>
-        // Prevent back navigation to cached page
-        (function() {
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    // Prevent back navigation to cached page
+    (function () {
+        history.pushState(null, null, location.href);
+        window.addEventListener('popstate', function () {
             history.pushState(null, null, location.href);
-            window.addEventListener('popstate', function() {
-                history.pushState(null, null, location.href);
-            });
-        })();
-
-        // Set minimum date for deadline to today
-        document.addEventListener('DOMContentLoaded', function() {
-            const deadlineInput = document.querySelector('input[type="date"]');
-            if (deadlineInput) {
-                const today = new Date().toISOString().split('T')[0];
-                deadlineInput.setAttribute('min', today);
-            }
         });
-    </script>
+    })();
+
+    // Set minimum date for deadline to today
+    document.addEventListener('DOMContentLoaded', function () {
+        const deadlineInput = document.querySelector('input[type="date"]');
+        const form = document.querySelector('.job-form');
+        const submitButton = form ? form.querySelector('button[type="submit"]') : null;
+        const createOrderUrl = "{% url 'create_post_job_order' %}";
+        const verifyPaymentUrl = "{% url 'verify_post_job_payment' %}";
+
+        if (deadlineInput) {
+            const today = new Date().toISOString().split('T')[0];
+            deadlineInput.setAttribute('min', today);
+        }
+
+        function getCsrfToken() {
+            const csrfField = document.querySelector('input[name="csrfmiddlewaretoken"]');
+            return csrfField ? csrfField.value : '';
+        }
+
+        function toggleSubmitting(isSubmitting) {
+            if (!submitButton) return;
+            submitButton.disabled = isSubmitting;
+            submitButton.innerHTML = isSubmitting
+                ? '<i class="fas fa-spinner fa-spin"></i> Processing Payment...'
+                : '<i class="fas fa-paper-plane"></i> Pay & Post Job';
+        }
+
+        function showError(message) {
+            alert(message || 'Something went wrong. Please try again.');
+        }
+
+        function verifyPayment(paymentResponse) {
+            const payload = new URLSearchParams();
+            payload.append('razorpay_order_id', paymentResponse.razorpay_order_id);
+            payload.append('razorpay_payment_id', paymentResponse.razorpay_payment_id);
+            payload.append('razorpay_signature', paymentResponse.razorpay_signature);
+
+            return fetch(verifyPaymentUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCsrfToken(),
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: payload,
+            }).then(response => response.json());
+        }
+
+        if (submitButton) {
+            submitButton.innerHTML = '<i class="fas fa-paper-plane"></i> Pay & Post Job';
+        }
+
+        if (form) {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                toggleSubmitting(true);
+
+                fetch(createOrderUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCsrfToken(),
+                    },
+                    body: new FormData(form),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.success) {
+                            const errorText = data.error || 'Please correct the form and try again.';
+                            showError(errorText);
+                            toggleSubmitting(false);
+                            return;
+                        }
+
+                        const options = {
+                            key: data.key,
+                            amount: data.amount,
+                            currency: data.currency,
+                            name: data.name,
+                            description: data.description,
+                            order_id: data.order_id,
+                            prefill: data.prefill || {},
+                            theme: {
+                                color: '#6c5ce7',
+                            },
+                            method: {
+                                card: false,
+                                upi: true,
+                                netbanking: false,
+                                wallet: true,
+                                emi: false,
+                                paylater: false
+                            },
+                            prefill: {
+                                name: data.prefill?.name || "",
+                                email: data.prefill?.email || ""
+                            },
+                            handler: function (paymentResponse) {
+                                verifyPayment(paymentResponse)
+                                    .then(verifyData => {
+                                        if (!verifyData.success) {
+                                            showError(verifyData.error || 'Payment verification failed.');
+                                            toggleSubmitting(false);
+                                            return;
+                                        }
+                                        window.location.href = verifyData.redirect_url;
+                                    })
+                                    .catch(() => {
+                                        showError('Payment verification failed. Please contact support if amount was deducted.');
+                                        toggleSubmitting(false);
+                                    });
+                            },
+                            modal: {
+                                ondismiss: function () {
+                                    toggleSubmitting(false);
+                                    showError('Payment was cancelled. Job was not posted.');
+                                },
+                            },
+                        };
+
+                        const razorpay = new Razorpay(options);
+                        razorpay.open();
+                    })
+                    .catch(() => {
+                        showError('Unable to start payment. Please try again.');
+                        toggleSubmitting(false);
+                    });
+            });
+        }
+    });
+</script>
 {% endblock %}
