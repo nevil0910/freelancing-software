@@ -119,6 +119,8 @@ class Job(models.Model):
         ('SUBMITTED', 'Submitted'),
         ('COMPLETED', 'Completed'),
         ('CLOSED', 'Closed'),
+        ('OVERDUE', 'Overdue'),
+        ('REFUNDED', 'Refunded'),
     )
     
     CATEGORY_CHOICES = (
@@ -147,7 +149,16 @@ class Job(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     submitted_at = models.DateTimeField(null=True, blank=True)
     completed_at = models.DateTimeField(null=True, blank=True)
+    overdue_at = models.DateTimeField(null=True, blank=True)
+    late_submission = models.BooleanField(default=False)
     auto_completed = models.BooleanField(default=False)
+    previous_status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        null=True,
+        blank=True,
+        help_text="Stores job status prior to becoming OVERDUE so it can be restored."
+    )
     
     def __str__(self):
         return f"{self.title} - {self.client.username}"

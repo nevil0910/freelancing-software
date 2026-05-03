@@ -92,7 +92,7 @@
                                     </td>
                                     <td>
                                         <div class="action-buttons">
-                                            {% if job.status == 'CLOSED' %}
+                                            {% if job.status == 'CLOSED' or job.status == 'REFUNDED' %}
                                             <a href="{% url 'job_view' job.id %}" class="btn-action btn-view">
                                                 <i class="fas fa-edit"></i> View
                                             </a>
@@ -101,7 +101,8 @@
                                                 <i class="fas fa-edit"></i> View & Edit
                                             </a>
                                             {% endif %}
-                                            {% if job.status != 'CLOSED' %}
+                                            
+                                            {% if job.status != 'CLOSED' and job.status != 'REFUNDED' %}
                                             <form method="post" action="{% url 'close_job' job.id %}" style="display: inline;">
                                                 {% csrf_token %}
                                                 <button type="submit" class="btn-action btn-close" onclick="return confirm('Are you sure you want to close this job?');">

@@ -21,6 +21,7 @@ from .services.browse_jobs import browse_jobs
 from .services.my_proposals import my_proposals
 from .services.active_jobs import active_jobs
 from .services.update_deadline import update_deadline
+from .services.late_work import continue_late_work, refund_overdue_job
 from .services.submit_work import submit_work
 from .services.review_submission import review_submission
 from .services.submit_review import submit_review, get_pending_reviews

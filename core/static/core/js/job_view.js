@@ -483,8 +483,80 @@ window.reviewSubmission = function (action) {
 };
 
 // ============================================================
-// Full-Width Chat (job_view page)
+// Continue Late Work (client)
 // ============================================================
+window.continueLateWork = function () {
+    if (!confirm('Continue allowing late work on this job? The freelancer can keep working.')) return;
+
+    const btn = document.getElementById('continueBtn');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    }
+
+    fetch('/job/' + config.jobId + '/continue-late-work/', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': (window.chatConfig && window.chatConfig.csrfToken) || getCsrf() }
+    })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                alert('Job status changed to In Progress. Late work is now allowed.');
+                location.reload();
+            } else {
+                alert(data.error || 'Error processing request.');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-redo"></i> Continue Late Work';
+                }
+            }
+        })
+        .catch(() => {
+            alert('Network error.');
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-redo"></i> Continue Late Work';
+            }
+        });
+};
+
+// ============================================================
+// Refund Overdue Job (client)
+// ============================================================
+window.refundJob = function () {
+    if (!confirm('Refund this job? The escrow will be returned to your wallet and the job will be marked as REFUNDED.')) return;
+
+    const btn = document.getElementById('refundBtn');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    }
+
+    fetch('/job/' + config.jobId + '/refund-job/', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': (window.chatConfig && window.chatConfig.csrfToken) || getCsrf() }
+    })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                alert('Job refunded. Funds have been returned to your wallet.');
+                location.reload();
+            } else {
+                alert(data.error || 'Error processing request.');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-undo"></i> Refund Job';
+                }
+            }
+        })
+        .catch(() => {
+            alert('Network error.');
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-undo"></i> Refund Job';
+            }
+        });
+};
 (function () {
     if (!config.canChat || !config.jobId) return;
 

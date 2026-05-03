@@ -153,6 +153,18 @@
                                     </p>
                                 </div>
 
+                            {% elif job.status == 'OVERDUE' and is_hired_freelancer %}
+                                <div class="applied-status">
+                                    <div class="status-icon">
+                                        <i class="fas fa-exclamation-circle" style="color:#f87171;"></i>
+                                    </div>
+                                    <p class="status-text">Job Status</p>
+                                    <p class="status-value" style="color:#f87171;">Overdue</p>
+                                    <p style="font-size:0.85rem;color:rgba(255,255,255,0.55);margin-top:10px;text-align:center;">
+                                        <i class="fas fa-clock"></i> Deadline has passed. Client can still extend or refund.
+                                    </p>
+                                </div>
+
                             {% elif job.status == 'SUBMITTED' %}
                                 <div class="applied-status">
                                     <div class="status-icon">
@@ -198,6 +210,82 @@
                              ================================ -->
 
                         {% if job.status == 'IN_PROGRESS' or job.status == 'SUBMITTED' %}
+                        <!-- Edit Deadline (IN_PROGRESS or SUBMITTED) -->
+                        <div class="panel-card">
+                            <p class="panel-card-title">
+                                <i class="fas fa-calendar-edit"></i> Update Deadline
+                            </p>
+                            <p style="font-size:0.82rem;color:rgba(255,255,255,0.45);margin-bottom:14px;">
+                                Only the project deadline can be modified while the job is in progress.
+                            </p>
+                            <form method="post" action="{% url 'update_deadline' job.id %}" class="edit-form">
+                                {% csrf_token %}
+                                <div class="form-row">
+                                    <label class="form-label">New Deadline</label>
+                                    {{ deadline_form.deadline }}
+                                    {% if deadline_form.deadline.errors %}
+                                        <ul class="errorlist">
+                                            {% for e in deadline_form.deadline.errors %}
+                                            <li>{{ e }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                </div>
+                                <button type="submit" class="btn-save">
+                                    <i class="fas fa-save"></i> Update Deadline
+                                </button>
+                            </form>
+                        </div>
+
+                        {% elif job.status == 'OVERDUE' %}
+                        <!-- Overdue Actions (Client) -->
+                        <div class="panel-card">
+                            <p class="panel-card-title">
+                                <i class="fas fa-exclamation-triangle"></i> Job Overdue
+                            </p>
+                            <p style="font-size:0.82rem;color:rgba(255,255,255,0.45);margin-bottom:14px;">
+                                The deadline has passed. Choose an action below.
+                            </p>
+                            <div style="display:flex;flex-direction:column;gap:10px;">
+                                {% if job.hired_freelancer %}
+                                <button type="button" class="btn-save" id="continueBtn" onclick="continueLateWork()">
+                                    <i class="fas fa-redo"></i> Continue Late Work
+                                </button>
+                                {% endif %}
+                                <button type="button" class="btn-close-job" id="refundBtn" onclick="refundJob()" style="background-color:#f87171; color: white;">
+                                    <i class="fas fa-undo"></i> Refund Job
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Update Deadline (show for OVERDUE as well) -->
+                        <div class="panel-card">
+                            <p class="panel-card-title">
+                                <i class="fas fa-calendar-edit"></i> Update Deadline
+                            </p>
+                            <p style="font-size:0.82rem;color:rgba(255,255,255,0.45);margin-bottom:14px;">
+                                Only the project deadline can be modified while the job is in progress or overdue.
+                            </p>
+                            <form method="post" action="{% url 'update_deadline' job.id %}" class="edit-form">
+                                {% csrf_token %}
+                                <div class="form-row">
+                                    <label class="form-label">New Deadline</label>
+                                    {{ deadline_form.deadline }}
+                                    {% if deadline_form.deadline.errors %}
+                                        <ul class="errorlist">
+                                            {% for e in deadline_form.deadline.errors %}
+                                            <li>{{ e }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                </div>
+                                <button type="submit" class="btn-save">
+                                    <i class="fas fa-save"></i> Update Deadline
+                                </button>
+                            </form>
+                        </div>
+
+                        {% elif job.status == 'IN_PROGRESS' or job.status == 'SUBMITTED' %}
                         <!-- Accepted Freelancers -->
                         <div class="panel-card">
                             <p class="panel-card-title">
@@ -310,6 +398,7 @@
                         </div>
                         {% endif %}
 
+                        {% if job.status != 'REFUNDED' %}
                         {% if job.status != 'CLOSED' %}
                         <div class="panel-card">
                             <p class="panel-card-title">
@@ -358,6 +447,7 @@
                             </form>
                         </div>
                         {% endif %}
+                        {% endif %}
 
                         {% if job.status == 'OPEN' %}
                         <div class="panel-card danger-zone">
@@ -387,12 +477,13 @@
                      BELOW SECTION: Submission + Chat (full width)
                      ================================================== -->
 
-                {% if user.user_type == 'freelancer' and is_hired_freelancer and job.status == 'IN_PROGRESS' %}
+                    {% if user.user_type == 'freelancer' and is_hired_freelancer %}
+                        {% if job.status == 'IN_PROGRESS' or job.status == 'OVERDUE' %}
                 <!-- Freelancer: Submit Work Form -->
                 <div class="full-width-section">
                     <div class="job-details-card">
                         <p class="section-title">
-                            <i class="fas fa-cloud-upload-alt"></i> Submit Your Work
+                            <i class="fas fa-cloud-upload-alt"></i> {% if job.status == 'OVERDUE' %}Submit Late Work{% else %}Submit Your Work{% endif %}
                         </p>
                         <div class="form-row" style="margin-bottom:14px;">
                             <label class="form-label">Message / Notes</label>
@@ -407,11 +498,12 @@
                         </div>
                         <div class="modal-alert" id="submitAlert" style="display:none;"></div>
                         <button type="button" class="btn-save" id="submitWorkBtn" onclick="submitWork()" style="max-width:280px;">
-                            <i class="fas fa-paper-plane"></i> Submit Work
+                            <i class="fas fa-paper-plane"></i> {% if job.status == 'OVERDUE' %}Submit Late{% else %}Submit Work{% endif %}
                         </button>
                     </div>
                 </div>
-                {% endif %}
+                        {% endif %}
+                    {% endif %}
 
                 {% if job.status == 'SUBMITTED' or job.status == 'COMPLETED' or job.status == 'CLOSED' %}
                 {% if latest_submission %}
@@ -616,7 +708,7 @@
                         <div class="app-actions">
                             {% if app.status == 'PENDING' %}
                             <button class="btn-accept" onclick="handleApplication({{ app.id }}, 'accept')" id="acceptBtn{{ app.id }}">
-                                <i class="fas fa-check"></i> Accept
+                                <i class="fas fa-check"></i> {% if job.status == 'OVERDUE' %}Accept Late{% else %}Accept{% endif %}
                             </button>
                             <button class="btn-reject" onclick="handleApplication({{ app.id }}, 'reject')" id="rejectBtn{{ app.id }}">
                                 <i class="fas fa-times"></i> Reject

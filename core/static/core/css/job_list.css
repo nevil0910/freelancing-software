@@ -225,6 +225,17 @@
     border: 1px solid rgba(46, 213, 115, 0.3);
 }
 
+.badge-overdue {
+    background: rgba(233, 169, 40, 0.241);
+    color: rgba(255, 206, 108, 0.563);
+    border: 1px solid rgba(255, 107, 107, 0.3);
+}
+.badge-refunded {
+    background: rgba(33, 255, 222, 0.251);
+    color: #21ffde;
+    border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
 .badge-closed {
     background: rgba(255, 107, 107, 0.2);
     color: #ff6b6b;

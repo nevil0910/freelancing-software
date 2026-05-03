@@ -37,8 +37,8 @@ urlpatterns = [
     path('my-proposals/', views.my_proposals, name='my_proposals'),
     path('active-jobs/', views.active_jobs, name='active_jobs'),
     path('job/<int:job_id>/update-deadline/', views.update_deadline, name='update_deadline'),
-
-    # Submission & Review URLs
+    path('job/<int:job_id>/continue-late-work/', views.continue_late_work, name='continue_late_work'),
+    path('job/<int:job_id>/refund-job/', views.refund_overdue_job, name='refund_overdue_job'),
     path('job/<int:job_id>/submit-work/', views.submit_work, name='submit_work'),
     path('job/<int:job_id>/review-submission/', views.review_submission, name='review_submission'),
     path('job/<int:job_id>/submit-review/', views.submit_review, name='submit_review'),

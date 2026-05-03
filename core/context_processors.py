@@ -1,5 +1,6 @@
 from django.conf import settings
 from .services.auto_complete import check_auto_complete
+from .services.overdue import check_overdue
 from .models import ChatMessage, Job, Review
 from django.db.models import Q
 
@@ -13,6 +14,12 @@ def chat_context(request):
         return {}
 
     check_auto_complete()
+    # Mark any IN_PROGRESS jobs whose deadline passed as OVERDUE
+    try:
+        check_overdue()
+    except Exception:
+        # Keep context processing resilient; don't break page render on errors
+        pass
     user = request.user
 
     # Total unread messages (client or freelancer)

@@ -48,7 +48,7 @@ def submit_work(request, job_id):
     if not is_authorized:
         return JsonResponse({'success': False, 'error': 'You are not assigned to this job.'}, status=403)
 
-    if job.status not in ('IN_PROGRESS', 'SUBMITTED'):
+    if job.status not in ('IN_PROGRESS', 'SUBMITTED', 'OVERDUE'):
         return JsonResponse({'success': False, 'error': 'Job is not in a submittable state.'}, status=400)
 
     message = request.POST.get('message', '').strip()
@@ -98,6 +98,11 @@ def submit_work(request, job_id):
 
     # Update job status
     job.status = 'SUBMITTED'
+    job.submitted_at = timezone.now()
+    
+    # Flag if submission is late (after deadline)
+    if job.status == 'OVERDUE' or (job.deadline and timezone.now().date() > job.deadline):
+        job.late_submission = True
     job.submitted_at = timezone.now()
     job.save()
 

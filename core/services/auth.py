@@ -168,7 +168,11 @@ def dashboard(request):
         return render(request, 'core/admin_dashboard.html', context)
     if user.user_type == 'client':
         posted_jobs = Job.objects.filter(client=user).count()
-        total_spent = Earning.objects.filter(job__client=user).aggregate(total=Sum('amount'))['total'] or 0
+        # i want here total spent from Job.budget
+        total_spent = Job.objects.filter(
+            client=user,
+            status__in=['OPEN','IN_PROGRESS', 'SUBMITTED', 'COMPLETED', 'CLOSED', 'OVERDUE']
+        ).aggregate(total=Sum('budget'))['total'] or 0
         active_projects = Job.objects.filter(client=user, status='IN_PROGRESS').count()
         completed_projects = Job.objects.filter(client=user, status__in=['COMPLETED', 'CLOSED']).count()
 

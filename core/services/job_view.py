@@ -42,7 +42,7 @@ def job_view(request, job_id):
             app.review_avg = rating_map.get(app.freelancer_id, 0)
         has_applied = False
         user_application = None
-        if job.status in ('IN_PROGRESS', 'SUBMITTED'):
+        if job.status in ('IN_PROGRESS', 'SUBMITTED', 'OVERDUE'):
             form = None
             deadline_form = DeadlineForm(instance=job)
         else:
