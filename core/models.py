@@ -153,7 +153,6 @@ class Job(models.Model):
     late_submission = models.BooleanField(default=False)
     auto_completed = models.BooleanField(default=False)
     previous_status = models.CharField(
-        max_length=20,
         choices=STATUS_CHOICES,
         null=True,
         blank=True,
