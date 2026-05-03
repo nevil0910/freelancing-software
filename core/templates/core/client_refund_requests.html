@@ -16,12 +16,12 @@
       style="display:grid;grid-template-columns: 1fr 2fr auto;gap:12px;align-items:center;">
       {% csrf_token %}
       <select name="job_id" required
-        style="padding:10px;border-radius:10px;background:rgba(255,255,255,0.06);color:#fff;border:1px solid rgba(255,255,255,0.15);">
+        style="padding:10px;border-radius:10px;background:rgba(255, 255, 255, 0.11);color:#fff;border:1px solid rgba(255, 255, 255, 0.2);">
         <option value="">Select Job</option>
         {% for j in jobs %}<option value="{{ j.id }}">{{ j.title }}</option>{% endfor %}
       </select>
       <input type="text" name="reason" required placeholder="Reason for cancellation/refund"
-        style="padding:10px;border-radius:10px;background:rgba(255,255,255,0.06);color:#fff;border:1px solid rgba(255,255,255,0.15);">
+        style="padding:10px;border-radius:10px;background:rgba(255, 255, 255, 0.11);color:#fff;border:1px solid rgba(255, 255, 255, 0.2);">
       <button class="btn-post-job" type="submit"><i class="fas fa-paper-plane"></i> Submit</button>
     </form>
   </div>
@@ -48,7 +48,7 @@
         </tr>
         {% empty %}
         <tr>
-          <td colspan="5" style="text-align:center;color:rgba(255,255,255,0.65);">No requests yet.</td>
+          <td colspan="5" style="text-align:center;color:rgba(255, 255, 255, 0.7);">No requests yet.</td>
         </tr>
         {% endfor %}
       </tbody>

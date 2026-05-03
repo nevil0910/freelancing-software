@@ -1,7 +1,7 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     overflow-x: hidden;
-    background: #0f0f1e;
+    background: #09090b;
     color: #ffffff;
 }
 
@@ -104,7 +104,7 @@ body {
 }
 
 .btn-secondary {
-    background: #ffffff1a;
+    background: rgba(255, 255, 255, 0.15);
     color: #ffffff;
     border: 2px solid #ffffff4d;
     backdrop-filter: blur(10px);
@@ -137,9 +137,9 @@ body {
 
 .floating-card {
     position: absolute;
-    background: #ffffff0d;
+    background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
-    border: 1px solid #ffffff1a;
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 20px;
     padding: 30px;
     width: 240px;

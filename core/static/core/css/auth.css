@@ -1,7 +1,7 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     overflow-x: hidden;
-    background: #0a1428;
+    background: #09090b;
     color: #ffffff;
 }
 
@@ -40,9 +40,9 @@ body {
 
 /* Auth Card */
 .auth-card {
-    background: #ffffff0d;
+    background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(20px);
-    border: 1px solid #ffffff1a;
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 24px;
     padding: 50px 40px;
     box-shadow: 0 20px 60px #0000004d;
@@ -143,8 +143,8 @@ body {
     width: 100%;
     padding: 16px 20px;
     font-size: 1rem;
-    background: #ffffff0d;
-    border: 2px solid #ffffff1a;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.15);
     border-radius: 12px;
     color: #ffffff;
     transition: all 0.3s ease;
@@ -152,10 +152,10 @@ body {
 }
 
 .form-group input:-webkit-autofill {
-    -webkit-box-shadow: 0 0 0px 1000px #ffffff0d inset;
+    -webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.1) inset;
     caret-color: #ffffff;
     -webkit-text-fill-color: #ffffff;
-    border-color: #ffffff1a;
+    border-color: rgba(255, 255, 255, 0.15);
     transition: background-color 5000s ease-in-out 0s;
 }
 
@@ -163,7 +163,7 @@ body {
 .form-group select:focus {
     outline: none;
     border-color: #8b5cf6;
-    background: #ffffff14;
+    background: rgba(255, 255, 255, 0.13);
     box-shadow: 0 0 0 4px #8b5cf626;
 }
 
@@ -176,7 +176,7 @@ body {
 }
 
 .form-group select option {
-    background: #1a1a3e;
+    background: #09090b;
     color: #ffffff;
 }
 
@@ -294,8 +294,8 @@ body {
 .switch-wrapper {
     position: relative;
     display: flex;
-    background: #ffffff0d;
-    border: 2px solid #ffffff1a;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.15);
     border-radius: 16px;
     padding: 8px;
     overflow: hidden;
@@ -370,7 +370,7 @@ body {
 }
 
 .switch-wrapper input#client:checked~.switch-left .switch-subtext {
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(255, 255, 255, 0.95);
 }
 
 /* Text color changes for checked states */
@@ -379,7 +379,7 @@ body {
 }
 
 .switch-wrapper input#freelancer:checked~.switch-right .switch-subtext {
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(255, 255, 255, 0.95);
 }
 
 .switch-wrapper input#client:checked~.switch-left .switch-icon,
@@ -477,7 +477,7 @@ body {
     border: 1px solid #5533a580;
     border-radius: 16px;
     padding: 20px;
-    box-shadow: 0 20px 60px rgba(78, 40, 165, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 60px rgba(78, 40, 165, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(10px);
 }
 
@@ -495,11 +495,11 @@ body {
     align-items: center;
     gap: 10px;
     margin-bottom: 10px;
-    color: rgba(255, 255, 255, 0.95);
+    color: rgba(255, 255, 255, 1);
     transition: all 0.3s ease;
     padding: 8px;
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.15);
 }
 
 .requirement:last-child {
@@ -522,7 +522,7 @@ body {
 }
 
 .requirement.invalid .requirement-icon {
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(255, 255, 255, 0.75);
 }
 
 /* Availability Messages */
@@ -605,16 +605,16 @@ body {
     text-align: center;
     font-weight: 700;
     padding: 10px !important;
-    border: 2px solid #ffffff1a !important;
+    border: 2px solid rgba(255, 255, 255, 0.15) !important;
     border-radius: 12px;
-    background: #ffffff0d;
+    background: rgba(255, 255, 255, 0.1);
     color: #ffffff;
     transition: all 0.3s ease;
 }
 
 .otp-box:focus {
     border-color: #8b5cf6 !important;
-    background: #ffffff14;
+    background: rgba(255, 255, 255, 0.13);
     box-shadow: 0 0 0 4px #8b5cf626;
     outline: none;
 }

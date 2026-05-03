@@ -1,13 +1,13 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    Profile Page Styles — FreelanceHub
-   Extends dashboard.css palette: #0f0f1e bg, #8b5cf6/#c084fc accent, glass
+   Extends dashboard.css palette: #09090b bg, #8b5cf6/#c084fc accent, glass
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* ── Profile Header ─────────────────────────────────────────────────────── */
 .profile-header {
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(255, 255, 255, 0.09);
     backdrop-filter: blur(24px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 24px;
     padding: 40px;
     display: flex;
@@ -53,7 +53,7 @@
     font-size: 2.6rem;
     font-weight: 700;
     color: #fff;
-    border: 3px solid rgba(255, 255, 255, 0.15);
+    border: 3px solid rgba(255, 255, 255, 0.2);
     box-shadow: 0 0 30px rgba(139, 92, 246, 0.4);
 }
 
@@ -65,7 +65,7 @@
     height: 32px;
     border-radius: 50%;
     background: linear-gradient(135deg, #8b5cf6, #c084fc);
-    border: 2px solid #0f0f1e;
+    border: 2px solid #09090b;
     color: #fff;
     font-size: 0.75rem;
     cursor: pointer;
@@ -167,8 +167,8 @@
 .filter-pill {
     padding: 8px 18px;
     border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.17);
+    background: rgba(255, 255, 255, 0.1);
     color: #a5b4fc;
     font-size: 0.88rem;
     cursor: pointer;
@@ -211,7 +211,7 @@
     overflow: hidden;
     cursor: pointer;
     border-radius: 4px;
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(255, 255, 255, 0.09);
 }
 
 .post-cell img,
@@ -257,8 +257,8 @@
     grid-column: 1 / -1;
     text-align: center;
     padding: 80px 40px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px dashed rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px dashed rgba(255, 255, 255, 0.15);
     border-radius: 16px;
     color: #6b7280;
 }
@@ -328,7 +328,7 @@
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.13);
     border: none;
     color: #a5b4fc;
     cursor: pointer;
@@ -384,9 +384,9 @@
 
 .btn-cancel {
     padding: 10px 22px;
-    background: rgba(255, 255, 255, 0.07);
+    background: rgba(255, 255, 255, 0.12);
     color: #a5b4fc;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 10px;
     font-weight: 600;
     cursor: pointer;
@@ -394,7 +394,7 @@
 }
 
 .btn-cancel:hover {
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.17);
     color: #fff;
 }
 
@@ -473,8 +473,8 @@
 .post-form-group textarea {
     width: 100%;
     padding: 12px 14px;
-    background: rgba(255, 255, 255, 0.07);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 10px;
     color: #fff;
     font-size: 0.95rem;
@@ -495,7 +495,7 @@
 }
 
 .post-form-group select option {
-    background: #1a1a3e;
+    background: #09090b;
 }
 
 /* ── Post View Modal ─────────────────────────────────────────────────────── */
@@ -530,7 +530,7 @@
     height: 36px;
     border-radius: 50%;
     background: rgba(30, 28, 58, 0.9);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     color: #e2e8f0;
     font-size: 1rem;
     display: flex;
@@ -602,7 +602,7 @@
 
 .post-modal-header {
     padding: 18px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
     display: flex;
     align-items: center;
     gap: 12px;
@@ -639,7 +639,7 @@
     color: #c4b5fd;
     font-size: 0.9rem;
     line-height: 1.6;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .post-modal-caption .caption-username {
@@ -654,7 +654,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .like-btn {
@@ -743,7 +743,7 @@
 /* Comment input */
 .post-modal-comment-input {
     padding: 14px 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
     display: flex;
     gap: 10px;
     align-items: center;
@@ -751,8 +751,8 @@
 
 .post-modal-comment-input textarea {
     flex: 1;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.11);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 10px;
     color: #fff;
     padding: 10px 14px;
@@ -949,7 +949,7 @@
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.85);
     color: #2b2b2b;
     border: none;
     width: 36px;
@@ -991,7 +991,7 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.55);
     transition: background 0.3s, transform 0.3s;
 }
 .carousel-dots .dot.active {
@@ -1054,8 +1054,8 @@
 }
 
 .review-item {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.09);
+    background: rgba(255, 255, 255, 0.09);
+    border: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: 12px;
     padding: 14px;
 }
@@ -1075,7 +1075,7 @@
 }
 
 .review-date {
-    color: rgba(255, 255, 255, 0.45);
+    color: rgba(255, 255, 255, 0.5);
     font-size: 0.78rem;
 }
 
@@ -1087,7 +1087,7 @@
 }
 
 .reviews-empty {
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(255, 255, 255, 0.65);
     text-align: center;
     margin: 10px 0 0;
 }

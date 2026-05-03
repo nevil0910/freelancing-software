@@ -35,7 +35,7 @@
               {% csrf_token %}
               {% if not u.is_blocked %}
               <input type="text" name="reason" placeholder="Reason (optional)"
-                style="padding:6px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:white;">
+                style="padding:6px 8px;border-radius:8px;border:1px solid rgba(255, 255, 255, 0.25);background:rgba(255, 255, 255, 0.1);color:white;">
               {% endif %}
               <button class="btn-action {% if u.is_blocked %}btn-view{% else %}btn-close{% endif %}">{% if u.is_blocked %} Unblock {% else %} Block {% endif %}</button>
             </form>

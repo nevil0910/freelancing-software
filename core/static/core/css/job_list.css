@@ -58,7 +58,7 @@
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
     transition: left 0.5s;
 }
 
@@ -116,7 +116,7 @@
     backdrop-filter: blur(20px);
     border-radius: 25px;
     padding: 35px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     overflow-x: auto;
 }
@@ -153,14 +153,14 @@
 
 .jobs-table td {
     padding: 18px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     font-size: 0.95rem;
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(255, 255, 255, 0.95);
 }
 
 .jobs-table tbody tr {
     transition: all 0.3s ease;
-    background: rgba(255, 255, 255, 0.02);
+    background: rgba(255, 255, 255, 0.07);
 }
 
 .jobs-table tbody tr:hover {
@@ -219,7 +219,7 @@
     border: 1px solid rgba(52, 152, 219, 0.3);
 }
 
-.badge-completed {
+.badge-completed, .badge-approved, .badge-credit {
     background: rgba(46, 213, 115, 0.2);
     color: #2ed573;
     border: 1px solid rgba(46, 213, 115, 0.3);
@@ -236,7 +236,7 @@
     border: 1px solid rgba(255, 107, 107, 0.3);
 }
 
-.badge-closed {
+.badge-closed, .badge-debit {
     background: rgba(255, 107, 107, 0.2);
     color: #ff6b6b;
     border: 1px solid rgba(255, 107, 107, 0.3);
@@ -288,7 +288,7 @@
     max-height: 88vh;
     overflow: hidden;
     border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.17);
     background: rgba(20, 20, 42, 0.96);
     backdrop-filter: blur(14px);
     display: flex;
@@ -305,7 +305,7 @@
     justify-content: space-between;
     gap: 10px;
     padding: 16px 18px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.13);
 }
 
 .modal-title {
@@ -315,7 +315,7 @@
 
 .modal-close {
     border: 0;
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.13);
     color: #cbd5e1;
     width: 34px;
     height: 34px;
@@ -329,8 +329,8 @@
 }
 
 .application-item {
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.08);
     border-radius: 12px;
     padding: 12px;
     margin-bottom: 12px;
@@ -373,13 +373,13 @@
 }
 
 .app-date {
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(255, 255, 255, 0.55);
     font-size: 0.8rem;
 }
 
 .app-message {
-    color: rgba(255, 255, 255, 0.78);
-    background: rgba(255, 255, 255, 0.02);
+    color: rgba(255, 255, 255, 0.83);
+    background: rgba(255, 255, 255, 0.07);
     border-left: 3px solid rgba(102, 126, 234, 0.45);
     padding: 10px;
     border-radius: 8px;
@@ -403,9 +403,9 @@
     align-items: center;
     gap: 5px;
     font-size: 0.82rem;
-    color: rgba(255, 255, 255, 0.75);
+    color: rgba(255, 255, 255, 0.8);
     padding: 4px 10px;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     line-height: 1;
 }
@@ -500,18 +500,18 @@
 
 .empty-state i {
     font-size: 5rem;
-    color: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.25);
     margin-bottom: 25px;
 }
 
 .empty-state h3 {
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(255, 255, 255, 0.85);
     font-size: 1.75rem;
     margin-bottom: 15px;
 }
 
 .empty-state p {
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(255, 255, 255, 0.55);
     font-size: 1.1rem;
     margin-bottom: 30px;
 }

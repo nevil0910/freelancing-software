@@ -128,7 +128,7 @@
                                         <div class="applied-message-preview">
                                             "{{ user_application.message|truncatechars:160 }}"
                                         </div>
-                                        <p style="font-size:0.8rem;color:rgba(255,255,255,0.35);margin-top:10px;">
+                                        <p style="font-size:0.8rem;color:rgba(255, 255, 255, 0.4);margin-top:10px;">
                                             Applied {{ user_application.created_at|date:"M d, Y" }}
                                         </p>
                                     </div>
@@ -136,7 +136,7 @@
                                     <button class="btn-apply-job" id="openApplyModal">
                                         <i class="fas fa-paper-plane"></i> Apply for this Job
                                     </button>
-                                    <p style="font-size:0.82rem;color:rgba(255,255,255,0.4);text-align:center;margin-top:12px;">
+                                    <p style="font-size:0.82rem;color:rgba(255, 255, 255, 0.45);text-align:center;margin-top:12px;">
                                         Send a cover message to the client
                                     </p>
                                 {% endif %}
@@ -148,7 +148,7 @@
                                     </div>
                                     <p class="status-text">Job Status</p>
                                     <p class="status-value accepted">In Progress</p>
-                                    <p style="font-size:0.85rem;color:rgba(255,255,255,0.55);margin-top:10px;text-align:center;">
+                                    <p style="font-size:0.85rem;color:rgba(255, 255, 255, 0.6);margin-top:10px;text-align:center;">
                                         <i class="fas fa-check-circle" style="color:#34d399;"></i> You are working on this job
                                     </p>
                                 </div>
@@ -160,7 +160,7 @@
                                     </div>
                                     <p class="status-text">Job Status</p>
                                     <p class="status-value" style="color:#f87171;">Overdue</p>
-                                    <p style="font-size:0.85rem;color:rgba(255,255,255,0.55);margin-top:10px;text-align:center;">
+                                    <p style="font-size:0.85rem;color:rgba(255, 255, 255, 0.6);margin-top:10px;text-align:center;">
                                         <i class="fas fa-clock"></i> Deadline has passed. Client can still extend or refund.
                                     </p>
                                 </div>
@@ -182,7 +182,7 @@
                                     <p class="status-text">Job Status</p>
                                     <p class="status-value accepted">Completed</p>
                                     {% if job.auto_completed %}
-                                    <p style="font-size:0.8rem;color:rgba(255,255,255,0.4);margin-top:6px;text-align:center;">
+                                    <p style="font-size:0.8rem;color:rgba(255, 255, 255, 0.45);margin-top:6px;text-align:center;">
                                         <i class="fas fa-info-circle"></i> Auto-approved after 3 days
                                     </p>
                                     {% endif %}
@@ -191,10 +191,10 @@
                             {% elif job.status == 'IN_PROGRESS' and not is_hired_freelancer %}
                                 <div class="applied-status">
                                     <div class="status-icon">
-                                        <i class="fas fa-lock" style="color:rgba(255,255,255,0.4);"></i>
+                                        <i class="fas fa-lock" style="color:rgba(255, 255, 255, 0.45);"></i>
                                     </div>
                                     <p class="status-text">Job Status</p>
-                                    <p class="status-value" style="color:rgba(255,255,255,0.5);">In Progress</p>
+                                    <p class="status-value" style="color:rgba(255, 255, 255, 0.55);">In Progress</p>
                                 </div>
                             {% else %}
                                 <div class="job-closed-notice">
@@ -215,7 +215,7 @@
                             <p class="panel-card-title">
                                 <i class="fas fa-calendar-edit"></i> Update Deadline
                             </p>
-                            <p style="font-size:0.82rem;color:rgba(255,255,255,0.45);margin-bottom:14px;">
+                            <p style="font-size:0.82rem;color:rgba(255, 255, 255, 0.5);margin-bottom:14px;">
                                 Only the project deadline can be modified while the job is in progress.
                             </p>
                             <form method="post" action="{% url 'update_deadline' job.id %}" class="edit-form">
@@ -243,7 +243,7 @@
                             <p class="panel-card-title">
                                 <i class="fas fa-exclamation-triangle"></i> Job Overdue
                             </p>
-                            <p style="font-size:0.82rem;color:rgba(255,255,255,0.45);margin-bottom:14px;">
+                            <p style="font-size:0.82rem;color:rgba(255, 255, 255, 0.5);margin-bottom:14px;">
                                 The deadline has passed. Choose an action below.
                             </p>
                             <div style="display:flex;flex-direction:column;gap:10px;">
@@ -263,7 +263,7 @@
                             <p class="panel-card-title">
                                 <i class="fas fa-calendar-edit"></i> Update Deadline
                             </p>
-                            <p style="font-size:0.82rem;color:rgba(255,255,255,0.45);margin-bottom:14px;">
+                            <p style="font-size:0.82rem;color:rgba(255, 255, 255, 0.5);margin-bottom:14px;">
                                 Only the project deadline can be modified while the job is in progress or overdue.
                             </p>
                             <form method="post" action="{% url 'update_deadline' job.id %}" class="edit-form">
@@ -293,7 +293,7 @@
                             </p>
                             {% for app in applications %}
                                 {% if app.status == 'ACCEPTED' %}
-                                <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+                                <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255, 255, 255, 0.11);">
                                     {% if app.freelancer.profile_photo_url %}
                                     <img src="{{ app.freelancer.profile_photo_url }}" alt="{{ app.freelancer.username }} avatar" class="app-avatar app-avatar-img">
                                     {% else %}
@@ -316,7 +316,7 @@
                             <p class="panel-card-title">
                                 <i class="fas fa-calendar-edit"></i> Update Deadline
                             </p>
-                            <p style="font-size:0.82rem;color:rgba(255,255,255,0.45);margin-bottom:14px;">
+                            <p style="font-size:0.82rem;color:rgba(255, 255, 255, 0.5);margin-bottom:14px;">
                                 Only the project deadline can be modified while the job is in progress.
                             </p>
                             <form method="post" action="{% url 'update_deadline' job.id %}" class="edit-form">
@@ -347,7 +347,7 @@
                                     <p class="status-text">Completed on</p>
                                     <p class="status-value accepted">{{ job.completed_at|date:"M d, Y" }}</p>
                                     {% if job.auto_completed %}
-                                    <p style="font-size:0.8rem;color:rgba(255,255,255,0.4);margin-top:6px;text-align:center;">
+                                    <p style="font-size:0.8rem;color:rgba(255, 255, 255, 0.45);margin-top:6px;text-align:center;">
                                         <i class="fas fa-info-circle"></i> Auto-approved after 3 days
                                     </p>
                                     {% endif %}
@@ -363,7 +363,7 @@
                                 <p class="panel-card-title" style="color:#f87171;">
                                     <i class="fas fa-exclamation-triangle" style="color:#f87171;"></i> Close Job
                                 </p>
-                                <p style="font-size:0.82rem;color:rgba(255,255,255,0.45);margin-bottom:14px;">
+                                <p style="font-size:0.82rem;color:rgba(255, 255, 255, 0.5);margin-bottom:14px;">
                                     Closing the job will hide the chat. This action is permanent.
                                 </p>
                                 <form method="post" action="{% url 'close_job' job.id %}">
@@ -492,7 +492,7 @@
                         <div class="form-row" style="margin-bottom:14px;">
                             <label class="form-label">Attach Files</label>
                             <input type="file" id="submitFiles" class="file-input-styled" multiple>
-                            <p style="font-size:0.78rem;color:rgba(255,255,255,0.35);margin-top:6px;">
+                            <p style="font-size:0.78rem;color:rgba(255, 255, 255, 0.4);margin-top:6px;">
                                 Upload multiple files — images, videos, documents
                             </p>
                         </div>
@@ -666,7 +666,7 @@
                 <span class="modal-title">
                     <i class="fas fa-users"></i>
                     Freelancer Applications
-                    <span style="font-weight:400;color:rgba(255,255,255,0.5);font-size:0.9rem;">({{ applications|length }})</span>
+                    <span style="font-weight:400;color:rgba(255, 255, 255, 0.55);font-size:0.9rem;">({{ applications|length }})</span>
                 </span>
                 <button class="modal-close" id="closeApplicationsModal">
                     <i class="fas fa-times"></i>

@@ -75,7 +75,7 @@
                     <span class="modal-title">
                         <i class="fas fa-users"></i>
                         Freelancer Applications
-                        <span id="applicationsMeta" style="font-weight:400;color:rgba(255,255,255,0.5);font-size:0.9rem;"></span>
+                        <span id="applicationsMeta" style="font-weight:400;color:rgba(255, 255, 255, 0.55);font-size:0.9rem;"></span>
                     </span>
                     <button class="modal-close" id="closeApplicationsModal">
                         <i class="fas fa-times"></i>
@@ -218,7 +218,7 @@
         btn.addEventListener('click', function () {
             const jobId = this.getAttribute('data-job-id');
             const jobTitle = this.getAttribute('data-job-title') || '';
-            applicationsList.innerHTML = '<p style="color:rgba(255,255,255,0.65);">Loading applications...</p>';
+            applicationsList.innerHTML = '<p style="color:rgba(255, 255, 255, 0.7);">Loading applications...</p>';
             applicationsMeta.textContent = '';
             openApplicationsModalFn();
 
