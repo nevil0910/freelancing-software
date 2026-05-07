@@ -428,8 +428,7 @@
                                 </div>
                                 <div class="form-row">
                                     <label class="form-label">Budget (₹ INR)</label>
-                                    {{ form.budget }}
-                                    {% if form.budget.errors %}<ul class="errorlist">{% for e in form.budget.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                                    <p class="form-static">₹ {{ job.budget }}</p>
                                 </div>
                                 <div class="form-row">
                                     <label class="form-label">Deadline</label>
